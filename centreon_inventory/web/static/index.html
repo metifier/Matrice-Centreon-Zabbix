@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrice Centreon → Zabbix</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231f4e8c'/%3E%3Cpath d='M3 4h10M3 8h10M3 12h10M6 3v10M10 3v10' stroke='white' stroke-width='1.2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Matrice <span>Centreon → Zabbix</span></div>
+  <form id="scope" class="scope" autocomplete="off">
+    <label>Client
+      <select id="scope-client"><option value="">Tous les hôtes</option></select>
+    </label>
+    <label>Hôtes contiennent<input id="scope-hosts" placeholder="ex. Mdph-973"></label>
+    <label>Services contiennent<input id="scope-services" placeholder="ex. Disk"></label>
+    <label>Exclure<input id="scope-exclude" placeholder="ex. test, -old"></label>
+    <label class="narrow">Mode
+      <select id="scope-mode"><option value="et">et</option><option value="ou">ou</option></select>
+    </label>
+    <button type="submit">Appliquer</button>
+    <button type="button" id="scope-save" class="ghost" title="Enregistrer ce filtre comme client">Enregistrer…</button>
+    <a id="export" class="button primary" href="#">Exporter Excel</a>
+  </form>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-view="dashboard" class="active">Tableau de bord</button>
+  <button data-view="service_templates">Templates de service</button>
+  <button data-view="host_templates">Templates d'hôte</button>
+  <button data-view="hosts">Hôtes</button>
+  <button data-view="services">Services</button>
+  <button data-view="zabbix_hosts" class="zbx">Zabbix · hôtes</button>
+  <button data-view="zabbix_only" class="zbx">Zabbix · uniquement</button>
+  <button data-view="zabbix_templates" class="zbx">Zabbix · templates</button>
+  <button data-view="commands">Commandes</button>
+  <button data-view="sources" class="right">Sources &amp; extractions</button>
+  <button data-view="clients">Clients</button>
+</nav>
+
+<main>
+  <section id="view-dashboard" class="view active">
+    <div id="empty" class="notice hidden">
+      Aucun inventaire Centreon chargé. Lancez une extraction dans <a href="#" data-goto="sources">Sources &amp; extractions</a>
+      (ou chargez le jeu de démonstration).
+    </div>
+    <div class="scope-banner hidden" id="scope-banner"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="card"><h3>Proposition par template de service</h3><div id="chart-props"></div></div>
+      <div class="card"><h3>Décision effective des services</h3><div id="chart-decisions"></div></div>
+      <div class="card"><h3>Statut des services dans Zabbix</h3><div id="chart-zbx"></div></div>
+      <div class="card span-all"><h3>Top 10 des templates de service</h3><div id="top"></div></div>
+    </div>
+    <details class="card"><summary>Synthèse détaillée</summary><div class="grid2"><table id="summary" class="kv"></table><table id="zsummary" class="kv"></table></div></details>
+  </section>
+
+  <section id="view-table" class="view">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Rechercher dans toutes les colonnes…">
+      <span id="count" class="muted"></span>
+      <span class="spacer"></span>
+      <label class="muted">Lignes <select id="size"><option>50</option><option selected>100</option><option>250</option><option>500</option></select></label>
+      <button id="clear-filters" class="ghost">Effacer les filtres</button>
+    </div>
+    <div class="table-wrap"><table id="grid" class="grid"><thead></thead><tbody></tbody></table></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <section id="view-sources" class="view">
+    <div class="grid2">
+      <form class="card" id="form-centreon">
+        <h3>Centreon — extraction par API</h3>
+        <label>URL<input name="url" placeholder="https://centreon.example.com/centreon" required></label>
+        <label>Utilisateur<input name="user" required></label>
+        <label>Mot de passe<input name="password" type="password" required autocomplete="off"></label>
+        <div class="checks">
+          <label><input type="checkbox" name="insecure"> Ne pas vérifier le certificat TLS</label>
+          <label><input type="checkbox" name="no_macros"> Sans macros (plus rapide)</label>
+          <label><input type="checkbox" name="v1_only"> API v1 uniquement</label>
+          <label><input type="checkbox" name="allow_getparam"> Autoriser SERVICE getparam (dernier recours)</label>
+        </div>
+        <label class="inline">Appels parallèles <input name="workers" type="number" value="8" min="1" max="32"></label>
+        <button type="submit" class="primary">Lancer l'extraction Centreon</button>
+        <p class="muted small">Lecture seule. Le mot de passe n'est pas enregistré.</p>
+        <div class="status" id="status-centreon"></div>
+      </form>
+
+      <form class="card" id="form-zabbix">
+        <h3>Zabbix — inventaire de l'existant par API</h3>
+        <label>URL<input name="url" placeholder="https://zabbix.example.com" required></label>
+        <label>Jeton d'API <span class="muted">(recommandé)</span><input name="token" type="password" autocomplete="off"></label>
+        <div class="or">ou</div>
+        <label>Utilisateur<input name="user"></label>
+        <label>Mot de passe<input name="password" type="password" autocomplete="off"></label>
+        <div class="checks"><label><input type="checkbox" name="insecure"> Ne pas vérifier le certificat TLS</label></div>
+        <button type="submit" class="primary">Lancer l'inventaire Zabbix</button>
+        <button type="button" id="forget-zabbix" class="ghost">Oublier l'inventaire Zabbix</button>
+        <p class="muted small">Méthodes *.get uniquement. Le jeton n'est pas enregistré.</p>
+        <div class="status" id="status-zabbix"></div>
+      </form>
+
+      <div class="card">
+        <h3>Autres sources</h3>
+        <form id="form-clapi">
+          <label>Export CLAPI (<code>centreon -e</code>)<input type="file" name="file" accept=".txt,.csv,text/plain"></label>
+          <button type="submit">Importer le fichier</button>
+        </form>
+        <hr>
+        <button id="demo" class="ghost">Charger le jeu de démonstration (Centreon + Zabbix fictifs)</button>
+      </div>
+
+      <div class="card">
+        <h3>Journal</h3>
+        <pre id="log" class="log">—</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-clients" class="view">
+    <div class="grid2">
+      <form class="card" id="form-client">
+        <h3>Définir un client</h3>
+        <p class="muted small">Le périmètre d'un client se définit par le nommage : chaînes que doivent contenir les noms
+          d'hôtes et/ou de services. Plusieurs valeurs séparées par des virgules ; préfixe <code>re:</code> pour une expression régulière.</p>
+        <input type="hidden" name="old">
+        <label>Nom du client<input name="name" required placeholder="ex. MDPH 973"></label>
+        <label>Hôtes contiennent<input name="hosts" placeholder="ex. Mdph-973"></label>
+        <label>Services contiennent<input name="services"></label>
+        <label>Exclure<input name="exclude"></label>
+        <label>Combinaison hôtes / services
+          <select name="mode"><option value="et">et — l'hôte ET le service correspondent</option>
+          <option value="ou">ou — l'hôte OU le service correspond</option></select></label>
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="reset" class="ghost">Nouveau</button>
+      </form>
+      <div class="card">
+        <h3>Clients enregistrés</h3>
+        <table class="grid" id="clients"><thead><tr><th>Client</th><th>Hôtes</th><th>Services</th><th>Exclure</th><th>Mode</th><th></th></tr></thead><tbody></tbody></table>
+        <h3>Préfixes détectés dans les noms d'hôtes</h3>
+        <p class="muted small">Cliquez sur un préfixe pour créer le client correspondant.</p>
+        <div id="prefixes" class="chips"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

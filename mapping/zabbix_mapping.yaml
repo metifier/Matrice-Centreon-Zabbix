@@ -1,0 +1,195 @@
+# Référentiel de correspondance Centreon -> Zabbix
+# ------------------------------------------------
+# Ce fichier est À ADAPTER à votre parc : les règles sont évaluées dans l'ordre,
+# la première qui correspond l'emporte. Toutes les expressions sont des regex
+# Python, insensibles à la casse.
+#
+# Critères possibles (tous ceux renseignés doivent correspondre) :
+#   template : un des templates de la chaîne d'héritage (service ou hôte)
+#   command  : nom de la commande Centreon
+#   plugin   : option --plugin=... des Centreon Plugins (ex. os::linux::snmp::plugin)
+#   mode     : option --mode=...  des Centreon Plugins (ex. cpu, storage)
+#   line     : ligne de commande résolue (utile pour les plugins Nagios check_*)
+#
+# Champs produits :
+#   zabbix_template : template Zabbix officiel couvrant le besoin (vide si aucun)
+#   zabbix_item     : clé d'item / mécanisme Zabbix équivalent
+#   category        : famille fonctionnelle (pour les filtres et la synthèse)
+#   strategy        : Natif | Adapter | Développer | Abandonner
+#                     Natif      = couvert par un template officiel Zabbix
+#                     Adapter    = équivalent Zabbix existant, à paramétrer
+#                     Développer = pas d'équivalent : script externe / UserParameter / agent2 plugin
+#                     Abandonner = sans objet sous Zabbix (ex. dummy, passif Centreon)
+#   confidence      : Élevée | Moyenne | Faible
+#   note            : commentaire libre affiché dans la matrice
+
+host_templates:
+  - {template: 'OS-Linux-SNMP',            zabbix_template: 'Linux by SNMP',                         strategy: Natif,   confidence: Élevée}
+  - {template: 'OS-Linux-(NRPE|SSH|Local)', zabbix_template: 'Linux by Zabbix agent',                strategy: Natif,   confidence: Élevée, note: 'Remplacer NRPE/SSH par l''agent Zabbix'}
+  - {template: 'OS-Linux',                 zabbix_template: 'Linux by Zabbix agent',                 strategy: Natif,   confidence: Moyenne}
+  - {template: 'OS-Windows-SNMP',          zabbix_template: 'Windows by SNMP',                       strategy: Natif,   confidence: Élevée}
+  - {template: 'OS-Windows-(NSClient|NRPE|WSMAN|WMI)', zabbix_template: 'Windows by Zabbix agent',   strategy: Natif,   confidence: Élevée, note: 'Remplacer NSClient++ par l''agent Zabbix'}
+  - {template: 'OS-Windows',               zabbix_template: 'Windows by Zabbix agent',               strategy: Natif,   confidence: Moyenne}
+  - {template: 'OS-AIX',                   zabbix_template: 'AIX by Zabbix agent',                   strategy: Natif,   confidence: Moyenne}
+  - {template: 'OS-Solaris',               zabbix_template: 'Solaris by Zabbix agent',               strategy: Natif,   confidence: Moyenne}
+  - {template: 'OS-FreeBSD',               zabbix_template: 'FreeBSD by Zabbix agent',               strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Cisco-(Standard|IOS|Catalyst)', zabbix_template: 'Cisco IOS by SNMP',            strategy: Natif,   confidence: Élevée}
+  - {template: 'Net-Cisco-(Nexus|NXOS)',   zabbix_template: 'Cisco Nexus 9000 Series by SNMP',       strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Cisco-ASA',            zabbix_template: 'Cisco ASAv by SNMP',                    strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Cisco-Meraki',         zabbix_template: 'Cisco Meraki organization by HTTP',     strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Cisco',                zabbix_template: 'Cisco IOS by SNMP',                     strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Fortinet-Fortigate',   zabbix_template: 'FortiGate by SNMP',                     strategy: Natif,   confidence: Élevée}
+  - {template: 'Net-PaloAlto',             zabbix_template: 'Palo Alto PA-440 by HTTP',              strategy: Natif,   confidence: Faible, note: 'Vérifier le modèle / passer éventuellement par le template SNMP générique'}
+  - {template: 'Net-Juniper',              zabbix_template: 'Juniper by SNMP',                       strategy: Natif,   confidence: Élevée}
+  - {template: 'Net-Mikrotik',             zabbix_template: 'Mikrotik by SNMP',                      strategy: Natif,   confidence: Élevée}
+  - {template: 'Net-(HP|Aruba|HPE)',       zabbix_template: 'HP Enterprise Switch by SNMP',          strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Huawei',               zabbix_template: 'Huawei VRP by SNMP',                    strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-Extreme',              zabbix_template: 'Extreme EXOS by SNMP',                  strategy: Natif,   confidence: Moyenne}
+  - {template: 'Net-(Dell|Force10)',       zabbix_template: 'Dell Force S-Series by SNMP',           strategy: Natif,   confidence: Faible}
+  - {template: 'Net-Ubiquiti',             zabbix_template: 'Ubiquiti AirOS by SNMP',                strategy: Natif,   confidence: Faible}
+  - {template: 'Net-',                     zabbix_template: 'Network Generic Device by SNMP',        strategy: Adapter, confidence: Faible}
+  - {template: 'HW-Server-Dell-Idrac',     zabbix_template: 'Dell iDRAC by SNMP',                    strategy: Natif,   confidence: Élevée}
+  - {template: 'HW-Server-(HP|HPE)-Ilo',   zabbix_template: 'HPE iLO by HTTP',                       strategy: Natif,   confidence: Moyenne}
+  - {template: 'HW-Server-(HP|HPE)',       zabbix_template: 'HPE ProLiant BL460 by SNMP',            strategy: Natif,   confidence: Faible}
+  - {template: 'HW-Server-(Lenovo|IBM)',   zabbix_template: 'Lenovo XCC by Redfish',                 strategy: Natif,   confidence: Faible}
+  - {template: 'HW-Ups',                   zabbix_template: 'APC UPS by SNMP',                       strategy: Natif,   confidence: Faible, note: 'Selon constructeur (APC, Eaton : UPS by SNMP générique)'}
+  - {template: 'HW-Storage-NetApp',        zabbix_template: 'NetApp AFF A700 by HTTP',               strategy: Natif,   confidence: Faible}
+  - {template: 'HW-Storage-Dell-(Equallogic|Compellent|Powerstore)', zabbix_template: '',            strategy: Développer, confidence: Faible}
+  - {template: 'HW-Printer',               zabbix_template: 'Generic SNMP',                          strategy: Adapter, confidence: Moyenne}
+  - {template: 'Virt-VMWare',              zabbix_template: 'VMware / VMware Hypervisor',            strategy: Natif,   confidence: Élevée, note: 'Utiliser la découverte VMware native (vCenter)'}
+  - {template: 'Virt-Hyperv',              zabbix_template: 'Windows by Zabbix agent + script Hyper-V', strategy: Adapter, confidence: Faible}
+  - {template: 'Virt-Proxmox',             zabbix_template: 'Proxmox VE by HTTP',                    strategy: Natif,   confidence: Élevée}
+  - {template: 'Virt-Nutanix',             zabbix_template: 'Nutanix Cluster Prism Element by HTTP', strategy: Natif,   confidence: Moyenne}
+  - {template: 'App-DB-MySQL|App-DB-MariaDB', zabbix_template: 'MySQL by Zabbix agent 2',            strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-Postgres',          zabbix_template: 'PostgreSQL by Zabbix agent 2',          strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-MSSQL',             zabbix_template: 'MSSQL by Zabbix agent 2',               strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-Oracle',            zabbix_template: 'Oracle by Zabbix Agent 2',              strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-MongoDB',           zabbix_template: 'MongoDB node by Zabbix agent 2',        strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-Redis',             zabbix_template: 'Redis by Zabbix agent 2',               strategy: Natif,   confidence: Élevée}
+  - {template: 'App-DB-Elasticsearch',     zabbix_template: 'Elasticsearch Cluster by HTTP',         strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Webserver-Apache',     zabbix_template: 'Apache by HTTP',                        strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Webserver-Nginx',      zabbix_template: 'Nginx by HTTP',                         strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Webserver-IIS',        zabbix_template: 'Microsoft IIS by Zabbix agent',         strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Tomcat',               zabbix_template: 'Apache Tomcat by JMX',                  strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Jvm|App-Java',         zabbix_template: 'Generic Java JMX',                      strategy: Natif,   confidence: Moyenne}
+  - {template: 'App-RabbitMQ',             zabbix_template: 'RabbitMQ node by HTTP',                 strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Kafka',                zabbix_template: 'Apache Kafka by JMX',                   strategy: Natif,   confidence: Moyenne}
+  - {template: 'App-Docker',               zabbix_template: 'Docker by Zabbix agent 2',              strategy: Natif,   confidence: Élevée}
+  - {template: 'Cloud-Kubernetes|App-Kubernetes', zabbix_template: 'Kubernetes cluster state by HTTP', strategy: Natif, confidence: Moyenne}
+  - {template: 'App-Exchange',             zabbix_template: 'Microsoft Exchange Server 2016 by Zabbix agent', strategy: Natif, confidence: Moyenne}
+  - {template: 'App-ActiveDirectory|App-AD-', zabbix_template: 'Active Directory DS by Zabbix agent', strategy: Natif,  confidence: Moyenne}
+  - {template: 'App-Haproxy',              zabbix_template: 'HAProxy by HTTP',                       strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Squid',                zabbix_template: 'Squid by SNMP',                         strategy: Natif,   confidence: Moyenne}
+  - {template: 'App-Php-Fpm',              zabbix_template: 'PHP-FPM by HTTP',                       strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Memcached',            zabbix_template: 'Memcached by Zabbix agent 2',           strategy: Natif,   confidence: Élevée}
+  - {template: 'App-Protocol-Dns|App-DNS', zabbix_template: '',  zabbix_item: 'net.dns[]',           strategy: Adapter, confidence: Moyenne}
+  - {template: 'App-Protocol-Http|App-Protocol-Https', zabbix_template: 'Website by Browser',        strategy: Adapter, confidence: Moyenne, note: 'Ou scénario Web Zabbix'}
+  - {template: 'App-Centreon|Centreon-',   zabbix_template: '',                                      strategy: Abandonner, confidence: Élevée, note: 'Supervision de Centreon lui-même : remplacée par « Zabbix server health »'}
+  - {template: 'generic-active-host|generic-host', zabbix_template: 'ICMP Ping',                   strategy: Natif,   confidence: Moyenne, note: 'Template de base : disponibilité ICMP'}
+  - {template: 'App-',                     zabbix_template: '',                                      strategy: Développer, confidence: Faible}
+
+services:
+  # --- Ping / disponibilité --------------------------------------------------------
+  - {mode: '^(ping|icmp)$',                      category: Disponibilité, zabbix_template: 'ICMP Ping', zabbix_item: 'icmpping / icmppingloss / icmppingsec', strategy: Natif, confidence: Élevée}
+  - {template: 'ping|icmp|host-alive',           category: Disponibilité, zabbix_template: 'ICMP Ping', zabbix_item: 'icmpping / icmppingloss / icmppingsec', strategy: Natif, confidence: Élevée}
+  - {line: 'check_(ping|icmp|fping)',            category: Disponibilité, zabbix_template: 'ICMP Ping', zabbix_item: 'icmpping / icmppingloss / icmppingsec', strategy: Natif, confidence: Élevée}
+
+  # --- Linux ------------------------------------------------------------------------
+  - {plugin: 'os::linux::snmp', mode: '^cpu(-detailed)?$', category: CPU,      zabbix_template: 'Linux by SNMP', zabbix_item: 'system.cpu.util[...] (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^load$',            category: CPU,      zabbix_template: 'Linux by SNMP', zabbix_item: 'system.cpu.load[...] (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^memory$',          category: Mémoire,  zabbix_template: 'Linux by SNMP', zabbix_item: 'vm.memory.* (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^swap$',            category: Mémoire,  zabbix_template: 'Linux by SNMP', zabbix_item: 'system.swap.* (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^(storage|disk-usage|inodes)$', category: Disque, zabbix_template: 'Linux by SNMP', zabbix_item: 'LLD vfs.fs (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^(interfaces|traffic)$', category: Réseau, zabbix_template: 'Linux by SNMP', zabbix_item: 'LLD net.if (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^uptime$',          category: Système,  zabbix_template: 'Linux by SNMP', zabbix_item: 'system.uptime (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::snmp', mode: '^processcount$',    category: Processus, zabbix_template: '', zabbix_item: 'Item SNMP hrSWRunName (à créer)', strategy: Adapter, confidence: Moyenne}
+  - {plugin: 'os::linux::(local|ssh)', mode: '^(cpu|load)', category: CPU,     zabbix_template: 'Linux by Zabbix agent', zabbix_item: 'system.cpu.util / system.cpu.load', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::(local|ssh)', mode: '^(memory|swap)$', category: Mémoire, zabbix_template: 'Linux by Zabbix agent', zabbix_item: 'vm.memory.size / system.swap.size', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::(local|ssh)', mode: '^(storage|disk|inodes)', category: Disque, zabbix_template: 'Linux by Zabbix agent', zabbix_item: 'LLD vfs.fs.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::linux::(local|ssh)', mode: '^(process|systemd)', category: Processus, zabbix_template: '', zabbix_item: 'proc.num[] / systemd.unit.info[] (agent 2)', strategy: Adapter, confidence: Élevée}
+  - {plugin: 'os::linux::(local|ssh)', mode: '^ntp$',     category: Temps,   zabbix_template: '', zabbix_item: 'Item agent : system.localtime / net.udp.service[ntp]', strategy: Adapter, confidence: Moyenne}
+
+  # --- Windows ----------------------------------------------------------------------
+  - {plugin: 'os::windows::snmp', mode: '^cpu$',           category: CPU,     zabbix_template: 'Windows by SNMP', zabbix_item: 'system.cpu.util (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::windows::snmp', mode: '^(memory|swap)$', category: Mémoire, zabbix_template: 'Windows by SNMP', zabbix_item: 'vm.memory.* (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::windows::snmp', mode: '^storage$',       category: Disque,  zabbix_template: 'Windows by SNMP', zabbix_item: 'LLD vfs.fs (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: 'os::windows::snmp', mode: '^(service|services)$', category: Services Windows, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'service.info[] (agent)', strategy: Adapter, confidence: Moyenne, note: 'Passer par l''agent pour les services'}
+  - {template: 'OS-Windows.*(Cpu|Processor)',    category: CPU,     zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'system.cpu.util', strategy: Natif, confidence: Élevée}
+  - {template: 'OS-Windows.*(Memory|Swap|Page)', category: Mémoire, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'vm.memory.util / perf_counter', strategy: Natif, confidence: Élevée}
+  - {template: 'OS-Windows.*(Disk|Storage|Drive)', category: Disque, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'LLD vfs.fs.*', strategy: Natif, confidence: Élevée}
+  - {template: 'OS-Windows.*Service',            category: Services Windows, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'LLD service.discovery / service.info[]', strategy: Natif, confidence: Élevée}
+  - {template: 'OS-Windows.*(Eventlog|Event-Log)', category: Logs,  zabbix_template: '', zabbix_item: 'eventlog[] (agent actif)', strategy: Adapter, confidence: Élevée}
+  - {template: 'OS-Windows.*(Uptime)',           category: Système, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'system.uptime', strategy: Natif, confidence: Élevée}
+  - {line: 'check_nt|nsclient|check_nrpe.*(CheckCPU|checkcpu)', category: CPU, zabbix_template: 'Windows by Zabbix agent', zabbix_item: 'system.cpu.util', strategy: Natif, confidence: Moyenne}
+
+  # --- Réseau -----------------------------------------------------------------------
+  - {plugin: '^network::', mode: '^(interfaces|traffic)$', category: Réseau,   zabbix_template: '(template constructeur SNMP)', zabbix_item: 'LLD net.if (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: '^network::', mode: '^(cpu|memory)$',         category: Matériel, zabbix_template: '(template constructeur SNMP)', zabbix_item: 'CPU / mémoire (SNMP)', strategy: Natif, confidence: Élevée}
+  - {plugin: '^network::', mode: '^(environment|hardware)$', category: Matériel, zabbix_template: '(template constructeur SNMP)', zabbix_item: 'LLD capteurs / ventilateurs / alimentations', strategy: Natif, confidence: Moyenne}
+  - {plugin: '^network::', mode: '^(vpn|ipsec|bgp|ospf|hsrp|vrrp)', category: Réseau, zabbix_template: '', zabbix_item: 'Items SNMP spécifiques (MIB constructeur)', strategy: Adapter, confidence: Faible}
+  - {plugin: '^network::',                                  category: Réseau,  zabbix_template: '(template constructeur SNMP)', zabbix_item: 'À vérifier dans le template constructeur', strategy: Adapter, confidence: Faible}
+
+  # --- Matériel ---------------------------------------------------------------------
+  - {plugin: '^hardware::server::dell::idrac', category: Matériel, zabbix_template: 'Dell iDRAC by SNMP', zabbix_item: 'LLD capteurs / disques / alimentations', strategy: Natif, confidence: Élevée}
+  - {plugin: '^hardware::server::hp::ilo',     category: Matériel, zabbix_template: 'HPE iLO by HTTP',    zabbix_item: 'Redfish', strategy: Natif, confidence: Moyenne}
+  - {plugin: '^hardware::ups',                 category: Énergie,  zabbix_template: 'APC UPS by SNMP',    zabbix_item: 'Batterie / charge / autonomie', strategy: Natif, confidence: Moyenne}
+  - {plugin: '^hardware::',                    category: Matériel, zabbix_template: '',                   zabbix_item: 'Items SNMP / Redfish (à créer)', strategy: Adapter, confidence: Faible}
+
+  # --- Bases de données -------------------------------------------------------------
+  - {plugin: 'database::mysql',    category: Base de données, zabbix_template: 'MySQL by Zabbix agent 2',      zabbix_item: 'mysql.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'database::postgres', category: Base de données, zabbix_template: 'PostgreSQL by Zabbix agent 2', zabbix_item: 'pgsql.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'database::mssql',    category: Base de données, zabbix_template: 'MSSQL by Zabbix agent 2',      zabbix_item: 'mssql.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'database::oracle',   category: Base de données, zabbix_template: 'Oracle by Zabbix Agent 2',     zabbix_item: 'oracle.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'database::(mongodb|redis|elasticsearch)', category: Base de données, zabbix_template: '(template agent 2 dédié)', zabbix_item: '', strategy: Natif, confidence: Moyenne}
+  - {mode: 'sql(-string)?$',       category: Base de données, zabbix_template: '', zabbix_item: 'Item ODBC db.odbc.select[] / agent2', strategy: Adapter, confidence: Moyenne, note: 'Requête SQL personnalisée à reprendre'}
+
+  # --- Applications / protocoles ----------------------------------------------------
+  - {plugin: 'apps::apache',  category: Web, zabbix_template: 'Apache by HTTP', zabbix_item: 'apache.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'apps::nginx',   category: Web, zabbix_template: 'Nginx by HTTP',  zabbix_item: 'nginx.*',  strategy: Natif, confidence: Élevée}
+  - {plugin: 'apps::tomcat',  category: Web, zabbix_template: 'Apache Tomcat by JMX', zabbix_item: 'jmx[]', strategy: Natif, confidence: Élevée}
+  - {plugin: 'apps::vmware',  category: Virtualisation, zabbix_template: 'VMware', zabbix_item: 'vmware.*', strategy: Natif, confidence: Élevée}
+  - {plugin: 'apps::protocols::http', mode: 'expected-content|response', category: Web, zabbix_template: 'Website by Browser', zabbix_item: 'Scénario Web / web.page.get[] / item HTTP agent', strategy: Adapter, confidence: Élevée}
+  - {plugin: 'apps::protocols::(x509|tls)|certificate', category: Certificat, zabbix_template: 'Website certificate by Zabbix agent 2', zabbix_item: 'web.certificate.get[]', strategy: Natif, confidence: Élevée}
+  - {plugin: 'apps::protocols::dns', category: DNS,     zabbix_template: '', zabbix_item: 'net.dns[] / net.dns.record[]', strategy: Adapter, confidence: Élevée}
+  - {plugin: 'apps::protocols::(smtp|imap|pop)', category: Messagerie, zabbix_template: '', zabbix_item: 'net.tcp.service[smtp|imap|pop]', strategy: Adapter, confidence: Élevée}
+  - {plugin: 'apps::protocols::(tcp|udp)', category: Réseau, zabbix_template: '', zabbix_item: 'net.tcp.service[] / net.tcp.port[]', strategy: Adapter, confidence: Élevée}
+  - {plugin: 'apps::protocols::(ftp|ssh|ldap|ntp|radius|snmp)', category: Protocole, zabbix_template: '', zabbix_item: 'net.tcp.service[...] / simple check', strategy: Adapter, confidence: Moyenne}
+  - {line: 'check_https?\b',        category: Web,        zabbix_template: 'Website by Browser', zabbix_item: 'Scénario Web / item HTTP agent', strategy: Adapter, confidence: Élevée}
+  - {line: 'check_ssl_cert|check_cert', category: Certificat, zabbix_template: 'Website certificate by Zabbix agent 2', zabbix_item: 'web.certificate.get[]', strategy: Natif, confidence: Élevée}
+  - {line: 'check_dns|check_dig',   category: DNS,        zabbix_template: '', zabbix_item: 'net.dns[]', strategy: Adapter, confidence: Élevée}
+  - {line: 'check_(tcp|udp)\b',     category: Réseau,     zabbix_template: '', zabbix_item: 'net.tcp.service[] (simple check)', strategy: Adapter, confidence: Élevée}
+  - {line: 'check_(smtp|imap|pop|ftp|ssh|ldap|ntp)', category: Protocole, zabbix_template: '', zabbix_item: 'net.tcp.service[...] (simple check)', strategy: Adapter, confidence: Élevée}
+  - {line: 'check_(disk|load|swap|users|procs|mem)', category: Système, zabbix_template: 'Linux by Zabbix agent', zabbix_item: 'vfs.fs / system.cpu.load / proc.num', strategy: Natif, confidence: Moyenne}
+  - {line: 'check_log|logfiles',    category: Logs,       zabbix_template: '', zabbix_item: 'log[] / logrt[] (agent actif)', strategy: Adapter, confidence: Moyenne}
+
+  # --- Génériques (par nom de mode / template) --------------------------------------
+  - {mode: '^cpu',                        category: CPU,       zabbix_template: '', zabbix_item: 'system.cpu.util', strategy: Adapter, confidence: Moyenne}
+  - {mode: '^(memory|swap)',              category: Mémoire,   zabbix_template: '', zabbix_item: 'vm.memory.size', strategy: Adapter, confidence: Moyenne}
+  - {mode: '^(storage|disk|inodes|filesystem)', category: Disque, zabbix_template: '', zabbix_item: 'vfs.fs.*', strategy: Adapter, confidence: Moyenne}
+  - {mode: '^(interfaces|traffic)',       category: Réseau,    zabbix_template: '', zabbix_item: 'LLD net.if', strategy: Adapter, confidence: Moyenne}
+  - {mode: '^uptime',                     category: Système,   zabbix_template: '', zabbix_item: 'system.uptime', strategy: Adapter, confidence: Moyenne}
+  - {template: '(^|[-_ ])cpu',            category: CPU,       zabbix_template: '', zabbix_item: 'system.cpu.util', strategy: Adapter, confidence: Faible}
+  - {template: '(^|[-_ ])(memory|mem|swap)', category: Mémoire, zabbix_template: '', zabbix_item: 'vm.memory.size', strategy: Adapter, confidence: Faible}
+  - {template: '(^|[-_ ])(disk|storage|fs|partition)', category: Disque, zabbix_template: '', zabbix_item: 'vfs.fs.*', strategy: Adapter, confidence: Faible}
+  - {template: '(^|[-_ ])(traffic|interface|if)', category: Réseau, zabbix_template: '', zabbix_item: 'LLD net.if', strategy: Adapter, confidence: Faible}
+  - {template: '(^|[-_ ])(proc|process)', category: Processus, zabbix_template: '', zabbix_item: 'proc.num[]', strategy: Adapter, confidence: Faible}
+  - {template: '(^|[-_ ])ntp',            category: Temps,     zabbix_template: '', zabbix_item: 'net.udp.service[ntp]', strategy: Adapter, confidence: Faible}
+
+  # --- Sans objet sous Zabbix -------------------------------------------------------
+  - {command: 'dummy|check_centreon_dummy|passive', category: Passif / Dummy, zabbix_template: '', zabbix_item: 'Item trapper (zabbix_sender) si encore utile', strategy: Abandonner, confidence: Moyenne}
+  - {template: '^(Meta|meta_)|^Module-Meta', category: Méta-service, zabbix_template: '', zabbix_item: 'Item calculé / agrégé', strategy: Adapter, confidence: Moyenne}
+  - {line: 'check_snmp\b',               category: SNMP générique, zabbix_template: '', zabbix_item: 'Item SNMP (OID à reprendre)', strategy: Adapter, confidence: Moyenne}
+
+# Valeur par défaut si aucune règle ne correspond (scripts maison, checks spécifiques)
+default_service:
+  category: Spécifique
+  zabbix_template: ''
+  zabbix_item: 'UserParameter / script externe / plugin agent 2'
+  strategy: Développer
+  confidence: Faible
+  note: 'Check spécifique : analyser le script et son besoin métier'
+
+default_host_template:
+  zabbix_template: ''
+  strategy: À analyser
+  confidence: Faible
