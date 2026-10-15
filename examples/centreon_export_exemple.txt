@@ -1,0 +1,142 @@
+CMD;ADD;base_host_alive;check;$USER1$/check_icmp -H $HOSTADDRESS$ -w 3000.0,80% -c 5000.0,100% -p 1
+CMD;ADD;App-Monitoring-Centreon-Ping;check;$USER1$/check_icmp -H $HOSTADDRESS$ -n $_SERVICEPACKETNUMBER$ -w $_SERVICEWARNING$ -c $_SERVICECRITICAL$
+CMD;ADD;OS-Linux-SNMP-Cpu;check;$CENTREONPLUGINS$/centreon_linux_snmp.pl --plugin=os::linux::snmp::plugin --mode=cpu --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --warning-average='$_SERVICEWARNING$' --critical-average='$_SERVICECRITICAL$'
+CMD;ADD;OS-Linux-SNMP-Memory;check;$CENTREONPLUGINS$/centreon_linux_snmp.pl --plugin=os::linux::snmp::plugin --mode=memory --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --warning-usage='$_SERVICEWARNING$' --critical-usage='$_SERVICECRITICAL$'
+CMD;ADD;OS-Linux-SNMP-Disk-Name;check;$CENTREONPLUGINS$/centreon_linux_snmp.pl --plugin=os::linux::snmp::plugin --mode=storage --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --storage='$_SERVICEDISKNAME$' --name --warning-usage='$_SERVICEWARNING$' --critical-usage='$_SERVICECRITICAL$'
+CMD;ADD;OS-Linux-SNMP-Traffic-Name;check;$CENTREONPLUGINS$/centreon_linux_snmp.pl --plugin=os::linux::snmp::plugin --mode=interfaces --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --interface='$_SERVICEINTERFACENAME$' --name --add-traffic
+CMD;ADD;OS-Linux-SNMP-Processcount;check;$CENTREONPLUGINS$/centreon_linux_snmp.pl --plugin=os::linux::snmp::plugin --mode=processcount --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --process-name='$_SERVICEPROCESSNAME$'
+CMD;ADD;OS-Windows-SNMP-Cpu;check;$CENTREONPLUGINS$/centreon_windows_snmp.pl --plugin=os::windows::snmp::plugin --mode=cpu --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$'
+CMD;ADD;OS-Windows-SNMP-Storage;check;$CENTREONPLUGINS$/centreon_windows_snmp.pl --plugin=os::windows::snmp::plugin --mode=storage --hostname=$HOSTADDRESS$ --snmp-version='$_HOSTSNMPVERSION$' --snmp-community='$_HOSTSNMPCOMMUNITY$' --storage='$_SERVICEDISKNAME$'
+CMD;ADD;OS-Windows-NSClient-Services;check;$USER1$/check_nrpe -H $HOSTADDRESS$ -p 5666 -c check_centreon_plugins -a 'os::windows::local::plugin' 'service' '--filter-name=$_SERVICESERVICENAME$'
+CMD;ADD;Net-Cisco-Standard-SNMP-Traffic-Name;check;$CENTREONPLUGINS$/centreon_cisco_standard_snmp.pl --plugin=network::cisco::standard::snmp::plugin --mode=interfaces --hostname=$HOSTADDRESS$ --snmp-community='$_HOSTSNMPCOMMUNITY$' --interface='$_SERVICEINTERFACENAME$' --name
+CMD;ADD;Net-Cisco-Standard-SNMP-Environment;check;$CENTREONPLUGINS$/centreon_cisco_standard_snmp.pl --plugin=network::cisco::standard::snmp::plugin --mode=environment --hostname=$HOSTADDRESS$ --snmp-community='$_HOSTSNMPCOMMUNITY$'
+CMD;ADD;App-DB-MySQL-Connections;check;$CENTREONPLUGINS$/centreon_mysql.pl --plugin=database::mysql::plugin --mode=connection-time --host=$HOSTADDRESS$ --username='$_HOSTMYSQLUSERNAME$' --password='$_HOSTMYSQLPASSWORD$'
+CMD;ADD;App-Webserver-Apache-Requests;check;$CENTREONPLUGINS$/centreon_apache_serverstatus.pl --plugin=apps::apache::serverstatus::plugin --mode=requests --hostname=$HOSTADDRESS$
+CMD;ADD;App-Protocol-HTTP-Response;check;$CENTREONPLUGINS$/centreon_protocol_http.pl --plugin=apps::protocols::http::plugin --mode=response --hostname=$_SERVICEURLHOST$ --urlpath='$_SERVICEURLPATH$' --ssl-opt='SSL_verify_mode => SSL_VERIFY_NONE'
+CMD;ADD;check_erp_batch;check;$USER2$/check_erp_batch.sh -H $HOSTADDRESS$ -j $ARG1$ -w $ARG2$ -c $ARG3$
+CMD;ADD;check_centreon_dummy;check;$USER1$/check_dummy -o $ARG1$ -s $ARG2$
+HTPL;ADD;generic-host;generic-host;;;;
+HTPL;setparam;generic-host;check_command;base_host_alive
+HTPL;ADD;generic-active-host;generic-active-host;;generic-host;;
+HTPL;ADD;generic-active-host-custom;generic-active-host-custom;;generic-active-host;;
+HTPL;ADD;OS-Linux-SNMP;Template Linux SNMP;;generic-active-host;;
+HTPL;ADD;OS-Linux-SNMP-custom;Template Linux SNMP;;OS-Linux-SNMP|generic-active-host-custom;;
+HTPL;setmacro;OS-Linux-SNMP-custom;SNMPCOMMUNITY;public;0;
+HTPL;setmacro;OS-Linux-SNMP-custom;SNMPVERSION;2c;0;
+HTPL;ADD;OS-Windows-SNMP-custom;Template Windows SNMP;;generic-active-host-custom;;
+HTPL;ADD;OS-Windows-NSClient-05-NRPE-custom;Windows NSClient NRPE;;generic-active-host-custom;;
+HTPL;ADD;Net-Cisco-Standard-SNMP-custom;Cisco standard;;generic-active-host-custom;;
+HTPL;ADD;App-DB-MySQL-custom;MySQL;;;;
+HTPL;setmacro;App-DB-MySQL-custom;MYSQLUSERNAME;centreon;0;
+HTPL;setmacro;App-DB-MySQL-custom;MYSQLPASSWORD;Sup3rS3cret;1;
+HTPL;ADD;App-Webserver-Apache-ServerStatus-custom;Apache;;;;
+HTPL;ADD;HW-Ups-Standard-Rfc1628-SNMP-custom;Onduleur RFC1628;;generic-active-host-custom;;
+HTPL;ADD;ERP-Applicatif;Serveur ERP maison;;;;
+STPL;ADD;generic-service;generic-service;
+STPL;ADD;generic-active-service;generic-active-service;generic-service
+STPL;ADD;generic-active-service-custom;generic-active-service-custom;generic-active-service
+STPL;ADD;Base-Ping-LAN;Ping-LAN;generic-active-service-custom
+STPL;setparam;Base-Ping-LAN;check_command;App-Monitoring-Centreon-Ping
+STPL;setmacro;Base-Ping-LAN;PACKETNUMBER;5;0;
+STPL;setmacro;Base-Ping-LAN;WARNING;200,20%;0;
+STPL;setmacro;Base-Ping-LAN;CRITICAL;400,50%;0;
+STPL;ADD;OS-Linux-Cpu-SNMP;Cpu;generic-active-service-custom
+STPL;setparam;OS-Linux-Cpu-SNMP;check_command;OS-Linux-SNMP-Cpu
+STPL;setmacro;OS-Linux-Cpu-SNMP;WARNING;80;0;
+STPL;setmacro;OS-Linux-Cpu-SNMP;CRITICAL;90;0;
+STPL;ADD;OS-Linux-Cpu-SNMP-custom;Cpu;OS-Linux-Cpu-SNMP
+STPL;ADD;OS-Linux-Memory-SNMP-custom;Memory;generic-active-service-custom
+STPL;setparam;OS-Linux-Memory-SNMP-custom;check_command;OS-Linux-SNMP-Memory
+STPL;ADD;OS-Linux-Disk-Generic-Name-SNMP-custom;Disk-Generic-Name;generic-active-service-custom
+STPL;setparam;OS-Linux-Disk-Generic-Name-SNMP-custom;check_command;OS-Linux-SNMP-Disk-Name
+STPL;ADD;OS-Linux-Traffic-Generic-Name-SNMP-custom;Traffic-Generic-Name;generic-active-service-custom
+STPL;setparam;OS-Linux-Traffic-Generic-Name-SNMP-custom;check_command;OS-Linux-SNMP-Traffic-Name
+STPL;ADD;OS-Linux-Process-Generic-SNMP-custom;Process-Generic;generic-active-service-custom
+STPL;setparam;OS-Linux-Process-Generic-SNMP-custom;check_command;OS-Linux-SNMP-Processcount
+STPL;ADD;OS-Windows-Cpu-SNMP-custom;Cpu;generic-active-service-custom
+STPL;setparam;OS-Windows-Cpu-SNMP-custom;check_command;OS-Windows-SNMP-Cpu
+STPL;ADD;OS-Windows-Disk-Generic-Name-SNMP-custom;Disk;generic-active-service-custom
+STPL;setparam;OS-Windows-Disk-Generic-Name-SNMP-custom;check_command;OS-Windows-SNMP-Storage
+STPL;ADD;OS-Windows-Services-NRPE-custom;Services;generic-active-service-custom
+STPL;setparam;OS-Windows-Services-NRPE-custom;check_command;OS-Windows-NSClient-Services
+STPL;ADD;Net-Cisco-Standard-Traffic-Generic-Name-SNMP-custom;Traffic;generic-active-service-custom
+STPL;setparam;Net-Cisco-Standard-Traffic-Generic-Name-SNMP-custom;check_command;Net-Cisco-Standard-SNMP-Traffic-Name
+STPL;ADD;Net-Cisco-Standard-Environment-SNMP-custom;Environment;generic-active-service-custom
+STPL;setparam;Net-Cisco-Standard-Environment-SNMP-custom;check_command;Net-Cisco-Standard-SNMP-Environment
+STPL;ADD;App-DB-MySQL-Connection-Time-custom;Connection-Time;generic-active-service-custom
+STPL;setparam;App-DB-MySQL-Connection-Time-custom;check_command;App-DB-MySQL-Connections
+STPL;ADD;App-Webserver-Apache-Requests-custom;Requests;generic-active-service-custom
+STPL;setparam;App-Webserver-Apache-Requests-custom;check_command;App-Webserver-Apache-Requests
+STPL;ADD;App-Protocol-HTTP-Response-Time-custom;HTTP-Response-Time;generic-active-service-custom
+STPL;setparam;App-Protocol-HTTP-Response-Time-custom;check_command;App-Protocol-HTTP-Response
+STPL;ADD;ERP-Batch-Nocturne;Batch ERP;generic-active-service-custom
+STPL;setparam;ERP-Batch-Nocturne;check_command;check_erp_batch
+STPL;setparam;ERP-Batch-Nocturne;check_command_arguments;!NIGHTLY!3600!7200
+STPL;ADD;OS-Linux-Ntp-SNMP-custom;Ntp;generic-active-service-custom
+STPL;ADD;Passive-Trap-Dummy;Trap passif;generic-service
+STPL;setparam;Passive-Trap-Dummy;check_command;check_centreon_dummy
+STPL;addhosttemplate;OS-Linux-Cpu-SNMP-custom;OS-Linux-SNMP-custom
+STPL;addhosttemplate;OS-Linux-Memory-SNMP-custom;OS-Linux-SNMP-custom
+STPL;addhosttemplate;OS-Linux-Disk-Generic-Name-SNMP-custom;OS-Linux-SNMP-custom
+STPL;addhosttemplate;OS-Windows-Cpu-SNMP-custom;OS-Windows-SNMP-custom
+STPL;addhosttemplate;OS-Windows-Disk-Generic-Name-SNMP-custom;OS-Windows-SNMP-custom
+STPL;addhosttemplate;Net-Cisco-Standard-Environment-SNMP-custom;Net-Cisco-Standard-SNMP-custom
+STPL;addhosttemplate;App-DB-MySQL-Connection-Time-custom;App-DB-MySQL-custom
+STPL;addhosttemplate;App-Webserver-Apache-Requests-custom;App-Webserver-Apache-ServerStatus-custom
+HG;ADD;HG-Linux;Serveurs Linux
+HG;ADD;HG-Windows;Serveurs Windows
+HG;ADD;HG-Reseau;Equipements reseau
+HG;ADD;HG-Web;Frontaux Web
+HOST;ADD;srv-lnx-web01;Frontal web 1;10.0.10.11;OS-Linux-SNMP-custom|App-Webserver-Apache-ServerStatus-custom;Poller-DC1;HG-Linux|HG-Web
+HOST;ADD;srv-lnx-web02;Frontal web 2;10.0.10.12;OS-Linux-SNMP-custom|App-Webserver-Apache-ServerStatus-custom;Poller-DC1;HG-Linux|HG-Web
+HOST;ADD;srv-lnx-db01;Base MySQL;10.0.10.21;OS-Linux-SNMP-custom|App-DB-MySQL-custom;Poller-DC1;HG-Linux
+HOST;ADD;srv-lnx-erp01;Serveur ERP;10.0.10.31;OS-Linux-SNMP-custom|ERP-Applicatif;Poller-DC2;HG-Linux
+HOST;ADD;srv-win-ad01;Controleur AD;10.0.20.11;OS-Windows-SNMP-custom|OS-Windows-NSClient-05-NRPE-custom;Poller-DC1;HG-Windows
+HOST;ADD;srv-win-file01;Serveur fichiers;10.0.20.12;OS-Windows-SNMP-custom;Poller-DC2;HG-Windows
+HOST;ADD;sw-core-01;Switch coeur;10.0.0.1;Net-Cisco-Standard-SNMP-custom;Poller-DC1;HG-Reseau
+HOST;ADD;sw-acc-02;Switch acces (decom);10.0.0.2;Net-Cisco-Standard-SNMP-custom;Poller-DC2;HG-Reseau
+HOST;setparam;sw-acc-02;activate;0
+HOST;ADD;ups-dc1;Onduleur DC1;10.0.0.50;HW-Ups-Standard-Rfc1628-SNMP-custom;Poller-DC1;
+HOST;setmacro;sw-core-01;SNMPCOMMUNITY;r3s3au-c0mm;0;
+SERVICE;ADD;srv-lnx-web01;Cpu;OS-Linux-Cpu-SNMP-custom
+SERVICE;ADD;srv-lnx-web01;Memory;OS-Linux-Memory-SNMP-custom
+SERVICE;ADD;srv-lnx-web01;Disk-/;OS-Linux-Disk-Generic-Name-SNMP-custom
+SERVICE;setmacro;srv-lnx-web01;Disk-/;DISKNAME;/;0;
+SERVICE;ADD;srv-lnx-web01;Apache-Requests;App-Webserver-Apache-Requests-custom
+SERVICE;ADD;srv-lnx-web02;Cpu;OS-Linux-Cpu-SNMP-custom
+SERVICE;ADD;srv-lnx-web02;Memory;OS-Linux-Memory-SNMP-custom
+SERVICE;ADD;srv-lnx-web02;Disk-/;OS-Linux-Disk-Generic-Name-SNMP-custom
+SERVICE;ADD;srv-lnx-web02;Apache-Requests;App-Webserver-Apache-Requests-custom
+SERVICE;ADD;srv-lnx-db01;Cpu;OS-Linux-Cpu-SNMP-custom
+SERVICE;ADD;srv-lnx-db01;Memory;OS-Linux-Memory-SNMP-custom
+SERVICE;ADD;srv-lnx-db01;Disk-/var/lib/mysql;OS-Linux-Disk-Generic-Name-SNMP-custom
+SERVICE;setmacro;srv-lnx-db01;Disk-/var/lib/mysql;DISKNAME;/var/lib/mysql;0;
+SERVICE;ADD;srv-lnx-db01;MySQL-Connection-Time;App-DB-MySQL-Connection-Time-custom
+SERVICE;ADD;srv-lnx-db01;Process-mysqld;OS-Linux-Process-Generic-SNMP-custom
+SERVICE;setmacro;srv-lnx-db01;Process-mysqld;PROCESSNAME;mysqld;0;
+SERVICE;ADD;srv-lnx-erp01;Cpu;OS-Linux-Cpu-SNMP-custom
+SERVICE;ADD;srv-lnx-erp01;Memory;OS-Linux-Memory-SNMP-custom
+SERVICE;ADD;srv-lnx-erp01;Batch-Nocturne;ERP-Batch-Nocturne
+SERVICE;ADD;srv-lnx-erp01;Batch-Mensuel;ERP-Batch-Nocturne
+SERVICE;setparam;srv-lnx-erp01;Batch-Mensuel;check_command_arguments;!MONTHLY!7200!14400
+SERVICE;ADD;srv-lnx-erp01;Licence-ERP;
+SERVICE;setparam;srv-lnx-erp01;Licence-ERP;check_command;check_erp_batch!LICENCE!30!7
+SERVICE;ADD;srv-win-ad01;Cpu;OS-Windows-Cpu-SNMP-custom
+SERVICE;ADD;srv-win-ad01;Disk-C;OS-Windows-Disk-Generic-Name-SNMP-custom
+SERVICE;setmacro;srv-win-ad01;Disk-C;DISKNAME;C:;0;
+SERVICE;ADD;srv-win-ad01;Service-NTDS;OS-Windows-Services-NRPE-custom
+SERVICE;setmacro;srv-win-ad01;Service-NTDS;SERVICENAME;NTDS;0;
+SERVICE;ADD;srv-win-file01;Cpu;OS-Windows-Cpu-SNMP-custom
+SERVICE;ADD;srv-win-file01;Disk-D;OS-Windows-Disk-Generic-Name-SNMP-custom
+SERVICE;setmacro;srv-win-file01;Disk-D;DISKNAME;D:;0;
+SERVICE;ADD;srv-win-file01;Trap-Sauvegarde;Passive-Trap-Dummy
+SERVICE;ADD;sw-core-01;Traffic-Gi1/0/1;Net-Cisco-Standard-Traffic-Generic-Name-SNMP-custom
+SERVICE;setmacro;sw-core-01;Traffic-Gi1/0/1;INTERFACENAME;GigabitEthernet1/0/1;0;
+SERVICE;ADD;sw-core-01;Environment;Net-Cisco-Standard-Environment-SNMP-custom
+SERVICE;ADD;sw-acc-02;Environment;Net-Cisco-Standard-Environment-SNMP-custom
+SERVICE;ADD;ups-dc1;Ping;Base-Ping-LAN
+SERVICE;ADD;srv-lnx-web01;Old-Check;OS-Linux-Memory-SNMP-custom
+SERVICE;setparam;srv-lnx-web01;Old-Check;activate;0
+HGSERVICE;ADD;HG-Web;HTTP-Response-Time;App-Protocol-HTTP-Response-Time-custom
+HGSERVICE;setmacro;HG-Web;HTTP-Response-Time;URLPATH;/health;0;
+HGSERVICE;ADD;HG-Linux;Ping;Base-Ping-LAN
