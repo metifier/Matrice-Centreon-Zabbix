@@ -49,19 +49,38 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
             zbx_tpl.setdefault(_norm(n), t)
 
     # ------------------------------------------------------------------ hôtes
-    matched_ids, host_match = set(), {}
+    # 1er passage : correspondances par nom ; 2e passage : alias puis adresse IP, uniquement si
+    # le candidat est unique (alias ou IP partagés => pas de rapprochement) et pas déjà utilisé.
+    matched_ids, host_match, how_match = set(), {}, {}
+    for row in m.hosts:
+        zh = by_name.get(_norm(row["Hôte"]))
+        if zh:
+            host_match[row["Hôte"]], how_match[row["Hôte"]] = zh, "Nom"
+            matched_ids.add(zh["hostid"])
+    alias_count = Counter(_norm(h.alias) for h in inv.hosts.values() if h.alias)
+    ip_count = Counter(r["Adresse"] for r in m.hosts if r["Adresse"])
+    for row in m.hosts:
+        if row["Hôte"] in host_match:
+            continue
+        h = inv.hosts.get(row["Hôte"])
+        zh, how = None, ""
+        if h and h.alias and alias_count[_norm(h.alias)] == 1:
+            cand = by_name.get(_norm(h.alias))
+            if cand and cand["hostid"] not in matched_ids:
+                zh, how = cand, "Alias"
+        if not zh and row["Adresse"] and ip_count[row["Adresse"]] == 1 and len(by_ip.get(row["Adresse"], [])) == 1:
+            cand = by_ip[row["Adresse"]][0]
+            if cand["hostid"] not in matched_ids:
+                zh, how = cand, "Adresse IP"
+        if zh:
+            host_match[row["Hôte"]], how_match[row["Hôte"]] = zh, how
+            matched_ids.add(zh["hostid"])
+
     m.zabbix_hosts = []
     for row in m.hosts:
-        h = inv.hosts.get(row["Hôte"])
-        zh, how = by_name.get(_norm(row["Hôte"])), "Nom"
-        if not zh and h and h.alias:
-            zh, how = by_name.get(_norm(h.alias)), "Alias"
-        if not zh and row["Adresse"] and len(by_ip.get(row["Adresse"], [])) == 1:
-            zh, how = by_ip[row["Adresse"]][0], "Adresse IP"
-        host_match[row["Hôte"]] = zh
+        zh, how = host_match.get(row["Hôte"]), how_match.get(row["Hôte"], "")
         suggested = split_templates(row["Templates Zabbix suggérés"])
         if zh:
-            matched_ids.add(zh["hostid"])
             linked = {_norm(t) for t in zh["templates"]}
             missing = [t for t in suggested if _norm(t) not in linked]
             status = PRESENT_A_LIER if missing else (PRESENT_OK if suggested else PRESENT)

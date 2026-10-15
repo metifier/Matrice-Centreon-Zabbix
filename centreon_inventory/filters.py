@@ -87,7 +87,7 @@ class ClientFilter:
         for name, h in inv.hosts.items():
             if excl_p and _any(excl_p, name):
                 continue
-            if name in hosts_with_services or (not svc_p and host_ok(h)):
+            if name in hosts_with_services or ((not svc_p or or_mode) and host_ok(h)):
                 hosts[name] = h
 
         label = self.name or "filtre"

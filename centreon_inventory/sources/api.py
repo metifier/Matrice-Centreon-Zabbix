@@ -344,7 +344,8 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
         for r in hg_rows:
             inv.hostgroup_services.append(HostgroupService(
                 hostgroup=r["hg name"], description=r["description"], template=hg_templates.get(str(r["id"])) or "",
-                check_command=r.get("check command", ""), args=_args(r.get("check command arg", ""))))
+                check_command=r.get("check command", ""), args=_args(r.get("check command arg", "")),
+                activate=_flag(r.get("activate", "1"))))
         if macros:
             res = each("HGSERVICE getmacro", range(len(hg_rows)), lambda i: v1.clapi(
                 "getmacro", "HGSERVICE", f"{hg_rows[i]['hg name']};{hg_rows[i]['description']}"))
