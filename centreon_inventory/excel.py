@@ -92,9 +92,18 @@ def write_csv(m: Matrix, directory: str | Path) -> list[Path]:
             if rows:
                 w = csv.DictWriter(fh, fieldnames=list(rows[0]), delimiter=";")
                 w.writeheader()
-                w.writerows({k: ("" if v is None else v) for k, v in r.items()} for r in rows)
+                w.writerows({k: _csv_safe(v) for k, v in r.items()} for r in rows)
         written.append(p)
     return written
+
+
+def _csv_safe(v):
+    """Neutralise les valeurs qu'Excel interpréterait comme une formule à l'ouverture du CSV."""
+    if v is None:
+        return ""
+    if isinstance(v, str) and v[:1] in ("=", "+", "-", "@"):
+        return "'" + v
+    return v
 
 
 # --------------------------------------------------------------------------- helpers
@@ -107,6 +116,9 @@ def _table(wb, title, rows, decisions=None, key_width=None):
     ws.append(headers)
     for r in rows:
         ws.append([r.get(h) for h in headers])
+        for cell in ws[ws.max_row]:
+            if isinstance(cell.value, str) and cell.value.startswith("="):
+                cell.data_type = "s"  # donnée Centreon / saisie utilisateur : jamais une formule
     _style_header(ws, len(headers))
     n = len(rows) + 1
     ws.freeze_panes = "B2"

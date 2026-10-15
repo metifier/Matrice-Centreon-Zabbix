@@ -29,7 +29,7 @@ def _snapshot(inv):
     }
 
 
-@pytest.mark.parametrize("v2", [True, False], ids=["api-v2", "api-v1-seule"])
+@pytest.mark.parametrize("v2", [True, False, "login-only"], ids=["api-v2", "api-v1-seule", "centreon-19.10"])
 def test_api_matches_reference_inventory(v2):
     ref = parse_clapi_export(SAMPLE)
     fake = FakeCentreon(ref, v2=v2)
@@ -70,3 +70,19 @@ def test_password_macros_are_masked():
     ref = parse_clapi_export(SAMPLE)
     inv = _load(FakeCentreon(ref))
     assert inv.hosts["srv-lnx-db01"].macros["$_HOSTMYSQLPASSWORD$"] == "********"
+
+
+def test_centreon_1910_falls_back_to_v1_on_no_route_found():
+    ref = parse_clapi_export(SAMPLE)
+    logs = []
+    inv = load_from_api(URL, "admin", "secret", session_factory=FakeCentreon(ref, v2="login-only"), log=logs.append)
+    assert _snapshot(inv) == _snapshot(ref)
+    assert any("No route found" in m and "repli sur l'API v1" in m for m in logs)
+
+
+def test_expired_token_triggers_relogin():
+    ref = parse_clapi_export(SAMPLE)
+    fake = FakeCentreon(ref, v2=False, expire_after=15)
+    inv = _load(fake, workers=4)
+    assert _snapshot(inv) == _snapshot(ref)
+    assert fake.logins > 2  # plusieurs ré-authentifications pendant la collecte

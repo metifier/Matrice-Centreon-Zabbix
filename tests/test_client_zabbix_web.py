@@ -177,3 +177,45 @@ def test_web_basic_auth(tmp_path, monkeypatch):
     c = create_app(tmp_path / "d").test_client()
     assert c.get("/api/state").status_code == 401
     assert c.get("/api/state", headers={"Authorization": "Basic dTpw"}).status_code == 200
+
+
+# ----------------------------------------------------------------------- retours de revue
+def test_or_mode_keeps_matching_hosts_without_services(inv):
+    from centreon_inventory.model import Host, Inventory
+    inv2 = Inventory(commands=inv.commands, host_templates=inv.host_templates, service_templates=inv.service_templates,
+                     hosts={**inv.hosts, "ups-sans-service": Host(name="ups-sans-service")}, services=list(inv.services))
+    scoped = ClientFilter(hosts="ups-", services="Trap", mode="ou").apply(inv2)
+    assert "ups-sans-service" in scoped.hosts and "srv-win-file01" in scoped.hosts
+
+
+def test_zabbix_alias_and_ip_matches_are_unique(inv, zbx):
+    import copy
+    from centreon_inventory.model import Host
+    inv2 = copy.deepcopy(inv)
+    # deux hôtes Centreon avec le même alias, égal au nom d'un hôte Zabbix : pas de rapprochement ambigu
+    inv2.hosts["dup-a"] = Host(name="dup-a", alias="srv-lnx-new01", address="10.9.9.1")
+    inv2.hosts["dup-b"] = Host(name="dup-b", alias="srv-lnx-new01", address="10.9.9.2")
+    # un hôte dont l'IP est celle d'un hôte Zabbix déjà rapproché par son nom
+    inv2.hosts["copie-web01"] = Host(name="copie-web01", address="10.0.10.11")
+    m = build_report(inv2, zabbix=zbx)
+    hosts = {r["Hôte Centreon"]: r for r in m.zabbix_hosts}
+    assert hosts["dup-a"]["Statut Zabbix"] == ABSENT and hosts["dup-b"]["Statut Zabbix"] == ABSENT
+    assert hosts["copie-web01"]["Statut Zabbix"] == ABSENT
+    assert hosts["srv-lnx-web01"]["Correspondance"] == "Nom"
+    assert "srv-lnx-new01" in [r["Hôte Zabbix"] for r in m.zabbix_only]
+
+
+def test_untrusted_values_are_never_formulas(inv, tmp_path):
+    import csv
+    from centreon_inventory.excel import write_csv, write_excel
+    decisions = {"service_templates": {"Base-Ping-LAN": {"Commentaire": '=HYPERLINK("http://x","clic")'}}}
+    m = build_report(inv, decisions=decisions)
+    ws = load_workbook(write_excel(m, tmp_path / "x.xlsx"))["Matrice templates services"]
+    hdr = [c.value for c in ws[1]]
+    row = next(r for r in ws.iter_rows(min_row=2) if r[0].value == "Base-Ping-LAN")
+    cell = row[hdr.index("Commentaire")]
+    assert cell.data_type == "s" and cell.value.startswith("=HYPERLINK")
+    write_csv(m, tmp_path / "csv")
+    with open(tmp_path / "csv" / "matrice_templates_services.csv", encoding="utf-8-sig", newline="") as fh:
+        rows = {r["Template de service"]: r for r in csv.DictReader(fh, delimiter=";")}
+    assert rows["Base-Ping-LAN"]["Commentaire"].startswith("'=")

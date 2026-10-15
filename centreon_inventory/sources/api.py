@@ -60,33 +60,73 @@ class _Http:
         return self._local.session
 
 
-class CentreonApiV1(_Http):
-    """Appels CLAPI via `POST /api/index.php?action=action&object=centreon_clapi`."""
+_TRANSIENT_HTTP = (502, 503, 504)
 
-    def __init__(self, base_url: str, session_factory, timeout: int = 120):
+
+class CentreonApiV1(_Http):
+    """Appels CLAPI via `POST /api/index.php?action=action&object=centreon_clapi` (Centreon 2.8 à 24.x).
+
+    Comme le client de conformit- : ré-authentification automatique si le jeton expire (401/403)
+    pendant une longue collecte, et nouvelles tentatives sur erreurs réseau ou passagères.
+    """
+
+    def __init__(self, base_url: str, session_factory, timeout: int = 120, retries: int = 3):
         super().__init__(session_factory, timeout)
         self.endpoint = base_url.rstrip("/") + "/api/index.php"
         self.token = None
+        self.retries = retries
+        self._credentials = None
+        self._login_lock = threading.Lock()
 
     def login(self, user: str, password: str):
+        self._credentials = (user, password)
         r = self.session.post(self.endpoint, params={"action": "authenticate"},
                               data={"username": user, "password": password}, timeout=self.timeout)
         if r.status_code != 200:
             raise ApiError(f"Authentification API v1 refusée (HTTP {r.status_code}) : {r.text[:200]}")
-        self.token = r.json().get("authToken")
+        try:
+            data = r.json()
+        except ValueError as exc:
+            raise ApiError(f"Authentification API v1 : réponse non JSON ({r.text[:200]})") from exc
+        self.token = data.get("authToken") or data.get("auth_token")
         if not self.token:
             raise ApiError("Authentification API v1 : pas de jeton dans la réponse")
 
+    def _relogin(self, expired_token):
+        with self._login_lock:
+            if self.token == expired_token and self._credentials:  # un seul thread se ré-authentifie
+                self.login(*self._credentials)
+
     def clapi(self, action: str, obj: str, values: str | None = None) -> list:
+        import time
         body = {"action": action, "object": obj}
         if values is not None:
             body["values"] = values
-        r = self.session.post(self.endpoint, params={"action": "action", "object": "centreon_clapi"},
-                              json=body, headers={"centreon-auth-token": self.token}, timeout=self.timeout)
-        if r.status_code != 200:
-            raise ApiError(f"{obj} {action} {values or ''} : HTTP {r.status_code} {r.text[:200]}")
-        result = r.json().get("result", [])
-        return result if isinstance(result, list) else []
+        label = f"{obj} {action} {values or ''}".strip()
+        for attempt in range(1, self.retries + 1):
+            token = self.token
+            try:
+                r = self.session.post(self.endpoint, params={"action": "action", "object": "centreon_clapi"},
+                                      json=body, headers={"centreon-auth-token": token}, timeout=self.timeout)
+            except OSError as exc:  # coupure réseau, timeout (requests.RequestException hérite d'OSError)
+                if attempt == self.retries:
+                    raise ApiError(f"{label} : {exc}") from exc
+                time.sleep(attempt)
+                continue
+            if r.status_code in (401, 403) and attempt < self.retries:
+                self._relogin(token)
+                continue
+            if r.status_code in _TRANSIENT_HTTP and attempt < self.retries:
+                time.sleep(attempt)
+                continue
+            if r.status_code != 200:
+                raise ApiError(f"{label} : HTTP {r.status_code} {r.text[:200]}")
+            try:
+                result = r.json().get("result", [])
+            except ValueError as exc:
+                raise ApiError(f"{label} : réponse non JSON ({r.text[:200]})") from exc
+            return result if isinstance(result, list) else []
+        raise ApiError(f"{label} : échec après {self.retries} tentatives")
 
 
 class CentreonApiV2(_Http):
@@ -110,11 +150,14 @@ class CentreonApiV2(_Http):
         while True:
             r = self.session.get(self.base + path, params={"limit": self.page_size, "page": page},
                                  headers={"X-AUTH-TOKEN": self.token}, timeout=self.timeout)
-            if r.status_code in (403, 404, 405):
-                raise NotAvailable(f"{path} : HTTP {r.status_code}")
             if r.status_code != 200:
-                raise ApiError(f"{path} : HTTP {r.status_code} {r.text[:200]}")
-            data = r.json()
+                # API v2 absente ou partielle selon la version de Centreon (ex. 19.10 : HTTP 500
+                # « No route found ») : on se replie sur l'API v1, qui couvre tout.
+                raise NotAvailable(f"{path} : HTTP {r.status_code} {r.text[:150]}")
+            try:
+                data = r.json()
+            except ValueError as exc:
+                raise NotAvailable(f"{path} : réponse non JSON") from exc
             batch = data.get("result", [])
             items.extend(batch)
             total = (data.get("meta") or {}).get("total", len(items))
@@ -161,7 +204,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             v2 = CentreonApiV2(url, factory, timeout)
             v2.login(user, password)
             log("API v2 : authentifié")
-        except (NotAvailable, ValueError) as exc:
+        except (NotAvailable, ValueError, OSError) as exc:
             log(f"API v2 indisponible ({exc}) : utilisation de l'API v1 seule")
             v2 = None
 
@@ -172,7 +215,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             items = v2.paginate(path)
             log(f"API v2 {path} : {len(items)} objets")
             return items
-        except NotAvailable as exc:
+        except (NotAvailable, OSError) as exc:
             log(f"API v2 {path} indisponible ({exc}) : repli sur l'API v1")
             return None
 
@@ -344,7 +387,8 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
         for r in hg_rows:
             inv.hostgroup_services.append(HostgroupService(
                 hostgroup=r["hg name"], description=r["description"], template=hg_templates.get(str(r["id"])) or "",
-                check_command=r.get("check command", ""), args=_args(r.get("check command arg", ""))))
+                check_command=r.get("check command", ""), args=_args(r.get("check command arg", "")),
+                activate=_flag(r.get("activate", "1"))))
         if macros:
             res = each("HGSERVICE getmacro", range(len(hg_rows)), lambda i: v1.clapi(
                 "getmacro", "HGSERVICE", f"{hg_rows[i]['hg name']};{hg_rows[i]['description']}"))
