@@ -21,8 +21,14 @@ class FakeResponse:
 
 
 class FakeCentreon:
-    def __init__(self, inv: Inventory, v2: bool = True, generic_getparam: bool = True):
+    def __init__(self, inv: Inventory, v2=True, generic_getparam: bool = True, expire_after: int = 0):
+        """v2 : True (API v2 complète), False (absente) ou "login-only" (Centreon 19.10 : la connexion
+        v2 répond mais les routes de configuration renvoient HTTP 500 « No route found »).
+        expire_after : le jeton v1 expire tous les N appels CLAPI (réponse 401)."""
+        import threading
         self.inv, self.v2, self.generic_getparam = inv, v2, generic_getparam
+        self.expire_after, self.logins, self._lock = expire_after, 0, threading.Lock()
+        self.token, self._uses = "tok-v1", 0
         self.calls: list[tuple] = []
         names = list(inv.commands)
         self.cmd_id = {n: i for i, n in enumerate(names, 1)}
@@ -49,9 +55,18 @@ class FakeCentreon:
     def post(self, url, params=None, data=None, json=None, headers=None, timeout=None):
         path = urlparse(url).path
         if path.endswith("/api/index.php") and params.get("action") == "authenticate":
-            return FakeResponse(200, {"authToken": "tok-v1"})
+            with self._lock:
+                self.logins += 1
+                self.token, self._uses = f"tok-v1-{self.logins}", 0
+                return FakeResponse(200, {"authToken": self.token})
         if path.endswith("/api/index.php"):
-            assert headers["centreon-auth-token"] == "tok-v1"
+            with self._lock:
+                if headers["centreon-auth-token"] != self.token:
+                    return FakeResponse(401, "Unauthorized")
+                self._uses += 1
+                if self.expire_after and self._uses > self.expire_after:
+                    self.token = "expiré"
+                    return FakeResponse(401, "Unauthorized")
             self.calls.append((json["object"], json["action"], json.get("values")))
             try:
                 return FakeResponse(200, {"result": self._clapi(json["object"], json["action"].lower(),
@@ -66,6 +81,9 @@ class FakeCentreon:
         if not self.v2:
             return FakeResponse(404, "")
         assert headers["X-AUTH-TOKEN"] == "tok-v2"
+        if self.v2 == "login-only":
+            route = urlparse(url).path
+            return FakeResponse(500, {"code": 500, "message": f'No route found for "GET {route}"'})
         path = urlparse(url).path.split("/api/latest", 1)[1]
         items = {"/configuration/hosts": self._v2_hosts, "/configuration/services": self._v2_services,
                  "/configuration/services/templates": self._v2_stpl}.get(path)
