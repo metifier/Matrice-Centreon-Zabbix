@@ -20,6 +20,7 @@ import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from ..model import as_text
 from ..model import (Command, Host, HostgroupService, HostTemplate, Inventory, Service,
                      ServiceTemplate)
 from .database import PASSWORD_MASK
@@ -125,7 +126,10 @@ class CentreonApiV1(_Http):
                 result = r.json().get("result", [])
             except ValueError as exc:
                 raise ApiError(f"{label} : réponse non JSON ({r.text[:200]})") from exc
-            return result if isinstance(result, list) else []
+            if not isinstance(result, list):
+                return []
+            # Chaque cellule en texte : certaines versions renvoient ponctuellement une liste ou un nombre.
+            return [{k: as_text(v) for k, v in row.items()} if isinstance(row, dict) else row for row in result]
         raise ApiError(f"{label} : échec après {self.retries} tentatives")
 
 

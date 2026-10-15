@@ -125,3 +125,24 @@ def test_scoped_collection_by_hostgroup_or_poller(criteria):
     assert {h: (scoped.hosts[h].poller, sorted(scoped.hosts[h].hostgroups)) for h in scoped.hosts} == \
         {h: (full.hosts[h].poller, sorted(full.hosts[h].hostgroups)) for h in full.hosts}
     assert len(scoped_fake.calls) < len(full_fake.calls)
+
+
+def test_non_text_values_from_api_do_not_break_the_matrix(tmp_path):
+    """Régression : une valeur de macro reçue sous forme de liste faisait planter /api/summary (TypeError)."""
+    from centreon_inventory.model import inventory_from_dict, inventory_to_dict
+    ref = parse_clapi_export(SAMPLE)
+    ref.service_templates["Base-Ping-LAN"].macros["WARNING"] = ["200,20%", "x"]   # inventaire déjà enregistré
+    ref.hosts["srv-lnx-db01"].macros["$_HOSTSNMPVERSION$"] = 2
+    inv = inventory_from_dict(inventory_to_dict(ref))
+    m = build_matrix(inv)
+    assert any("-w 200,20%;x" in r["Ligne de commande résolue"] for r in m.services if r["Service"] == "Ping")
+
+    class ListMacroFake(FakeCentreon):
+        def _clapi(self, obj, action, values):
+            rows = super()._clapi(obj, action, values)
+            if (obj, action) == ("STPL", "getmacro"):
+                rows = [{**r, "macro value": [r["macro value"]]} for r in rows]
+            return rows
+    inv = _load(ListMacroFake(parse_clapi_export(SAMPLE), v2=False))
+    assert all(isinstance(v, str) for t in inv.service_templates.values() for v in t.macros.values())
+    build_matrix(inv)
