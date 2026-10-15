@@ -123,12 +123,37 @@ def load_zabbix(url: str, token: str = "", user: str = "", password: str = "", v
     log(f"Zabbix : {len(hosts)} hôtes")
 
     templates = []
-    for t in api.call("template.get", {"output": ["templateid", "host", "name"], "selectHosts": "count"}) or []:
+    linked_key = "selectTemplates" if v >= (6, 2) else "selectParentTemplates"
+    params = {"output": ["templateid", "host", "name"], "selectHosts": "count", linked_key: ["templateid"]}
+    try:
+        raw_templates = api.call("template.get", params) or []
+    except ZabbixError as exc:  # paramètre de templates liés non reconnu par cette version
+        log(f"template.get sans templates liés ({exc})")
+        params.pop(linked_key)
+        raw_templates = api.call("template.get", params) or []
+    for t in raw_templates:
         nb = t.get("hosts")
+        linked = t.get("templates") or t.get("parentTemplates") or []
         templates.append({"templateid": str(t.get("templateid")), "host": t.get("host", ""),
                           "name": t.get("name") or t.get("host", ""),
-                          "hosts": int(nb) if not isinstance(nb, list) and nb is not None else len(nb or [])})
+                          "hosts": int(nb) if not isinstance(nb, list) and nb is not None else len(nb or []),
+                          "linked": [str(x.get("templateid")) for x in linked],
+                          "items": [], "prototypes": []})
     log(f"Zabbix : {len(templates)} templates")
+
+    # Items et prototypes d'items (LLD) des templates : base de la corrélation services Centreon <-> items.
+    by_id = {t["templateid"]: t for t in templates}
+    for method, field in (("item.get", "items"), ("itemprototype.get", "prototypes")):
+        try:
+            rows = api.call(method, {"output": ["name", "key_", "hostid"], "templated": True}) or []
+        except ZabbixError as exc:
+            log(f"{method} indisponible ({exc}) : corrélation des items limitée")
+            continue
+        for it in rows:
+            t = by_id.get(str(it.get("hostid")))
+            if t is not None:
+                t[field].append([it.get("name", ""), it.get("key_", "")])
+        log(f"Zabbix : {len(rows)} {'items' if field == 'items' else 'prototypes d’items'} de templates")
     return ZabbixInventory(url=url, version=api.version, hosts=hosts, templates=templates)
 
 

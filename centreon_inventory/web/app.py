@@ -40,7 +40,7 @@ EXAMPLE_ZABBIX = EXAMPLE.with_name("zabbix_demo.json")
 VIEWS = {
     "service_templates": "service_templates", "host_templates": "host_templates", "hosts": "hosts",
     "services": "services", "commands": "commands", "zabbix_hosts": "zabbix_hosts",
-    "zabbix_only": "zabbix_only", "zabbix_templates": "zabbix_templates",
+    "zabbix_only": "zabbix_only", "zabbix_templates": "zabbix_templates", "correlation": "correlation",
 }
 # Ordre d'affichage web : clé, volumétrie, correspondance et décisions d'abord (le reste suit).
 WEB_ORDER = {
@@ -50,10 +50,13 @@ WEB_ORDER = {
     "host_templates": ["Template d'hôte", "Nb hôtes (direct)", "Nb hôtes (total)", "Template Zabbix suggéré",
                        "Template Zabbix disponible", "Stratégie", "Priorité", "Proposition", "Décision finale",
                        "Template Zabbix cible", "Commentaire"],
+    "correlation": ["Template de service", "Nb services", "Catégorie", "Couverture standard", "Approche recommandée",
+                    "Items Zabbix correspondants", "Template Zabbix examiné"],
     "hosts": ["Hôte", "Adresse", "Collecteur", "Actif", "Nb services", "Templates Zabbix suggérés", "Proposition",
               "Décision finale", "Commentaire"],
     "services": ["Hôte", "Service", "Actif", "Template de service", "Catégorie", "Template Zabbix suggéré",
-                 "Statut Zabbix", "Proposition", "Décision (template)", "Décision (service)", "Décision effective",
+                 "Couverture standard", "Item Zabbix standard", "Statut Zabbix", "Proposition", "Décision (template)", "Décision (hôte)", "Décision (service)",
+                 "Décision effective",
                  "Commentaire"],
 }
 EDITABLE = {t: {"key": t, "fields": fields} for t, (_, _, fields) in TABLES.items()}
@@ -215,6 +218,22 @@ def _client_from_request(store: Store) -> ClientFilter:
 
 def _cell(v):
     return "" if v is None else v
+
+
+def _filter_rows(rows, args):
+    """Recherche globale (q) et filtres par colonne (f.<colonne>, « = » pour une égalité stricte)."""
+    q = (args.get("q") or "").strip().lower()
+    filtered = rows
+    if q:
+        filtered = [r for r in filtered if any(q in str(_cell(v)).lower() for v in r.values())]
+    for k, v in args.items():
+        if k.startswith("f.") and v.strip():
+            col, needle = k[2:], v.strip().lower()
+            if needle.startswith("="):
+                filtered = [r for r in filtered if str(_cell(r.get(col))).lower() == needle[1:]]
+            else:
+                filtered = [r for r in filtered if needle in str(_cell(r.get(col))).lower()]
+    return filtered
 
 
 def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None, session_factory=None,
@@ -408,9 +427,11 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             props[r["Proposition"]][1] += r["Nb services"]
         for r in m.services:
             statuses[r.get("Statut Zabbix", "")] = statuses.get(r.get("Statut Zabbix", ""), 0) + 1
-        effective = {}
+        effective, coverage = {}, {}
         for r in m.services:
             effective[r["Décision effective"]] = effective.get(r["Décision effective"], 0) + 1
+            if r.get("Couverture standard"):
+                coverage[r["Couverture standard"]] = coverage.get(r["Couverture standard"], 0) + 1
         return jsonify({
             "summary": [[_cell(a), _cell(b)] for a, b in m.summary],
             "zabbix_summary": [[_cell(a), _cell(b)] for a, b in m.zabbix_summary],
@@ -421,7 +442,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
                     "zabbix": bool(m.zabbix_hosts or m.zabbix_templates),
                     "zabbix_present": sum(r["Statut Zabbix"] != "Absent de Zabbix" for r in m.zabbix_hosts),
                     "zabbix_only": len(m.zabbix_only)},
-            "propositions": props, "decisions_effectives": effective,
+            "propositions": props, "decisions_effectives": effective, "couverture": coverage,
             "statuts_zabbix": {k: v for k, v in statuses.items() if k},
             "top": [{k: r[k] for k in ("Template de service", "Nb services", "Nb hôtes", "Proposition",
                                        "Template Zabbix suggéré")} for r in m.service_templates[:10] if r["Nb services"]],
@@ -439,17 +460,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
         first = [c for c in WEB_ORDER.get(view, []) if c in columns]
         columns = first + [c for c in columns if c not in first]
         args = request.args
-        q = (args.get("q") or "").strip().lower()
-        filtered = rows
-        if q:
-            filtered = [r for r in filtered if any(q in str(_cell(v)).lower() for v in r.values())]
-        for k, v in args.items():
-            if k.startswith("f.") and v.strip():
-                col, needle = k[2:], v.strip().lower()
-                if needle.startswith("="):
-                    filtered = [r for r in filtered if str(_cell(r.get(col))).lower() == needle[1:]]
-                else:
-                    filtered = [r for r in filtered if needle in str(_cell(r.get(col))).lower()]
+        filtered = _filter_rows(rows, args)
         sort, desc = args.get("sort"), args.get("dir") == "desc"
         if sort in columns:
             def sort_key(r):
@@ -466,13 +477,41 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             out_rows.append(row)
         values = {}
         for c in ("Proposition", "Statut Zabbix", "Décision effective", "Stratégie", "Catégorie", "Priorité",
-                  "Actif", "Collecteur", "Disponible dans Zabbix"):
+                  "Actif", "Collecteur", "Disponible dans Zabbix", "Couverture standard", "Décision (hôte)"):
             if c in columns:
                 values[c] = sorted({str(_cell(r.get(c))) for r in rows} - {""})
         return jsonify({"columns": columns, "rows": out_rows, "total": len(filtered), "all": len(rows),
                         "page": page, "size": size, "values": values,
                         "editable": EDITABLE.get(view, {}).get("fields", []),
                         "choices": HOST_CHOICES if view == "hosts" else CHOICES})
+
+    @app.get("/api/table/<view>/keys")
+    def table_keys(view):
+        """Clés de toutes les lignes filtrées (sélection « tous les résultats » pour une décision groupée)."""
+        if view not in TABLES:
+            abort(404)
+        m = store.report(_client_from_request(store))
+        rows = _filter_rows(getattr(m, VIEWS[view]), request.args) if m else []
+        return jsonify({"keys": [row_key(view, r) for r in rows]})
+
+    @app.post("/api/decisions/bulk")
+    def decisions_bulk():
+        """Applique une même valeur à plusieurs lignes (décision groupée)."""
+        d = request.get_json(force=True) or {}
+        keys = [str(k) for k in d.get("keys") or []]
+        if not keys:
+            abort(400, "Aucune ligne sélectionnée")
+        with store.lock:
+            decisions = store.decisions()
+            try:
+                for key in keys:
+                    set_decision(decisions, d.get("table", ""), key, d.get("field", ""),
+                                 str(d.get("value") or "").strip())
+            except ValueError as exc:
+                abort(400, str(exc))
+            save_decisions(store._path("decisions"), decisions)
+        store.invalidate()
+        return jsonify({"ok": True, "count": len(keys)})
 
     @app.post("/api/decision")
     def decision():

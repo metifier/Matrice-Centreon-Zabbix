@@ -193,3 +193,30 @@ default_host_template:
   zabbix_template: ''
   strategy: À analyser
   confidence: Faible
+
+# Corrélation services Centreon <-> items Zabbix
+# ---------------------------------------------
+# Pour chaque catégorie de service, expression régulière recherchée dans la CLÉ ou le NOM des items
+# (et prototypes d'items LLD) des templates Zabbix suggérés ou déjà liés à l'hôte. Un service est
+# « couvert par un item standard » si au moins un item correspond.
+correlation:
+  Disponibilité:    'icmpping|agent\.ping|zabbix\[host,.*available|availability|\bping\b'
+  CPU:              'system\.cpu\.(util|load)|cpu.*(util|load)|processor'
+  Mémoire:          'vm\.memory|system\.swap|memory|swap'
+  Disque:           'vfs\.fs|vfs\.dev|storage|disk|filesystem|\bfs\b'
+  Réseau:           'net\.if|if(hc)?(in|out)|interface|bits (received|sent)'
+  Système:          'system\.uptime|uptime|system\.hostname|system\.sw\.os'
+  Processus:        'proc\.(num|get|cpu|mem)|process'
+  Services Windows: 'service\.(info|discovery)|services?\b.*state'
+  Base de données:  'mysql\.|pgsql\.|mssql\.|oracle\.|mongodb\.|redis\.|db\.odbc'
+  Web:              'web\.(page|test)|website|web scenario|response time|http\.(response|status)|apache\.|nginx\.|tomcat|php-?fpm|iis'
+  Certificat:       'web\.certificate|certificate'
+  Matériel:         'sensor|temperature|fan|psu|power supply|hardware|health'
+  Énergie:          'battery|ups|input voltage|output'
+  DNS:              'net\.dns'
+  Messagerie:       'net\.tcp\.service\[(smtp|imap|pop)|smtp|imap'
+  Protocole:        'net\.tcp\.service|net\.udp\.service|net\.tcp\.port'
+  Temps:            'ntp|system\.localtime|clock'
+  Logs:             'log\[|logrt\[|eventlog\['
+  Virtualisation:   'vmware\.'
+  SNMP générique:   'snmp'

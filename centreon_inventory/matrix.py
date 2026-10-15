@@ -68,6 +68,7 @@ class Matrix:
     zabbix_templates: list[dict] = field(default_factory=list)
     zabbix_summary: list[tuple] = field(default_factory=list)
     client: object = None  # filters.ClientFilter du périmètre affiché
+    correlation: list[dict] = field(default_factory=list)  # services Centreon <-> items Zabbix
 
 
 def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, medium: int = 5,
@@ -100,7 +101,8 @@ def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, m
             "Ligne de commande résolue": clean(chk.line), "Catégorie": sug.category,
             "Template Zabbix suggéré": sug.zabbix_template, "Item Zabbix équivalent": sug.zabbix_item,
             "Stratégie": sug.strategy, "Proposition": proposal,
-            "Décision (template)": None, "Décision (service)": "", "Décision effective": None,
+            "Décision (template)": None, "Décision (hôte)": None, "Décision (service)": "",
+            "Décision effective": None,
             "Commentaire": "",
         }
         m.services.append(row)

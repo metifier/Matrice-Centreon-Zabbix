@@ -60,9 +60,14 @@ def apply_decisions(m: Matrix, decisions: dict | None) -> Matrix:
                 if field in fields:
                     row[field] = value
     by_tpl = {r["Template de service"]: (r["Décision finale"] or r["Proposition"]) for r in m.service_templates}
+    by_host = {r["Hôte"]: (r["Décision finale"] or r["Proposition"]) for r in m.hosts}
     for row in m.services:
         row["Décision (template)"] = by_tpl.get(row["Template de service"], "")
-        if row["Décision (service)"]:
+        row["Décision (hôte)"] = by_host.get(row["Hôte"], "")
+        if row["Décision (hôte)"] == NE_PAS_MIGRER:
+            # Un hôte qui n'est pas migré emporte tous ses services, quelle que soit leur décision.
+            row["Décision effective"] = NE_PAS_MIGRER
+        elif row["Décision (service)"]:
             row["Décision effective"] = row["Décision (service)"]
         elif row["Actif"] == "Non":
             row["Décision effective"] = NE_PAS_MIGRER

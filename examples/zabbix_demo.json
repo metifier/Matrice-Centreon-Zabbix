@@ -116,49 +116,197 @@
    "templateid": "100",
    "host": "Linux by SNMP",
    "name": "Linux by SNMP",
-   "hosts": 2
+   "hosts": 2,
+   "linked": [],
+   "items": [
+    [
+     "CPU utilization",
+     "system.cpu.util[snmp.cpu.util]"
+    ],
+    [
+     "Memory utilization",
+     "vm.memory.util[snmp.vm.memory.util]"
+    ],
+    [
+     "Uptime",
+     "system.uptime[hrSystemUptime.0]"
+    ]
+   ],
+   "prototypes": [
+    [
+     "{#FSNAME}: Space utilization",
+     "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"
+    ],
+    [
+     "Interface {#IFNAME}: Bits received",
+     "net.if.in[ifHCInOctets.{#SNMPINDEX}]"
+    ]
+   ]
   },
   {
    "templateid": "101",
    "host": "Linux by Zabbix agent",
    "name": "Linux by Zabbix agent",
-   "hosts": 1
+   "hosts": 1,
+   "linked": [
+    "108"
+   ],
+   "items": [
+    [
+     "Memory utilization",
+     "vm.memory.util"
+    ],
+    [
+     "System uptime",
+     "system.uptime"
+    ]
+   ],
+   "prototypes": []
   },
   {
    "templateid": "102",
    "host": "Apache by HTTP",
    "name": "Apache by HTTP",
-   "hosts": 1
+   "hosts": 1,
+   "linked": [],
+   "items": [
+    [
+     "Requests per second",
+     "apache.requests.rate"
+    ],
+    [
+     "Workers busy",
+     "apache.workers.busy"
+    ]
+   ],
+   "prototypes": []
   },
   {
    "templateid": "103",
    "host": "Windows by Zabbix agent",
    "name": "Windows by Zabbix agent",
-   "hosts": 1
+   "hosts": 1,
+   "linked": [],
+   "items": [
+    [
+     "CPU utilization",
+     "system.cpu.util"
+    ],
+    [
+     "Memory utilization",
+     "vm.memory.util"
+    ]
+   ],
+   "prototypes": [
+    [
+     "FS [{#FSNAME}]: Space: Used, in %",
+     "vfs.fs.dependent.size[{#FSNAME},pused]"
+    ],
+    [
+     "State of service \"{#SERVICE.NAME}\"",
+     "service.info[\"{#SERVICE.NAME}\",state]"
+    ]
+   ]
   },
   {
    "templateid": "104",
    "host": "Windows by SNMP",
    "name": "Windows by SNMP",
-   "hosts": 0
+   "hosts": 0,
+   "linked": [],
+   "items": [
+    [
+     "CPU utilization",
+     "system.cpu.util[snmp.cpu.util]"
+    ]
+   ],
+   "prototypes": [
+    [
+     "{#FSNAME}: Space utilization",
+     "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"
+    ]
+   ]
   },
   {
    "templateid": "105",
    "host": "Cisco IOS by SNMP",
    "name": "Cisco IOS by SNMP",
-   "hosts": 1
+   "hosts": 1,
+   "linked": [],
+   "items": [
+    [
+     "Uptime",
+     "system.uptime[sysUpTime.0]"
+    ]
+   ],
+   "prototypes": [
+    [
+     "Interface {#IFNAME}: Bits received",
+     "net.if.in[ifHCInOctets.{#SNMPINDEX}]"
+    ],
+    [
+     "{#SENSOR_INFO}: Temperature",
+     "sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]"
+    ]
+   ]
   },
   {
    "templateid": "106",
    "host": "ICMP Ping",
    "name": "ICMP Ping",
-   "hosts": 1
+   "hosts": 1,
+   "linked": [],
+   "items": [
+    [
+     "ICMP ping",
+     "icmpping"
+    ],
+    [
+     "ICMP loss",
+     "icmppingloss"
+    ],
+    [
+     "ICMP response time",
+     "icmppingsec"
+    ]
+   ],
+   "prototypes": []
   },
   {
    "templateid": "107",
    "host": "MySQL by Zabbix agent 2",
    "name": "MySQL by Zabbix agent 2",
-   "hosts": 0
+   "hosts": 0,
+   "linked": [],
+   "items": [
+    [
+     "Status",
+     "mysql.ping[\"{$MYSQL.DSN}\"]"
+    ],
+    [
+     "Connections per second",
+     "mysql.connections.rate"
+    ]
+   ],
+   "prototypes": []
+  },
+  {
+   "templateid": "108",
+   "host": "Linux CPU by Zabbix agent",
+   "name": "Linux CPU by Zabbix agent",
+   "hosts": 0,
+   "linked": [],
+   "items": [
+    [
+     "CPU utilization",
+     "system.cpu.util"
+    ],
+    [
+     "Load average (1m avg)",
+     "system.cpu.load[all,avg1]"
+    ]
+   ],
+   "prototypes": []
   }
  ]
 }

@@ -11,8 +11,10 @@ const BADGES = {
   "Absent de Zabbix": "b-bad", "Hôte absent de Zabbix": "b-bad", "Non migré (décision)": "",
   "Non (à importer)": "b-bad", "Natif": "b-ok", "Adapter": "b-info", "Développer": "b-dev", "Abandonner": "",
   "Haute": "b-bad", "Moyenne": "b-warn", "Basse": "",
+  "Couvert par un item standard": "b-ok", "Template standard sans item correspondant": "b-warn",
+  "Template standard à importer dans Zabbix": "b-info", "Spécificité à créer": "b-dev", "Non migré": "",
 };
-const BADGE_COLUMNS = new Set(["Proposition", "Décision effective", "Décision (template)", "Statut Zabbix",
+const BADGE_COLUMNS = new Set(["Couverture standard", "Proposition", "Décision effective", "Décision (template)", "Décision (hôte)", "Statut Zabbix",
   "Disponible dans Zabbix", "Stratégie", "Priorité"]);
 const NUMERIC = (v) => typeof v === "number";
 
@@ -149,6 +151,9 @@ async function loadDashboard() {
   bars($("#chart-props"), Object.entries(d.propositions).map(([k2, [n, s]]) => [k2, n, `tpl · ${s} svc`]).sort((a, b) => b[1] - a[1]));
   bars($("#chart-decisions"), Object.entries(d.decisions_effectives).sort((a, b) => b[1] - a[1]));
   const zbx = Object.entries(d.statuts_zabbix).sort((a, b) => b[1] - a[1]);
+  const cov = Object.entries(d.couverture || {}).sort((a, b) => b[1] - a[1]);
+  if (cov.length) bars($("#chart-cov"), cov);
+  else $("#chart-cov").innerHTML = '<p class="muted">Lancez l\'inventaire Zabbix pour voir quels services sont déjà couverts par les items des templates standards.</p>';
   if (zbx.length) bars($("#chart-zbx"), zbx);
   else $("#chart-zbx").innerHTML = '<p class="muted">Lancez l\'inventaire Zabbix (onglet Sources) pour comparer.</p>';
   $("#top").innerHTML = `<table class="grid"><thead><tr><th>Template</th><th>Services</th><th>Hôtes</th><th>Proposition</th><th>Zabbix</th></tr></thead><tbody>${
@@ -161,7 +166,14 @@ async function loadDashboard() {
 
 // ------------------------------------------------------------------ tables
 function tstate() {
-  return (app.tables[app.view] ||= { page: 1, size: 100, sort: "", dir: "asc", q: "", filters: {} });
+  return (app.tables[app.view] ||= { page: 1, size: 100, sort: "", dir: "asc", q: "", filters: {}, sel: new Set() });
+}
+
+function tableQuery(ts) {
+  const p = scopeQuery();
+  if (ts.q) p.set("q", ts.q);
+  for (const [c, v] of Object.entries(ts.filters)) if (v) p.set("f." + c, v);
+  return p;
 }
 
 let tableTimer;
@@ -176,6 +188,7 @@ async function loadTable() {
   for (const [c, v] of Object.entries(ts.filters)) if (v) p.set("f." + c, v);
   const d = await api(`/api/table/${view}?` + p);
   if (view !== app.view) return;
+  app.lastTable = d;
   $("#search").value = ts.q;
   $("#size").value = String(ts.size);
   renderTable(d, ts);
@@ -190,15 +203,25 @@ function renderTable(d, ts) {
     $("#count").textContent = ""; $("#pager").innerHTML = "";
     return;
   }
-  thead.innerHTML = `<tr>${d.columns.map((c) => `<th data-col="${esc(c)}" title="Trier">${esc(c)}${ts.sort === c ? `<span class="arrow">${ts.dir === "asc" ? "▲" : "▼"}</span>` : ""}</th>`).join("")}</tr>
-    <tr class="filters">${d.columns.map((c) => {
+  const selectable = editable.size > 0, sel = ts.sel;
+  const pageKeys = d.rows.map((r) => r._key);
+  const allOnPage = selectable && pageKeys.length && pageKeys.every((k) => sel.has(k));
+  const selHead = selectable ? `<th class="sel"><input type="checkbox" data-sel-page title="Sélectionner la page" ${allOnPage ? "checked" : ""}></th>` : "";
+  const selFilter = selectable ? '<th class="sel"></th>' : "";
+  thead.innerHTML = `<tr>${selHead}${d.columns.map((c) => `<th data-col="${esc(c)}" title="Trier">${esc(c)}${ts.sort === c ? `<span class="arrow">${ts.dir === "asc" ? "▲" : "▼"}</span>` : ""}</th>`).join("")}</tr>
+    <tr class="filters">${selFilter}${d.columns.map((c) => {
       const v = ts.filters[c] || "";
       if (d.values && d.values[c]) {
         return `<th><select data-filter="${esc(c)}"><option value="">(tous)</option>${d.values[c].map((x) => `<option value="=${esc(x)}" ${v === "=" + x ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></th>`;
       }
       return `<th><input data-filter="${esc(c)}" value="${esc(v)}" placeholder="filtrer"></th>`;
     }).join("")}</tr>`;
-  tbody.innerHTML = d.rows.map((r) => `<tr>${d.columns.map((c) => cell(c, r, editable, d.choices)).join("")}</tr>`).join("");
+  tbody.innerHTML = d.rows.map((r) => {
+    const checked = selectable && sel.has(r._key);
+    const box = selectable ? `<td class="sel"><input type="checkbox" data-sel="${esc(r._key)}" ${checked ? "checked" : ""}></td>` : "";
+    return `<tr class="${checked ? "selected" : ""}">${box}${d.columns.map((c) => cell(c, r, editable, d.choices)).join("")}</tr>`;
+  }).join("");
+  updateBulk();
   $("#count").textContent = `${d.total} ligne(s)` + (d.total !== d.all ? ` sur ${d.all}` : "");
   const pages = Math.max(1, Math.ceil(d.total / d.size));
   $("#pager").innerHTML = pages > 1 ? `<button data-page="1" ${d.page === 1 ? "disabled" : ""}>«</button>
@@ -206,6 +229,41 @@ function renderTable(d, ts) {
     <span>Page ${d.page} / ${pages}</span>
     <button data-page="${d.page + 1}" ${d.page >= pages ? "disabled" : ""}>›</button>
     <button data-page="${pages}" ${d.page >= pages ? "disabled" : ""}>»</button>` : "";
+}
+
+function updateBulk() {
+  const d = app.lastTable, ts = tstate(), bar = $("#bulk");
+  const fields = (d && d.editable) || [];
+  if (!fields.length || !ts.sel.size || ["dashboard", "sources", "clients"].includes(app.view)) {
+    bar.classList.add("hidden");
+    return;
+  }
+  bar.classList.remove("hidden");
+  $("#bulk-count").textContent = `${ts.sel.size} ligne(s) sélectionnée(s)`;
+  $("#bulk-all").textContent = `Sélectionner les ${d.total} résultats filtrés`;
+  $("#bulk-all").classList.toggle("hidden", ts.sel.size >= d.total);
+  const fsel = $("#bulk-field"), current = fsel.value;
+  fsel.innerHTML = fields.map((f) => `<option ${f === current ? "selected" : ""}>${esc(f)}</option>`).join("");
+  renderBulkValue();
+}
+
+function renderBulkValue() {
+  const d = app.lastTable, field = $("#bulk-field").value, opts = d && d.choices && d.choices[field];
+  $("#bulk-value-wrap").innerHTML = opts
+    ? `<select id="bulk-value"><option value="">(effacer)</option>${opts.map((o) => `<option>${esc(o)}</option>`).join("")}</select>`
+    : '<input id="bulk-value" placeholder="(vide = effacer)">';
+}
+
+async function applyBulk() {
+  const ts = tstate(), field = $("#bulk-field").value, value = $("#bulk-value").value;
+  const n = ts.sel.size;
+  if (!confirm(`Appliquer « ${field} = ${value || "(vide)"} » à ${n} ligne(s) ?`)) return;
+  try {
+    await post("/api/decisions/bulk", { table: app.view, keys: [...ts.sel], field, value });
+    ts.sel.clear();
+    toast(`${n} ligne(s) mises à jour`);
+    loadTable();
+  } catch (e) { toast("Erreur : " + e.message); }
 }
 
 function cell(c, r, editable, choices) {
@@ -285,7 +343,7 @@ function applyScope(s) {
   $("#scope-services").value = app.scope.services;
   $("#scope-exclude").value = app.scope.exclude;
   $("#scope-mode").value = app.scope.mode;
-  for (const t of Object.values(app.tables)) t.page = 1;
+  for (const t of Object.values(app.tables)) { t.page = 1; if (t.sel) t.sel.clear(); }
   try { localStorage.setItem("scope", JSON.stringify(app.scope)); } catch (e) { /* stockage indisponible */ }
 }
 
@@ -328,7 +386,7 @@ function bind() {
   const grid = $("#grid");
   grid.addEventListener("click", (e) => {
     const th = e.target.closest("thead tr:first-child th");
-    if (!th) return;
+    if (!th || th.classList.contains("sel")) return;
     const ts = tstate(), col = th.dataset.col;
     ts.dir = ts.sort === col && ts.dir === "asc" ? "desc" : "asc";
     ts.sort = col; ts.page = 1;
@@ -342,10 +400,33 @@ function bind() {
   });
   grid.addEventListener("change", (e) => {
     if (e.target.dataset.edit !== undefined) return saveDecision(e.target);
+    const ts = tstate();
+    if (e.target.dataset.sel !== undefined) {
+      if (e.target.checked) ts.sel.add(e.target.dataset.sel); else ts.sel.delete(e.target.dataset.sel);
+      e.target.closest("tr").classList.toggle("selected", e.target.checked);
+      return updateBulk();
+    }
+    if (e.target.dataset.selPage !== undefined) {
+      for (const box of $$("input[data-sel]", grid)) {
+        box.checked = e.target.checked;
+        if (box.checked) ts.sel.add(box.dataset.sel); else ts.sel.delete(box.dataset.sel);
+        box.closest("tr").classList.toggle("selected", box.checked);
+      }
+      return updateBulk();
+    }
     const f = e.target.dataset.filter;
     if (f !== undefined && e.target.tagName === "SELECT") {
       const ts = tstate(); ts.filters[f] = e.target.value; ts.page = 1; loadTable();
     }
+  });
+  $("#bulk-field").addEventListener("change", renderBulkValue);
+  $("#bulk-apply").addEventListener("click", applyBulk);
+  $("#bulk-clear").addEventListener("click", () => { tstate().sel.clear(); loadTable(); });
+  $("#bulk-all").addEventListener("click", async () => {
+    const ts = tstate();
+    const { keys } = await api(`/api/table/${app.view}/keys?` + tableQuery(ts));
+    keys.forEach((k) => ts.sel.add(k));
+    loadTable();
   });
   $("#search").addEventListener("input", (e) => { const ts = tstate(); ts.q = e.target.value; ts.page = 1; debounced(loadTable); });
   $("#size").addEventListener("change", (e) => { const ts = tstate(); ts.size = +e.target.value; ts.page = 1; loadTable(); });

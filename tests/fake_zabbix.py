@@ -2,7 +2,33 @@
 from __future__ import annotations
 
 TEMPLATES = ["Linux by SNMP", "Linux by Zabbix agent", "Apache by HTTP", "Windows by Zabbix agent",
-             "Windows by SNMP", "Cisco IOS by SNMP", "ICMP Ping", "MySQL by Zabbix agent 2"]
+             "Windows by SNMP", "Cisco IOS by SNMP", "ICMP Ping", "MySQL by Zabbix agent 2",
+             "Linux CPU by Zabbix agent"]
+
+# Items et prototypes (LLD) simplifiés, inspirés des templates officiels Zabbix 7.0
+ITEMS = {
+    "Linux by SNMP": [("CPU utilization", "system.cpu.util[snmp.cpu.util]"),
+                      ("Memory utilization", "vm.memory.util[snmp.vm.memory.util]"),
+                      ("Uptime", "system.uptime[hrSystemUptime.0]")],
+    "Linux CPU by Zabbix agent": [("CPU utilization", "system.cpu.util"), ("Load average (1m avg)", "system.cpu.load[all,avg1]")],
+    "Linux by Zabbix agent": [("Memory utilization", "vm.memory.util"), ("System uptime", "system.uptime")],
+    "Apache by HTTP": [("Requests per second", "apache.requests.rate"), ("Workers busy", "apache.workers.busy")],
+    "Windows by Zabbix agent": [("CPU utilization", "system.cpu.util"), ("Memory utilization", "vm.memory.util")],
+    "Windows by SNMP": [("CPU utilization", "system.cpu.util[snmp.cpu.util]")],
+    "ICMP Ping": [("ICMP ping", "icmpping"), ("ICMP loss", "icmppingloss"), ("ICMP response time", "icmppingsec")],
+    "MySQL by Zabbix agent 2": [("Status", "mysql.ping[\"{$MYSQL.DSN}\"]"), ("Connections per second", "mysql.connections.rate")],
+    "Cisco IOS by SNMP": [("Uptime", "system.uptime[sysUpTime.0]")],
+}
+PROTOTYPES = {
+    "Linux by SNMP": [("{#FSNAME}: Space utilization", "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"),
+                      ("Interface {#IFNAME}: Bits received", "net.if.in[ifHCInOctets.{#SNMPINDEX}]")],
+    "Windows by Zabbix agent": [("FS [{#FSNAME}]: Space: Used, in %", "vfs.fs.dependent.size[{#FSNAME},pused]"),
+                                ("State of service \"{#SERVICE.NAME}\"", "service.info[\"{#SERVICE.NAME}\",state]")],
+    "Windows by SNMP": [("{#FSNAME}: Space utilization", "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]")],
+    "Cisco IOS by SNMP": [("Interface {#IFNAME}: Bits received", "net.if.in[ifHCInOctets.{#SNMPINDEX}]"),
+                          ("{#SENSOR_INFO}: Temperature", "sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]")],
+}
+LINKED = {"Linux by Zabbix agent": ["Linux CPU by Zabbix agent"]}
 
 HOSTS = [
     # correspond par nom ; templates complets
@@ -61,10 +87,16 @@ class FakeZabbix:
                 "interfaces": [{"ip": h["ip"], "dns": "", "type": h["iface"], "main": "1", "useip": "1"}],
                 "items": str(h["items"]),
             } for i, h in enumerate(HOSTS)])
+        tids = {n: str(100 + i) for i, n in enumerate(TEMPLATES)}
         if method == "template.get":
-            return self._ok(json, [{"templateid": str(100 + i), "host": t, "name": t,
-                                    "hosts": str(sum(t in h["templates"] for h in HOSTS))}
-                                   for i, t in enumerate(TEMPLATES)])
+            key = "templates" if "selectTemplates" in params else "parentTemplates"
+            return self._ok(json, [{"templateid": tids[t], "host": t, "name": t,
+                                    "hosts": str(sum(t in h["templates"] for h in HOSTS)),
+                                    key: [{"templateid": tids[x]} for x in LINKED.get(t, [])]}
+                                   for t in TEMPLATES])
+        if method in ("item.get", "itemprototype.get"):
+            src = ITEMS if method == "item.get" else PROTOTYPES
+            return self._ok(json, [{"name": n, "key_": k, "hostid": tids[t]} for t, rows in src.items() for n, k in rows])
         return self._err(json, f"Method {method} not found")
 
     @staticmethod

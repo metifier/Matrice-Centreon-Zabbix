@@ -26,6 +26,7 @@ SHEET_HELP = "Mode d'emploi"
 SHEET_ZBX_HOSTS = "Comparatif Zabbix hôtes"
 SHEET_ZBX_ONLY = "Uniquement dans Zabbix"
 SHEET_ZBX_TPL = "Templates Zabbix"
+SHEET_CORR = "Corrélation items Zabbix"
 
 HEADER_FILL = PatternFill("solid", fgColor="1F3864")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -41,7 +42,10 @@ STATUS_COLORS = {
     "Absent de Zabbix": "F8CBAD", "Hôte absent de Zabbix": "F8CBAD", "À créer dans Zabbix": "FCE4D6",
     "Non migré (décision)": "D9D9D9", "Non (à importer)": "F8CBAD",
 }
-STATUS_COLUMNS = {"Statut Zabbix", "Disponible dans Zabbix"}
+STATUS_COLORS.update({"Couvert par un item standard": "C6EFCE", "Template standard sans item correspondant": "FFEB9C",
+                      "Template standard à importer dans Zabbix": "DDEBF7", "Spécificité à créer": "FCE4D6",
+                      "Non migré": "D9D9D9"})
+STATUS_COLUMNS = {"Statut Zabbix", "Disponible dans Zabbix", "Couverture standard"}
 INPUT_COLUMNS = {"Décision finale", "Décision (service)", "Template / item Zabbix cible",
                  "Template Zabbix cible", "Commentaire"}
 MAX_WIDTH = {"Ligne de commande résolue": 80, "Ligne de commande": 90, "Chaîne d'héritage": 50,
@@ -64,6 +68,8 @@ def write_excel(m: Matrix, path) -> Path:
         _table(wb, SHEET_ZBX_HOSTS, m.zabbix_hosts)
         _table(wb, SHEET_ZBX_ONLY, m.zabbix_only)
         _table(wb, SHEET_ZBX_TPL, m.zabbix_templates)
+        if m.correlation:
+            _table(wb, SHEET_CORR, m.correlation, key_width=40)
     _table(wb, SHEET_CMD, m.commands)
     _help_sheet(wb)
     wb.calculation.fullCalcOnLoad = True
@@ -84,8 +90,8 @@ def write_csv(m: Matrix, directory: str | Path) -> list[Path]:
                        ("matrice_templates_hotes", m.host_templates), ("hotes", m.hosts),
                        ("services", m.services), ("commandes", m.commands),
                        ("comparatif_zabbix_hotes", m.zabbix_hosts), ("uniquement_zabbix", m.zabbix_only),
-                       ("templates_zabbix", m.zabbix_templates)):
-        if not rows and name.startswith(("comparatif", "uniquement", "templates_zabbix")):
+                       ("templates_zabbix", m.zabbix_templates), ("correlation_items_zabbix", m.correlation)):
+        if not rows and name.startswith(("comparatif", "uniquement", "templates_zabbix", "correlation")):
             continue
         p = directory / f"{name}.csv"
         with p.open("w", newline="", encoding="utf-8-sig") as fh:
@@ -145,7 +151,7 @@ def _table(wb, title, rows, decisions=None, key_width=None):
                     ws.conditional_formatting.add(
                         f"{letter}2:{letter}{n}",
                         FormulaRule(formula=[f'{letter}2="{status}"'], fill=PatternFill("solid", fgColor=color)))
-        if h in ("Proposition", "Décision finale", "Décision (template)", "Décision effective",
+        if h in ("Proposition", "Décision finale", "Décision (template)", "Décision (hôte)", "Décision effective",
                  "Décision (service)"):
             for decision, color in DECISION_COLORS.items():
                 ws.conditional_formatting.add(
@@ -176,6 +182,12 @@ def _service_formulas(ws, m: Matrix):
     keys = f"{sheet}!${s_col['Template de service']}$2:${s_col['Template de service']}${last}"
     final = f"{sheet}!${s_col['Décision finale']}$2:${s_col['Décision finale']}${last}"
     proposal = f"{sheet}!${s_col['Proposition']}$2:${s_col['Proposition']}${last}"
+    hosts_ref = None
+    if m.hosts:
+        h_col = {h: get_column_letter(i) for i, h in enumerate(m.hosts[0], 1)}
+        hsheet, hlast = quote_sheetname(SHEET_HOSTS), len(m.hosts) + 1
+        rng = lambda c: f"{hsheet}!${h_col[c]}$2:${h_col[c]}${hlast}"  # noqa: E731
+        hosts_ref = (rng("Hôte"), rng("Décision finale"), rng("Proposition"))
     for r in range(2, len(m.services) + 2):
         key = f"${col['Template de service']}{r}"
         match = f"MATCH({key},{keys},0)"
@@ -183,8 +195,15 @@ def _service_formulas(ws, m: Matrix):
             f'=IFERROR(IF(INDEX({final},{match})<>"",INDEX({final},{match}),INDEX({proposal},{match})),"")')
         svc_dec, tpl_dec, actif = (f"{col['Décision (service)']}{r}", f"{col['Décision (template)']}{r}",
                                    f"{col['Actif']}{r}")
+        host_dec = f"{col['Décision (hôte)']}{r}"
+        if hosts_ref:
+            hkeys, hfinal, hprop = hosts_ref
+            hmatch = f"MATCH(${col['Hôte']}{r},{hkeys},0)"
+            ws[host_dec] = (f'=IFERROR(IF(INDEX({hfinal},{hmatch})<>"",INDEX({hfinal},{hmatch}),'
+                            f'INDEX({hprop},{hmatch})),"")')
         ws[f"{col['Décision effective']}{r}"] = (
-            f'=IF({svc_dec}<>"",{svc_dec},IF({actif}="Non","{NE_PAS_MIGRER}",{tpl_dec}))')
+            f'=IF({host_dec}="{NE_PAS_MIGRER}","{NE_PAS_MIGRER}",'
+            f'IF({svc_dec}<>"",{svc_dec},IF({actif}="Non","{NE_PAS_MIGRER}",{tpl_dec})))')
 
 
 def _cross(wb, title, columns, rows, legend):
@@ -262,6 +281,9 @@ def _help_sheet(wb):
          "« Décision effective » donne le résultat final (filtrable).", False),
         ("4. « Hôtes » : liste des hôtes avec interface et templates Zabbix suggérés, proxy = collecteur Centreon.", False),
         ("5. Onglets « Croisé » : vue matricielle hôtes × templates pour repérer les profils d'hôtes.", False),
+        ("6. « Corrélation items Zabbix » : pour chaque template de service Centreon, item(s) des templates Zabbix "
+         "standards qui couvrent déjà la mesure, ou spécificité à créer. Démarche conseillée : lier d'abord les "
+         "templates standards, puis n'ajouter que les spécificités.", False),
         ("", False),
         ("Stratégies", True),
         ("Natif : couvert par un template officiel Zabbix → effort faible.", False),
