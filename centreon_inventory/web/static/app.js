@@ -219,7 +219,7 @@ function renderTable(d, ts) {
   tbody.innerHTML = d.rows.map((r) => {
     const checked = selectable && sel.has(r._key);
     const box = selectable ? `<td class="sel"><input type="checkbox" data-sel="${esc(r._key)}" ${checked ? "checked" : ""}></td>` : "";
-    return `<tr class="${checked ? "selected" : ""}">${box}${d.columns.map((c) => cell(c, r, editable, d.choices)).join("")}</tr>`;
+    return `<tr class="${checked ? "selected" : ""}">${box}${d.columns.map((c, i) => cell(c, r, editable, d.choices, i === 0)).join("")}</tr>`;
   }).join("");
   updateBulk();
   $("#count").textContent = `${d.total} ligne(s)` + (d.total !== d.all ? ` sur ${d.all}` : "");
@@ -266,8 +266,11 @@ async function applyBulk() {
   } catch (e) { toast("Erreur : " + e.message); }
 }
 
-function cell(c, r, editable, choices) {
+function cell(c, r, editable, choices, first) {
   const v = r[c];
+  if (first && r._key !== undefined) {
+    return `<td title="Voir le détail"><a href="#" class="detail" data-detail="${esc(r._key)}">${esc(v)}</a></td>`;
+  }
   if (editable.has(c)) {
     const opts = choices && choices[c];
     if (opts) {
@@ -285,6 +288,74 @@ async function saveDecision(el) {
     toast("Décision enregistrée");
     loadTable();
   } catch (e) { toast("Erreur : " + e.message); }
+}
+
+// ------------------------------------------------------------------ fiche détaillée
+const kvTable = (pairs) => `<table class="kv"><tbody>${pairs.map((p) =>
+  `<tr><td>${esc(p.label)}</td><td>${BADGE_COLUMNS.has(p.label) ? `<span class="badge ${BADGES[p.value] || ""}">${esc(p.value)}</span>` : esc(p.value)}</td></tr>`).join("")}</tbody></table>`;
+const macroTable = (macros) => Object.keys(macros || {}).length
+  ? `<table class="grid"><thead><tr><th>Macro</th><th>Valeur</th></tr></thead><tbody>${Object.entries(macros).map(([k, v]) =>
+    `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>` : '<p class="muted small">Aucune macro.</p>';
+
+function rowsTable(t) {
+  if (!t || !t.rows.length) return '<p class="muted small">Aucun.</p>';
+  return `<table class="grid"><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${
+    t.rows.map((r) => `<tr>${t.columns.map((c) => BADGE_COLUMNS.has(c) && r[c]
+      ? `<td><span class="badge ${BADGES[r[c]] || ""}">${esc(r[c])}</span></td>`
+      : `<td class="${c.startsWith("Ligne") ? "small" : ""}">${esc(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table>`
+    + (t.total > t.rows.length ? `<p class="muted small">${t.rows.length} affichés sur ${t.total}.</p>` : "");
+}
+
+function zabbixSection(z) {
+  if (z === null || z === undefined) return '<p class="muted small">Lancez l\'inventaire Zabbix pour voir les items des templates standards.</p>';
+  if (!z.length) return '<p class="muted small">Aucun template Zabbix suggéré.</p>';
+  return z.map((t) => `<h4>${esc(t.template)} ${t.present ? "" : '<span class="badge b-bad">absent de Zabbix</span>'}</h4>` +
+    (t.present ? (t.items.length ? `<table class="grid"><thead><tr><th>Item / prototype</th><th>Clé</th><th>Type</th><th>Template</th></tr></thead><tbody>${
+      t.items.map((i) => `<tr class="${i.match ? "match" : ""}"><td>${i.match ? "✔ " : ""}${esc(i.name)}</td><td class="small">${esc(i.key)}</td><td>${esc(i.type)}</td><td class="small">${esc(i.template)}</td></tr>`).join("")
+    }</tbody></table>` + (t.total > t.items.length ? `<p class="muted small">${t.items.length} sur ${t.total}.</p>` : "")
+      : '<p class="muted small">Aucun item inventorié (relancez l\'inventaire Zabbix).</p>') : "")).join("")
+    + '<p class="muted small">✔ = item correspondant à la catégorie du service (règles « correlation » du référentiel).</p>';
+}
+
+function decideBox(view, key) {
+  const d = app.lastTable;
+  const field = view === "services" ? "Décision (service)" : "Décision finale";
+  const opts = d && d.choices && d.choices[field];
+  if (!opts || !(d.editable || []).includes(field)) return "";
+  const row = (d.rows || []).find((r) => r._key === key) || {};
+  return `<div class="decide"><strong>${esc(field)}</strong>
+    <select data-edit="${esc(field)}" data-key="${esc(key)}" id="drawer-decision"><option value=""></option>${
+      opts.map((o) => `<option ${o === row[field] ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>
+    <span class="muted small">enregistrée immédiatement</span></div>`;
+}
+
+async function openDetail(view, key) {
+  let d;
+  try { d = await api(`/api/detail/${view}?key=${encodeURIComponent(key)}&` + scopeQuery()); }
+  catch (e) { return toast("Détail indisponible : " + e.message); }
+  $("#drawer-kind").textContent = d.kind;
+  $("#drawer-title").textContent = d.title;
+  let html = decideBox(view, key);
+  html += `<h3>Résumé</h3>${kvTable(d.summary || [])}`;
+  if (d.example) html += `<h3>Ligne de commande (exemple : ${esc(d.example.service)})</h3><pre>${esc(d.example.line)}</pre>`;
+  if (d.chain && d.chain.length) {
+    html += `<h3>Chaîne d'héritage Centreon</h3>` + d.chain.map((c, i) => `<details ${i === 0 ? "open" : ""}><summary><strong>${esc(c.name)}</strong>${c.command ? ` — commande ${esc(c.command)}` : ""}</summary>
+      ${c.args ? `<div class="small">Arguments : <code>${esc(c.args)}</code></div>` : ""}
+      ${c.line ? `<pre>${esc(c.line)}</pre>` : ""}
+      ${Object.keys(c.macros || {}).length ? macroTable(c.macros) : ""}
+      ${c.host_templates && c.host_templates.length ? `<div class="small muted">Lié aux templates d'hôte : ${esc(c.host_templates.join(", "))}</div>` : ""}</details>`).join("");
+  }
+  if (d.no_template) html += '<p class="notice small">Services sans template de service : la commande est portée directement par chaque service (voir la liste ci-dessous). « sans commande » signifie que ni template ni commande n\'ont été lus : relancez la collecte et consultez le journal (diagnostic des templates).</p>';
+  if (d.linked_service_templates) html += `<h3>Templates de service liés (${d.linked_service_templates.length})</h3>${rowsTable({
+    columns: ["Template de service", "Nb services", "Catégorie", "Template Zabbix suggéré", "Proposition"],
+    rows: d.linked_service_templates.map((x) => ({ "Template de service": x.name, ...(x.row || {}) })), total: d.linked_service_templates.length })}`;
+  if (d.macros && Object.keys(d.macros).length) html += `<h3>Macros</h3>${macroTable(d.macros)}`;
+  if ("zabbix" in d) html += `<h3>Items des templates Zabbix standards</h3>${zabbixSection(d.zabbix)}`;
+  if (d.services) html += `<h3>Services (${d.services.total})</h3>${rowsTable(d.services)}`;
+  if (d.hosts && d.hosts.length) html += `<h3>Hôtes (${d.hosts.length})</h3><div class="chips">${d.hosts.map((h) => `<span class="chip">${esc(h)}</span>`).join("")}</div>`;
+  $("#drawer-body").innerHTML = html;
+  $("#drawer").classList.remove("hidden");
+  $("#drawer").scrollTop = 0;
 }
 
 // ------------------------------------------------------------------ extractions
@@ -384,6 +455,16 @@ function bind() {
   });
 
   const grid = $("#grid");
+  grid.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-detail]");
+    if (a) { e.preventDefault(); e.stopPropagation(); openDetail(app.view, a.dataset.detail); }
+  }, true);
+  $("#drawer-close").addEventListener("click", () => $("#drawer").classList.add("hidden"));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#drawer").classList.add("hidden"); });
+  $("#drawer-body").addEventListener("change", async (e) => {
+    if (e.target.dataset.edit === undefined) return;
+    await saveDecision(e.target);
+  });
   grid.addEventListener("click", (e) => {
     const th = e.target.closest("thead tr:first-child th");
     if (!th || th.classList.contains("sel")) return;

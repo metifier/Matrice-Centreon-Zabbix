@@ -331,3 +331,19 @@ def test_correlation_linked_templates(inv, zbx):
     cat = _Catalog(zbx)
     keys = {k for _, _, k, _ in cat.items(cat.get("Linux by Zabbix agent"))}
     assert "system.cpu.util" in keys and "vm.memory.util" in keys
+
+
+def test_web_detail(client):
+    client.post("/api/import/demo")
+    d = client.get("/api/detail/service_templates?key=OS-Linux-Disk-Generic-Name-SNMP-custom").get_json()
+    assert d["kind"] == "Template de service" and d["services"]["total"] == 3
+    assert [c["name"] for c in d["chain"]][0] == "OS-Linux-Disk-Generic-Name-SNMP-custom"
+    assert "--storage=" in d["example"]["line"]
+    items = d["zabbix"][0]["items"]
+    assert items[0]["match"] and items[0]["key"].startswith("vfs.fs")  # item correspondant en tête
+    d = client.get("/api/detail/service_templates?key=(aucun template) check_erp_batch").get_json()
+    assert d["no_template"] and d["services"]["rows"][0]["Hôte"] == "srv-lnx-erp01"
+    assert client.get("/api/detail/host_templates?key=OS-Linux-SNMP-custom").get_json()["linked_service_templates"]
+    assert client.get("/api/detail/hosts?key=srv-lnx-db01").get_json()["services"]["total"] == 6
+    assert client.get("/api/detail/services?key=srv-lnx-db01|Cpu").status_code == 200
+    assert client.get("/api/detail/services?key=inconnu|x").status_code == 404

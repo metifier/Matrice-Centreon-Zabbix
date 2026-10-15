@@ -145,6 +145,14 @@ Onglet **Corrélation items** (et feuille Excel *Corrélation items Zabbix*) : p
 correspondants et **approche recommandée**. L'onglet *Templates Zabbix* indique aussi l'**apport du standard** :
 nombre d'items du template qui n'ont pas d'équivalent dans Centreon.
 
+### Fiche détaillée
+
+Dans les tableaux, **cliquez sur le nom** d'un template de service, d'un template d'hôte, d'un hôte ou d'un
+service : un panneau affiche la proposition et sa justification, un exemple de ligne de commande résolue, la
+chaîne d'héritage Centreon (commande, arguments, macros de chaque niveau), les services et hôtes concernés, et
+les items du template Zabbix standard (l'item correspondant au service est marqué ✔). La décision se saisit
+directement dans le panneau.
+
 ### Décisions : hôtes et décisions groupées
 
 - Un hôte marqué **« Ne pas migrer »** entraîne tous ses services en « Ne pas migrer » (interface et Excel,

@@ -485,6 +485,17 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
                         "editable": EDITABLE.get(view, {}).get("fields", []),
                         "choices": HOST_CHOICES if view == "hosts" else CHOICES})
 
+    @app.get("/api/detail/<view>")
+    def row_detail(view):
+        from .detail import detail
+        m = store.report(_client_from_request(store))
+        if m is None:
+            abort(404)
+        d = detail(m, view, request.args.get("key", ""), store.zabbix, Mapper(store.mapping_path))
+        if d is None:
+            abort(404)
+        return jsonify(d)
+
     @app.get("/api/table/<view>/keys")
     def table_keys(view):
         """Clés de toutes les lignes filtrées (sélection « tous les résultats » pour une décision groupée)."""
