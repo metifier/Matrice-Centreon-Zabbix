@@ -20,8 +20,14 @@ const app = {
   view: "dashboard",
   state: null,
   tables: {},
-  scope: { client: "", hosts: "", services: "", exclude: "", mode: "et" },
+  scope: { client: "", hosts: "", hostgroups: "", pollers: "", services: "", exclude: "", mode: "et" },
+  lookup: null,
 };
+const SCOPE_FIELDS = ["hosts", "hostgroups", "pollers", "services", "exclude"];
+const EMPTY_SCOPE = { client: "", hosts: "", hostgroups: "", pollers: "", services: "", exclude: "", mode: "et" };
+const scopeFromClient = (c) => ({ client: c.name, hosts: c.hosts || "", hostgroups: c.hostgroups || "",
+  pollers: c.pollers || "", services: c.services || "", exclude: c.exclude || "", mode: c.mode || "et" });
+const scopeActive = (s) => SCOPE_FIELDS.some((k) => s[k]);
 
 function toast(msg) {
   const t = $("#toast");
@@ -44,8 +50,8 @@ function scopeQuery() {
   const s = app.scope, p = new URLSearchParams();
   if (s.client) p.set("client", s.client);
   else {
-    for (const k of ["hosts", "services", "exclude"]) if (s[k]) p.set(k, s[k]);
-    if (s.hosts || s.services || s.exclude) p.set("mode", s.mode);
+    for (const k of SCOPE_FIELDS) if (s[k]) p.set(k, s[k]);
+    if (scopeActive(s)) p.set("mode", s.mode);
   }
   return p;
 }
@@ -54,11 +60,18 @@ function scopeLabel() {
   const s = app.scope;
   if (s.client) {
     const c = (app.state.clients || []).find((x) => x.name === s.client) || {};
-    return `Client « ${s.client} » — hôtes : ${c.hosts || "*"} · services : ${c.services || "*"} · exclusions : ${c.exclude || "aucune"}`;
+    return `Client « ${s.client} » — ${describe(c)}`;
   }
-  if (s.hosts || s.services || s.exclude)
-    return `Filtre — hôtes : ${s.hosts || "*"} · services : ${s.services || "*"} · exclusions : ${s.exclude || "aucune"} (${s.mode})`;
+  if (scopeActive(s)) return `Filtre — ${describe(s)} (${s.mode})`;
   return "";
+}
+
+function describe(c) {
+  const parts = [`hôtes : ${c.hosts || "*"}`];
+  if (c.hostgroups) parts.push(`groupes : ${c.hostgroups}`);
+  if (c.pollers) parts.push(`collecteurs : ${c.pollers}`);
+  parts.push(`services : ${c.services || "*"}`, `exclusions : ${c.exclude || "aucune"}`);
+  return parts.join(" · ");
 }
 
 function updateExportLink() {
@@ -246,19 +259,29 @@ function formData(form) {
 function renderClients() {
   const st = app.state;
   $("#clients tbody").innerHTML = st.clients.length ? st.clients.map((c) => `<tr>
-    <td><strong>${esc(c.name)}</strong></td><td>${esc(c.hosts)}</td><td>${esc(c.services)}</td><td>${esc(c.exclude)}</td><td>${esc(c.mode)}</td>
+    <td><strong>${esc(c.name)}</strong></td><td>${esc(c.hosts)}</td><td>${esc(c.hostgroups)}</td><td>${esc(c.pollers)}</td><td>${esc(c.services)}</td><td>${esc(c.exclude)}</td><td>${esc(c.mode)}</td>
     <td><button data-apply="${esc(c.name)}">Afficher</button> <button data-edit-client="${esc(c.name)}" class="ghost">Modifier</button>
     <button data-del-client="${esc(c.name)}" class="ghost">Supprimer</button></td></tr>`).join("")
-    : '<tr><td colspan="6" class="muted">Aucun client enregistré.</td></tr>';
+    : '<tr><td colspan="8" class="muted">Aucun client enregistré.</td></tr>';
   $("#prefixes").innerHTML = st.prefixes.length
     ? st.prefixes.map(([p, n]) => `<span class="chip" data-prefix="${esc(p)}">${esc(p)} <span class="muted">${n}</span></span>`).join("")
     : '<span class="muted">Aucun préfixe récurrent (chargez un inventaire).</span>';
+  const lk = app.lookup;
+  const groups = lk ? lk.hostgroups.map((g) => [g, ""]) : (st.hostgroups || []);
+  const pollers = lk ? lk.pollers.map((p) => [p, ""]) : (st.pollers || []);
+  const chip = (kind, [v, n]) => `<span class="chip" data-${kind}="${esc(v)}">${esc(v)}${n !== "" ? ` <span class="muted">${n}</span>` : ""}</span>`;
+  const gp = lk ? (lk.hostgroup_prefixes || []).map(([p, n]) => chip("group", [p + "*", n])).join("") : "";
+  $("#groups").innerHTML = (gp ? `<div class="muted small">Préfixes :</div>${gp}<div class="muted small" style="width:100%">Groupes :</div>` : "")
+    + (groups.length ? groups.map((g) => chip("group", g)).join("") : '<span class="muted">Aucun groupe connu.</span>');
+  $("#pollers").innerHTML = pollers.length ? pollers.map((p) => chip("poller", p)).join("") : '<span class="muted">Aucun collecteur connu.</span>';
 }
 
 function applyScope(s) {
   Object.assign(app.scope, s);
   $("#scope-client").value = app.scope.client;
   $("#scope-hosts").value = app.scope.hosts;
+  $("#scope-hostgroups").value = app.scope.hostgroups || "";
+  $("#scope-pollers").value = app.scope.pollers || "";
   $("#scope-services").value = app.scope.services;
   $("#scope-exclude").value = app.scope.exclude;
   $("#scope-mode").value = app.scope.mode;
@@ -278,24 +301,26 @@ function bind() {
   });
   $("#scope").addEventListener("submit", (e) => {
     e.preventDefault();
-    applyScope({ client: "", hosts: $("#scope-hosts").value.trim(), services: $("#scope-services").value.trim(),
+    applyScope({ client: "", hosts: $("#scope-hosts").value.trim(), hostgroups: $("#scope-hostgroups").value.trim(),
+      pollers: $("#scope-pollers").value.trim(), services: $("#scope-services").value.trim(),
       exclude: $("#scope-exclude").value.trim(), mode: $("#scope-mode").value });
     refresh();
   });
   $("#scope-client").addEventListener("change", (e) => {
     const c = app.state.clients.find((x) => x.name === e.target.value);
-    applyScope(c ? { client: c.name, hosts: c.hosts, services: c.services, exclude: c.exclude, mode: c.mode || "et" }
-      : { client: "", hosts: "", services: "", exclude: "", mode: "et" });
+    applyScope(c ? scopeFromClient(c) : { ...EMPTY_SCOPE });
     refresh();
   });
   $("#scope-save").addEventListener("click", async () => {
-    const hosts = $("#scope-hosts").value.trim(), services = $("#scope-services").value.trim(), exclude = $("#scope-exclude").value.trim();
-    if (!hosts && !services && !exclude) return toast("Renseignez au moins un motif (hôtes, services ou exclusion).");
-    const name = prompt("Nom du client pour ce filtre :", hosts);
+    const f = {};
+    for (const k of SCOPE_FIELDS) f[k] = $(`#scope-${k}`).value.trim();
+    if (!scopeActive(f)) return toast("Renseignez au moins un motif (hôtes, groupes, collecteur, services ou exclusion).");
+    const name = prompt("Nom du client pour ce filtre :", f.hosts || f.hostgroups || f.pollers);
     if (!name) return;
-    await post("/api/clients", { name, hosts, services, exclude, mode: $("#scope-mode").value });
+    const c = { name, ...f, mode: $("#scope-mode").value };
+    await post("/api/clients", c);
     await loadState();
-    applyScope({ client: name, hosts, services, exclude, mode: $("#scope-mode").value });
+    applyScope(scopeFromClient(c));
     toast(`Client « ${name} » enregistré`);
     refresh();
   });
@@ -335,7 +360,8 @@ function bind() {
     const d = formData(e.target);
     if (d.scope_only) {
       const s = app.scope, c = s.client ? (app.state.clients.find((x) => x.name === s.client) || {}) : s;
-      d.scope = { name: s.client || "", hosts: c.hosts || "", services: c.services || "", exclude: c.exclude || "", mode: c.mode || "et" };
+      d.scope = { name: s.client || "", mode: c.mode || "et" };
+      for (const k of SCOPE_FIELDS) d.scope[k] = c[k] || "";
     }
     try {
       const { job } = await post("/api/jobs/centreon", d);
@@ -350,6 +376,16 @@ function bind() {
       const { job } = await post("/api/jobs/zabbix", d);
       e.target.password.value = ""; e.target.token.value = "";
       followJob(job, $("#status-zabbix"));
+    } catch (err) { toast(err.message); }
+  });
+  $("#lookup").addEventListener("click", async () => {
+    const d = formData($("#form-centreon"));
+    if (!d.url || !d.user || !d.password) return toast("Renseignez l'URL, l'utilisateur et le mot de passe Centreon.");
+    try {
+      app.lookup = await post("/api/centreon/lookup", d);
+      renderClients();
+      toast(`${app.lookup.hostgroups.length} groupes d'hôtes, ${app.lookup.pollers.length} collecteurs : voir l'onglet Clients`);
+      show("clients");
     } catch (err) { toast(err.message); }
   });
   $("#forget-zabbix").addEventListener("click", async () => {
@@ -381,22 +417,28 @@ function bind() {
     } catch (err) { toast(err.message); }
   });
   $("#view-clients").addEventListener("click", async (e) => {
-    const t = e.target.closest("[data-apply],[data-edit-client],[data-del-client],[data-prefix]");
+    const t = e.target.closest("[data-apply],[data-edit-client],[data-del-client],[data-prefix],[data-group],[data-poller]");
     if (!t) return;
     const find = (n) => app.state.clients.find((c) => c.name === n);
     if (t.dataset.apply) {
       const c = find(t.dataset.apply);
-      applyScope({ client: c.name, hosts: c.hosts, services: c.services, exclude: c.exclude, mode: c.mode || "et" });
+      applyScope(scopeFromClient(c));
       show("dashboard");
     } else if (t.dataset.editClient) {
       const c = find(t.dataset.editClient);
-      for (const k of ["name", "hosts", "services", "exclude", "mode"]) fcl[k].value = c[k] || "";
+      for (const k of ["name", ...SCOPE_FIELDS, "mode"]) fcl[k].value = c[k] || "";
       fcl.old.value = c.name; fcl.name.focus();
     } else if (t.dataset.delClient) {
       if (!confirm(`Supprimer le client « ${t.dataset.delClient} » ?`)) return;
       await api("/api/clients/" + encodeURIComponent(t.dataset.delClient), { method: "DELETE" });
-      if (app.scope.client === t.dataset.delClient) applyScope({ client: "", hosts: "", services: "", exclude: "" });
+      if (app.scope.client === t.dataset.delClient) applyScope({ ...EMPTY_SCOPE });
       await loadState();
+    } else if (t.dataset.group || t.dataset.poller) {
+      const field = t.dataset.group ? fcl.hostgroups : fcl.pollers, v = t.dataset.group || t.dataset.poller;
+      const cur = field.value.split(",").map((x) => x.trim()).filter(Boolean);
+      if (!cur.includes(v)) field.value = [...cur, v].join(", ");
+      if (!fcl.name.value) fcl.name.value = v.replace(/\*$/, "");
+      field.focus();
     } else if (t.dataset.prefix) {
       fcl.reset(); fcl.name.value = t.dataset.prefix; fcl.hosts.value = t.dataset.prefix; fcl.name.focus();
     }

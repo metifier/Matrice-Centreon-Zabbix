@@ -41,8 +41,8 @@ def main(argv=None) -> int:
     p_api.add_argument("--workers", type=int, default=8, help="Appels API en parallèle (8)")
     p_api.add_argument("--timeout", type=int, default=120, help="Timeout HTTP en secondes (120)")
     p_api.add_argument("--collecte-client", action="store_true",
-                       help="Ne collecter que les hôtes du client (--client-hotes), leurs services et les templates "
-                            "utilisés : beaucoup plus rapide qu'une collecte du parc entier")
+                       help="Ne collecter que les hôtes du client (--client-hotes, --client-groupes, "
+                            "--client-collecteurs), leurs services et les templates utilisés : beaucoup plus rapide")
 
     p_web = sub.add_parser("web", help="Lance l'interface web (pilotage, consultation, export Excel)")
     p_web.add_argument("--host", default="127.0.0.1", help="Adresse d'écoute (127.0.0.1)")
@@ -73,6 +73,9 @@ def main(argv=None) -> int:
         g.add_argument("--client", default="", help="Nom du client (affiché dans la synthèse)")
         g.add_argument("--client-hotes", default="",
                        help="Motif(s) que le nom d'hôte doit contenir, séparés par des virgules ; 're:' pour une regex")
+        g.add_argument("--client-groupes", default="",
+                       help="Motif(s) sur les groupes d'hôtes Centreon, ex. 'ctg-eple-973-*' (« * » = joker)")
+        g.add_argument("--client-collecteurs", default="", help="Motif(s) sur le collecteur (poller) Centreon")
         g.add_argument("--client-services", default="", help="Motif(s) que la description du service doit contenir")
         g.add_argument("--client-exclure", default="", help="Motif(s) excluant hôtes ou services")
         g.add_argument("--client-mode", choices=["et", "ou"], default="et",
@@ -92,12 +95,13 @@ def main(argv=None) -> int:
         return 0
 
     client = ClientFilter(name=args.client, hosts=args.client_hotes, services=args.client_services,
-                          exclude=args.client_exclure, mode=args.client_mode)
+                          exclude=args.client_exclure, mode=args.client_mode,
+                          hostgroups=args.client_groupes, pollers=args.client_collecteurs)
 
     if args.source == "api":
         from .sources.api import ApiError, load_from_api
-        if args.collecte_client and not args.client_hotes:
-            print("--collecte-client nécessite --client-hotes", file=sys.stderr)
+        if args.collecte_client and not client.host_criteria:
+            print("--collecte-client nécessite --client-hotes, --client-groupes ou --client-collecteurs", file=sys.stderr)
             return 2
         password = args.password or os.environ.get("CENTREON_API_PASSWORD") or getpass.getpass(
             f"Mot de passe Centreon pour {args.user} : ")

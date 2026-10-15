@@ -88,14 +88,25 @@ Le client est identifié par le nommage des hôtes et des services :
 | Champ | Effet |
 |---|---|
 | Hôtes contiennent | le nom (ou l'alias) de l'hôte contient l'une des chaînes (ex. `Mdph-973`) |
+| Groupes d'hôtes | l'hôte appartient à un groupe d'hôtes Centreon correspondant (ex. `ctg-eple-973-*`) |
+| Collecteur | l'hôte est supervisé par un collecteur (poller) correspondant |
 | Services contiennent | la description du service contient l'une des chaînes |
 | Exclure | écarte les hôtes ou services contenant l'une des chaînes |
 | Mode | `et` : l'hôte ET le service doivent correspondre ; `ou` : l'un OU l'autre |
 
+Les critères d'hôte renseignés (nom, groupe, collecteur) se cumulent. Un motif contenant `*` ou `?`
+porte sur le nom entier (ex. `ctg-eple-973-*`, comme dans conformit-).
 Plusieurs chaînes se séparent par des virgules ; la recherche ignore la casse ; le préfixe
 `re:` active une expression régulière (ex. `re:^Mdph-97[34]-`). Dans une vue client, les
 templates non utilisés par ce client sont masqués et la synthèse indique le périmètre.
-En ligne de commande : `--client "MDPH 973" --client-hotes "Mdph-973"` (voir `--help`).
+En ligne de commande : `--client "MDPH 973" --client-hotes "Mdph-973"`, `--client-groupes "ctg-eple-973-*"`,
+`--client-collecteurs "Poller-973"` (voir `--help`).
+
+**Filtrer avant la collecte** (case « Limiter la collecte au client » ou `--collecte-client`) : le périmètre
+est résolu dans Centreon avant la collecte détaillée — membres des groupes d'hôtes correspondants et hôtes des
+collecteurs correspondants — puis seuls ces hôtes, leurs services et les templates qu'ils utilisent sont lus.
+Le bouton « Lister les groupes et collecteurs » (onglet Sources) interroge Centreon en deux appels pour choisir
+les groupes et collecteurs du client avant toute collecte.
 
 ## Comparatif avec l'existant Zabbix
 

@@ -231,3 +231,26 @@ def test_web_scoped_centreon_collection(client):
     assert j["status"] == "terminé", j
     state = client.get("/api/state").get_json()
     assert state["centreon"]["hosts"] == 2 and "collecte limitée" in state["centreon"]["source"]
+
+
+def test_glob_hostgroup_and_poller_filters(inv):
+    f = ClientFilter(hostgroups="HG-L*")
+    assert set(f.apply(inv).hosts) == {"srv-lnx-web01", "srv-lnx-web02", "srv-lnx-db01", "srv-lnx-erp01"}
+    f = ClientFilter(hostgroups="hg-web", pollers="Poller-DC1")
+    assert set(f.apply(inv).hosts) == {"srv-lnx-web01", "srv-lnx-web02"}
+    assert ClientFilter.from_dict(f.to_dict()) == f
+
+
+def test_web_lookup_and_client_with_hostgroups(client):
+    r = client.post("/api/centreon/lookup", json={"url": "https://c/centreon", "user": "a", "password": "p"})
+    data = r.get_json()
+    assert "HG-Linux" in data["hostgroups"] and "Poller-DC2" in data["pollers"]
+    client.post("/api/clients", json={"name": "Web DC1", "hostgroups": "hg-web*", "pollers": "poller-dc1"})
+    r = client.post("/api/jobs/centreon", json={"url": "https://c/centreon", "user": "a", "password": "p",
+                                                "scope_only": True,
+                                                "scope": {"name": "Web DC1", "hostgroups": "hg-web*", "pollers": "poller-dc1"}})
+    assert _wait(client, r.get_json()["job"])["status"] == "terminé"
+    t = client.get("/api/table/hosts?client=Web DC1").get_json()
+    assert {row["Hôte"] for row in t["rows"]} == {"srv-lnx-web01", "srv-lnx-web02"}
+    state = client.get("/api/state").get_json()
+    assert dict(state["pollers"]) == {"Poller-DC1": 2}

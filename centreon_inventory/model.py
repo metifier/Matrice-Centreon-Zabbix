@@ -208,7 +208,19 @@ _HMACRO_RE = re.compile(r"\$_HOST([A-Za-z0-9_]+)\$")
 _SMACRO_RE = re.compile(r"\$_SERVICE([A-Za-z0-9_]+)\$")
 
 
+def as_text(value) -> str:
+    """Valeur quelconque -> texte (une réponse d'API peut contenir une liste ou un nombre)."""
+    if value is None:
+        return ""
+    if isinstance(value, (list, tuple)):
+        return ";".join(as_text(v) for v in value)
+    if isinstance(value, dict):
+        return ";".join(f"{k}={as_text(v)}" for k, v in value.items())
+    return str(value)
+
+
 def substitute(line: str, args: str, host_macros: dict, service_macros: dict) -> str:
+    line, args = as_text(line), as_text(args)
     if not line:
         return ""
     arg_values = args.split("!")[1:] if args.startswith("!") else (args.split("!") if args else [])
@@ -220,8 +232,8 @@ def substitute(line: str, args: str, host_macros: dict, service_macros: dict) ->
     line = _ARG_RE.sub(arg, line)
     # Deux passes : un argument peut contenir lui-même une macro.
     for _ in range(2):
-        line = _SMACRO_RE.sub(lambda m: service_macros.get(m.group(1).upper(), m.group(0)), line)
-        line = _HMACRO_RE.sub(lambda m: host_macros.get(m.group(1).upper(), m.group(0)), line)
+        line = _SMACRO_RE.sub(lambda m: as_text(service_macros.get(m.group(1).upper(), m.group(0))), line)
+        line = _HMACRO_RE.sub(lambda m: as_text(host_macros.get(m.group(1).upper(), m.group(0))), line)
     return line
 
 
@@ -255,7 +267,36 @@ def inventory_to_dict(inv: Inventory) -> dict:
     return asdict(inv)
 
 
+_LIST_FIELDS = {"templates", "parents", "hostgroups", "service_templates", "host_templates"}
+
+
+def _clean(obj):
+    """Normalise un objet relu depuis le JSON : textes en str, listes de str, macros {str: str}."""
+    from dataclasses import fields
+    for f in fields(obj):
+        value = getattr(obj, f.name)
+        if f.name == "macros":
+            setattr(obj, f.name, {as_text(k): as_text(v) for k, v in (value or {}).items()})
+        elif f.name in _LIST_FIELDS:
+            setattr(obj, f.name, [as_text(v) for v in (value or [])] if isinstance(value, list) else
+                    [v for v in as_text(value).split(";") if v])
+        elif f.name == "activate":
+            setattr(obj, f.name, bool(value) if not isinstance(value, str) else value.strip() not in ("0", ""))
+        else:
+            setattr(obj, f.name, as_text(value))
+    return obj
+
+
 def inventory_from_dict(d: dict) -> Inventory:
+    inv = _inventory_from_dict(d)
+    for coll in (inv.commands.values(), inv.host_templates.values(), inv.hosts.values(),
+                 inv.service_templates.values(), inv.services, inv.hostgroup_services):
+        for obj in coll:
+            _clean(obj)
+    return inv
+
+
+def _inventory_from_dict(d: dict) -> Inventory:
     return Inventory(
         commands={k: Command(**v) for k, v in (d.get("commands") or {}).items()},
         host_templates={k: HostTemplate(**v) for k, v in (d.get("host_templates") or {}).items()},

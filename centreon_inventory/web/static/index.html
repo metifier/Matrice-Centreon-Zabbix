@@ -15,6 +15,8 @@
       <select id="scope-client"><option value="">Tous les hôtes</option></select>
     </label>
     <label>Hôtes contiennent<input id="scope-hosts" placeholder="ex. Mdph-973"></label>
+    <label>Groupes d'hôtes<input id="scope-hostgroups" placeholder="ex. ctg-eple-973-*"></label>
+    <label>Collecteur<input id="scope-pollers" placeholder="ex. Poller-973"></label>
     <label>Services contiennent<input id="scope-services" placeholder="ex. Disk"></label>
     <label>Exclure<input id="scope-exclude" placeholder="ex. test, -old"></label>
     <label class="narrow">Mode
@@ -85,6 +87,7 @@
         </div>
         <label class="inline">Appels parallèles <input name="workers" type="number" value="8" min="1" max="32"></label>
         <button type="submit" class="primary">Lancer l'extraction Centreon</button>
+        <button type="button" id="lookup" class="ghost">Lister les groupes et collecteurs</button>
         <p class="muted small">Lecture seule. Le mot de passe n'est pas enregistré.</p>
         <div class="status" id="status-centreon"></div>
       </form>
@@ -124,11 +127,16 @@
     <div class="grid2">
       <form class="card" id="form-client">
         <h3>Définir un client</h3>
-        <p class="muted small">Le périmètre d'un client se définit par le nommage : chaînes que doivent contenir les noms
-          d'hôtes et/ou de services. Plusieurs valeurs séparées par des virgules ; préfixe <code>re:</code> pour une expression régulière.</p>
+        <p class="muted small">Le périmètre d'un client se définit par le nom des hôtes, leurs groupes d'hôtes, leur
+          collecteur et/ou le nom des services. Les critères d'hôte renseignés se cumulent. Plusieurs valeurs séparées par
+          des virgules ; <code>*</code> = n'importe quels caractères (ex. <code>ctg-eple-973-*</code>) ; préfixe
+          <code>re:</code> pour une expression régulière. Avec « Limiter la collecte au client », seuls ces hôtes sont
+          collectés.</p>
         <input type="hidden" name="old">
         <label>Nom du client<input name="name" required placeholder="ex. MDPH 973"></label>
         <label>Hôtes contiennent<input name="hosts" placeholder="ex. Mdph-973"></label>
+        <label>Groupes d'hôtes <span class="muted small">(ex. ctg-eple-973-* — « * » = n'importe quels caractères)</span><input name="hostgroups"></label>
+        <label>Collecteurs (pollers)<input name="pollers"></label>
         <label>Services contiennent<input name="services"></label>
         <label>Exclure<input name="exclude"></label>
         <label>Combinaison hôtes / services
@@ -139,10 +147,15 @@
       </form>
       <div class="card">
         <h3>Clients enregistrés</h3>
-        <table class="grid" id="clients"><thead><tr><th>Client</th><th>Hôtes</th><th>Services</th><th>Exclure</th><th>Mode</th><th></th></tr></thead><tbody></tbody></table>
+        <div class="table-scroll"><table class="grid" id="clients"><thead><tr><th>Client</th><th>Hôtes</th><th>Groupes</th><th>Collecteurs</th><th>Services</th><th>Exclure</th><th>Mode</th><th></th></tr></thead><tbody></tbody></table></div>
         <h3>Préfixes détectés dans les noms d'hôtes</h3>
         <p class="muted small">Cliquez sur un préfixe pour créer le client correspondant.</p>
         <div id="prefixes" class="chips"></div>
+        <h3>Groupes d'hôtes et collecteurs</h3>
+        <p class="muted small">Issus de l'inventaire chargé, ou de Centreon via « Lister les groupes et collecteurs »
+          (onglet Sources). Cliquez pour l'ajouter au client en cours d'édition.</p>
+        <div id="groups" class="chips"></div>
+        <div id="pollers" class="chips" style="margin-top:8px"></div>
       </div>
     </div>
   </section>

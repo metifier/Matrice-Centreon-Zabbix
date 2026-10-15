@@ -34,6 +34,18 @@ def split_templates(value: str) -> list[str]:
     return out
 
 
+def _zabbix_host_in_scope(client: ClientFilter, zh: dict) -> bool:
+    """Périmètre client appliqué à un hôte Zabbix : nom et groupes (les groupes Zabbix reprennent souvent
+    ceux de Centreon) ; le critère collecteur, propre à Centreon, ne s'applique pas."""
+    if client.hosts.strip() and not (client.host_matches(zh["host"]) or client.host_matches(zh["name"])):
+        return False
+    if client.hostgroups.strip() and not any(client.hostgroup_matches(g) for g in zh.get("groups") or []):
+        return False
+    # Sans critère de nom ni de groupe (ex. collecteur seul), l'appartenance d'un hôte Zabbix au client
+    # ne peut pas être établie : on ne le liste pas.
+    return bool(client.hosts.strip() or client.hostgroups.strip())
+
+
 def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | None = None) -> Matrix:
     inv = m.inventory
     by_name, by_ip = {}, {}
@@ -105,7 +117,7 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
     for zh in zbx.hosts:
         if zh["hostid"] in matched_ids:
             continue
-        if client and client.active and not (client.host_matches(zh["host"]) or client.host_matches(zh["name"])):
+        if client and client.active and not _zabbix_host_in_scope(client, zh):
             continue
         m.zabbix_only.append({
             "Hôte Zabbix": zh["host"], "Nom visible": zh["name"], "Activé": "Oui" if zh["enabled"] else "Non",

@@ -209,7 +209,8 @@ def _client_from_request(store: Store) -> ClientFilter:
             if c.get("name") == name:
                 return ClientFilter.from_dict(c)
     return ClientFilter(name=args.get("name", ""), hosts=args.get("hosts", ""), services=args.get("services", ""),
-                        exclude=args.get("exclude", ""), mode=args.get("mode", "et") or "et")
+                        exclude=args.get("exclude", ""), mode=args.get("mode", "et") or "et",
+                        hostgroups=args.get("hostgroups", ""), pollers=args.get("pollers", ""))
 
 
 def _cell(v):
@@ -248,6 +249,12 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
     def state():
         inv, zbx = store.inventory, store.zabbix
         prefixes = detect_prefixes(inv.hosts) if inv else []
+        hg_count, poller_count = {}, {}
+        for h in (inv.hosts.values() if inv else []):
+            for g in h.hostgroups:
+                hg_count[g] = hg_count.get(g, 0) + 1
+            if h.poller:
+                poller_count[h.poller] = poller_count.get(h.poller, 0) + 1
         return jsonify({
             "settings": store.settings(), "clients": store.clients(),
             "centreon": {"date": store.meta("centreon"), "source": inv.source, "hosts": len(inv.hosts),
@@ -256,6 +263,8 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             "zabbix": {"date": store.meta("zabbix"), "url": zbx.url, "version": zbx.version,
                        "hosts": len(zbx.hosts), "templates": len(zbx.templates)} if zbx else None,
             "prefixes": prefixes[:50],
+            "hostgroups": sorted(hg_count.items(), key=lambda x: (-x[1], x[0]))[:100],
+            "pollers": sorted(poller_count.items(), key=lambda x: (-x[1], x[0])),
             "jobs": [{k: j[k] for k in ("id", "kind", "status", "error")} for j in jobs.recent()],
             "choices": {"default": CHOICES, "hosts": HOST_CHOICES}, "editable": EDITABLE,
         })
@@ -300,8 +309,9 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
         scope = None
         if d.get("scope_only"):
             scope = ClientFilter.from_dict(d.get("scope") or {})
-            if not scope.hosts.strip():
-                abort(400, "Pour limiter la collecte à un client, renseignez « Hôtes contiennent » (ou choisissez un client).")
+            if not scope.host_criteria:
+                abort(400, "Pour limiter la collecte à un client, renseignez un critère d'hôte (nom, groupe d'hôtes "
+                           "ou collecteur) ou choisissez un client.")
 
         def run_job(log):
             from ..sources.api import load_from_api
@@ -330,6 +340,23 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             store.set_zabbix(zbx)
             log(f"Inventaire Zabbix enregistré : {len(zbx.hosts)} hôtes, {len(zbx.templates)} templates")
         return jsonify({"job": jobs.start("Zabbix (API)", run_job)})
+
+    @app.post("/api/centreon/lookup")
+    def centreon_lookup():
+        """Liste les groupes d'hôtes et les collecteurs Centreon (2 appels) pour choisir un périmètre."""
+        from ..sources.api import ApiError, CentreonApiV1, _default_session_factory
+        d = request.get_json(force=True) or {}
+        if not (d.get("url") and d.get("user") and d.get("password")):
+            abort(400, "URL, utilisateur et mot de passe Centreon requis")
+        v1 = CentreonApiV1(d["url"].strip(), session_factory or _default_session_factory(not d.get("insecure")), 60)
+        try:
+            v1.login(d["user"].strip(), d["password"])
+            groups = sorted(g["name"] for g in v1.clapi("show", "HG"))
+            pollers = sorted(p["name"] for p in v1.clapi("show", "INSTANCE"))
+        except (ApiError, OSError) as exc:
+            abort(400, f"Centreon : {exc}")
+        return jsonify({"hostgroups": groups, "pollers": pollers,
+                        "hostgroup_prefixes": detect_prefixes(groups, depth=3, minimum=2)[:40]})
 
     @app.get("/api/jobs/<job_id>")
     def job_status(job_id):
