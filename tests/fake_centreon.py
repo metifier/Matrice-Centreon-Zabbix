@@ -121,6 +121,8 @@ class FakeCentreon:
         if (obj, action) == ("HOST", "show"):
             return [{"id": self.host_id[h.name], "name": h.name, "alias": h.alias, "address": h.address,
                      "activate": "1" if h.activate else "0"} for h in inv.hosts.values()]
+        if (obj, action) == ("HOST", "gethostgroup"):
+            return [{"id": i, "name": g} for i, g in enumerate(self.hgs, 1) if g in inv.hosts[values].hostgroups]
         if (obj, action) == ("HOST", "gettemplate"):
             return idname(inv.hosts[values].templates, self.htpl_id)
         if (obj, action) == ("HOST", "getmacro"):

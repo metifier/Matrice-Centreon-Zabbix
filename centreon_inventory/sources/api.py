@@ -194,9 +194,11 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                   timeout: int = 120, session_factory=None, log=None, scope=None) -> Inventory:
     """Collecte la configuration Centreon.
 
-    scope : filtre client (filters.ClientFilter) optionnel. S'il porte sur les noms d'hôtes (mode « et »),
-    seuls les hôtes correspondants, leurs services et les templates de service qu'ils utilisent (avec leurs
-    parents) sont lus objet par objet : la collecte d'un client est bien plus rapide que celle du parc entier.
+    scope : filtre client (filters.ClientFilter) optionnel. S'il porte sur l'hôte (nom, groupe d'hôtes ou
+    collecteur, mode « et »), le périmètre est résolu AVANT la collecte détaillée : membres des groupes
+    d'hôtes correspondants (HG getmember) et hôtes des collecteurs correspondants (INSTANCE gethosts).
+    Seuls ces hôtes, leurs services et les templates de service qu'ils utilisent (avec leurs parents) sont
+    ensuite lus objet par objet : la collecte d'un client est bien plus rapide que celle du parc entier.
     """
     import time
     log = log or (lambda msg: print(msg, file=sys.stderr, flush=True))
@@ -256,10 +258,9 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                 last = time.monotonic()
         return out
 
-    scoped = bool(scope is not None and scope.active and scope.hosts.strip()
-                  and scope.mode.strip().lower() != "ou")
-    inv = Inventory(source=f"API Centreon {url}" + (f" — collecte limitée au client « {scope.name or scope.hosts} »"
-                                                     if scoped else ""))
+    scoped = bool(scope is not None and scope.host_criteria and scope.mode.strip().lower() != "ou")
+    label = scope and (scope.name or scope.hosts or scope.hostgroups or scope.pollers)
+    inv = Inventory(source=f"API Centreon {url}" + (f" — collecte limitée au client « {label} »" if scoped else ""))
     try:
         # --- commandes -----------------------------------------------------------
         for c in v1.clapi("show", "CMD"):
@@ -294,11 +295,31 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                 t.macros = _macros(r.get("macros") or [])
 
         # --- hôtes ------------------------------------------------------------------------
+        allowed, poller_of = None, {}
+        if scoped and scope.hostgroups.strip():
+            groups = [g["name"] for g in v1.clapi("show", "HG") if scope.hostgroup_matches(g["name"])]
+            log(f"Groupes d'hôtes du client : {len(groups)}" + (f" ({', '.join(groups[:5])}…)" if groups else ""))
+            members = set()
+            for rows in each("HG getmember (groupes du client)", groups,
+                             lambda g: v1.clapi("getmember", "HG", g)).values():
+                members.update(x.get("name") for x in rows or [])
+            allowed = members
+        if scoped and scope.pollers.strip():
+            pollers = [p["name"] for p in v1.clapi("show", "INSTANCE") if scope.poller_matches(p["name"])]
+            log(f"Collecteurs du client : {len(pollers)}" + (f" ({', '.join(pollers[:5])})" if pollers else ""))
+            on_pollers = set()
+            for poller, rows in each("INSTANCE gethosts (collecteurs du client)", pollers,
+                                     lambda p: v1.clapi("gethosts", "INSTANCE", p)).items():
+                for x in rows or []:
+                    on_pollers.add(x.get("name"))
+                    poller_of[x.get("name")] = poller
+            allowed = on_pollers if allowed is None else allowed & on_pollers
         for r in v1.clapi("show", "HOST"):
-            if scoped and not scope.host_matches(r["name"], r.get("alias", "")):
+            if scoped and ((allowed is not None and r["name"] not in allowed)
+                           or not scope.host_matches(r["name"], r.get("alias", ""))):
                 continue
             inv.hosts[r["name"]] = Host(name=r["name"], alias=r.get("alias", ""), address=r.get("address", ""),
-                                        activate=_flag(r.get("activate", "1")))
+                                        activate=_flag(r.get("activate", "1")), poller=poller_of.get(r["name"], ""))
         if scoped:
             log(f"Hôtes du client : {len(inv.hosts)}")
         v2_hosts = v2_list("/configuration/hosts")
@@ -313,16 +334,24 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             res = each("HOST gettemplate", inv.hosts, lambda n: v1.clapi("gettemplate", "HOST", n))
             for name, rows in res.items():
                 inv.hosts[name].templates = [x["name"] for x in rows or []]
-            pollers = [p["name"] for p in v1.clapi("show", "INSTANCE")]
-            for poller, rows in each("INSTANCE gethosts", pollers, lambda p: v1.clapi("gethosts", "INSTANCE", p)).items():
-                for x in rows or []:
-                    if x.get("name") in inv.hosts:
-                        inv.hosts[x["name"]].poller = poller
-            groups = [g["name"] for g in v1.clapi("show", "HG")]
-            for hg, rows in each("HG getmember", groups, lambda g: v1.clapi("getmember", "HG", g)).items():
-                for x in rows or []:
-                    if x.get("name") in inv.hosts and hg not in inv.hosts[x["name"]].hostgroups:
-                        inv.hosts[x["name"]].hostgroups.append(hg)
+            if not poller_of:
+                pollers = [p["name"] for p in v1.clapi("show", "INSTANCE")]
+                for poller, rows in each("INSTANCE gethosts", pollers,
+                                         lambda p: v1.clapi("gethosts", "INSTANCE", p)).items():
+                    for x in rows or []:
+                        if x.get("name") in inv.hosts:
+                            inv.hosts[x["name"]].poller = poller
+            if scoped:
+                # Périmètre réduit : groupes de chaque hôte du client (un appel par hôte).
+                for name, rows in each("HOST gethostgroup", inv.hosts,
+                                       lambda n: v1.clapi("gethostgroup", "HOST", n)).items():
+                    inv.hosts[name].hostgroups = [x["name"] for x in rows or []]
+            else:
+                groups = [g["name"] for g in v1.clapi("show", "HG")]
+                for hg, rows in each("HG getmember", groups, lambda g: v1.clapi("getmember", "HG", g)).items():
+                    for x in rows or []:
+                        if x.get("name") in inv.hosts and hg not in inv.hosts[x["name"]].hostgroups:
+                            inv.hosts[x["name"]].hostgroups.append(hg)
         if macros:
             res = each("HOST getmacro", inv.hosts, lambda n: v1.clapi("getmacro", "HOST", n))
             for name, rows in res.items():

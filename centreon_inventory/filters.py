@@ -1,11 +1,16 @@
 """Filtrage de l'inventaire par client, à partir du nommage des hôtes et des services.
 
 Un motif est une chaîne recherchée sans tenir compte de la casse (ex. « Mdph-973 »).
-Plusieurs motifs se séparent par des virgules (OU logique). Préfixer par « re: » pour
-une expression régulière (ex. « re:^Mdph-9(73|74)- »).
+Plusieurs motifs se séparent par des virgules (OU logique). Un motif contenant « * » ou « ? »
+est un motif global sur le nom entier, comme dans conformit- (ex. « ctg-eple-973-* »).
+Préfixer par « re: » pour une expression régulière (ex. « re:^Mdph-9(73|74)- »).
+
+Les critères d'hôte (nom, groupe d'hôtes, collecteur) se cumulent : un hôte doit satisfaire
+chacun de ceux qui sont renseignés.
 """
 from __future__ import annotations
 
+import fnmatch
 import re
 from collections import Counter
 from dataclasses import asdict, dataclass
@@ -21,6 +26,8 @@ def _compile(patterns: str) -> list:
             continue
         if p.lower().startswith("re:"):
             out.append(re.compile(p[3:].strip(), re.IGNORECASE))
+        elif "*" in p or "?" in p:
+            out.append(re.compile(fnmatch.translate(p), re.IGNORECASE))
         else:
             out.append(re.compile(re.escape(p), re.IGNORECASE))
     return out
@@ -34,8 +41,10 @@ def _any(patterns: list, value: str) -> bool:
 class ClientFilter:
     """Critères de périmètre d'un client.
 
-    hosts    : motifs que le nom (ou l'alias) de l'hôte doit contenir
-    services : motifs que la description du service doit contenir
+    hosts      : motifs que le nom (ou l'alias) de l'hôte doit contenir
+    hostgroups : motifs sur les groupes d'hôtes Centreon (ex. « ctg-eple-973-* »)
+    pollers    : motifs sur le collecteur (poller) Centreon de l'hôte
+    services   : motifs que la description du service doit contenir
     exclude  : motifs excluant un hôte ou un service (nom d'hôte ou description)
     mode     : « et » (hôte ET service doivent correspondre) ou « ou » (hôte OU service)
     """
@@ -44,10 +53,31 @@ class ClientFilter:
     services: str = ""
     exclude: str = ""
     mode: str = "et"
+    hostgroups: str = ""
+    pollers: str = ""
 
     @property
     def active(self) -> bool:
-        return bool(self.hosts.strip() or self.services.strip() or self.exclude.strip())
+        return bool(self.host_criteria or self.services.strip() or self.exclude.strip())
+
+    @property
+    def host_criteria(self) -> bool:
+        """Au moins un critère portant sur l'hôte (nom, groupe ou collecteur)."""
+        return bool(self.hosts.strip() or self.hostgroups.strip() or self.pollers.strip())
+
+    def hostgroup_matches(self, group: str) -> bool:
+        pats = _compile(self.hostgroups)
+        return not pats or _any(pats, group)
+
+    def poller_matches(self, poller: str) -> bool:
+        pats = _compile(self.pollers)
+        return not pats or _any(pats, poller)
+
+    def host_ok(self, host) -> bool:
+        """L'hôte satisfait-il tous les critères d'hôte renseignés ?"""
+        return (self.host_matches(host.name, host.alias)
+                and (not self.hostgroups.strip() or any(self.hostgroup_matches(g) for g in host.hostgroups))
+                and (not self.pollers.strip() or self.poller_matches(host.poller)))
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -55,7 +85,7 @@ class ClientFilter:
     @classmethod
     def from_dict(cls, d: dict | None) -> "ClientFilter":
         d = d or {}
-        values = {k: str(d.get(k) or "") for k in ("name", "hosts", "services", "exclude")}
+        values = {k: str(d.get(k) or "") for k in ("name", "hosts", "services", "exclude", "hostgroups", "pollers")}
         return cls(mode=str(d.get("mode") or "et"), **values)
 
     def host_matches(self, name: str, alias: str = "") -> bool:
@@ -67,10 +97,8 @@ class ClientFilter:
         if not self.active:
             return inv
         host_p, svc_p, excl_p = _compile(self.hosts), _compile(self.services), _compile(self.exclude)
-        or_mode = self.mode.strip().lower() == "ou" and host_p and svc_p
-
-        def host_ok(h):
-            return not host_p or _any(host_p, h.name) or _any(host_p, h.alias)
+        or_mode = self.mode.strip().lower() == "ou" and self.host_criteria and svc_p
+        host_ok = self.host_ok
 
         services = []
         for s in inv.services:

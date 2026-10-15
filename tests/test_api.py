@@ -105,3 +105,23 @@ def test_scoped_collection_reads_only_the_client():
     assert sorted(map(key, build_matrix(scoped).services)) == sorted(map(key, build_matrix(full).services))
     assert len(scoped_fake.calls) < len(full_fake.calls) * 0.75
     assert "collecte limitée" in scoped.source
+
+
+@pytest.mark.parametrize("criteria", [
+    {"hostgroups": "hg-lin*"},                       # motif global, insensible à la casse (comme conformit-)
+    {"pollers": "Poller-DC2"},
+    {"hostgroups": "HG-Linux", "pollers": "poller-dc1"},
+])
+def test_scoped_collection_by_hostgroup_or_poller(criteria):
+    from centreon_inventory.filters import ClientFilter
+    ref = parse_clapi_export(SAMPLE)
+    scope = ClientFilter(name="client", **criteria)
+    full_fake, scoped_fake = FakeCentreon(ref, v2=False), FakeCentreon(ref, v2=False)
+    full = scope.apply(_load(full_fake))
+    scoped = _load(scoped_fake, scope=scope)
+    assert full.hosts and set(scoped.hosts) == set(full.hosts)
+    snap = lambda inv: sorted((s.host, s.description, s.template, s.args) for s in inv.services)  # noqa: E731
+    assert snap(scope.apply(scoped)) == snap(full)
+    assert {h: (scoped.hosts[h].poller, sorted(scoped.hosts[h].hostgroups)) for h in scoped.hosts} == \
+        {h: (full.hosts[h].poller, sorted(full.hosts[h].hostgroups)) for h in full.hosts}
+    assert len(scoped_fake.calls) < len(full_fake.calls)
