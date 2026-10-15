@@ -44,37 +44,74 @@ commande). **Adaptez ce fichier à votre parc** (templates maison, nomenclature)
 python3 -m pip install -r requirements.txt
 ```
 
-Python ≥ 3.9. Dépendances : `openpyxl`, `PyYAML`, et `PyMySQL` (uniquement pour la lecture en base).
+Python ≥ 3.9. Dépendances : `requests`, `openpyxl`, `PyYAML` (et `PyMySQL` uniquement pour la lecture directe en base).
 
-## Récupérer les données Centreon
+## Récupérer les données Centreon par l'API (méthode recommandée)
 
-Deux sources au choix ; la base SQL est la plus complète, l'export CLAPI ne demande aucun accès réseau supplémentaire.
+```bash
+export CENTREON_API_PASSWORD='...'
+python3 -m centreon_inventory api \
+    --url https://centreon.example.com/centreon \
+    --user inventaire \
+    -o matrice_centreon_zabbix.xlsx
+```
 
-### Option 1 — Export CLAPI (sur le serveur central)
+L'outil s'exécute depuis n'importe quel poste ayant accès en HTTPS à l'interface Centreon ;
+rien n'est installé sur le serveur Centreon.
+
+### Prérequis côté Centreon
+
+- Un compte Centreon dédié (ex. `inventaire`) avec, dans *Configuration > Utilisateurs >
+  Contacts / Utilisateurs > onglet Authentification Centreon* :
+  - **Reach API Configuration** = Oui (API v1) ;
+  - un accès en lecture aux menus de configuration hôtes / services (profil ACL ou compte
+    administrateur) pour l'API v2.
+- Le compte doit voir tous les hôtes à inventorier (les ACL Centreon filtrent ce que l'API renvoie).
+
+### Ce que fait l'extraction
+
+| Donnée | API v2 (Centreon ≥ 23.10, utilisée automatiquement) | API v1 (toutes versions, repli) |
+|---|---|---|
+| Commandes | — | `CMD show` |
+| Templates d'hôte et héritage | — | `HTPL show`, `HTPL gettemplate` |
+| Templates de service (parent, liens, macros) | `GET /configuration/services/templates` | `STPL show`, `STPL getparam template`, `STPL gethosttemplate`, `STPL getmacro` |
+| Hôtes (templates, collecteur, groupes) | `GET /configuration/hosts` | `HOST show`, `HOST gettemplate`, `INSTANCE gethosts`, `HG getmember` |
+| Services (commande, arguments, état) | — | `SERVICE show` |
+| Template de chaque service | `GET /configuration/services` | `HGSERVICE getparam <id>;service_template_model_stm_id` |
+| Macros hôtes / services (héritées comprises) | — | `HOST getmacro`, `SERVICE getmacro` |
+| Services de groupes d'hôtes | — | `HGSERVICE show`, `getparam`, `getmacro` |
+
+- **Lecture seule** : seules des actions `show` / `get*` et des `GET` sont appelées.
+- `SERVICE getparam` n'est **jamais** utilisé par défaut : dans Centreon, cet appel marque les
+  collecteurs « configuration modifiée » (sans rien changer réellement). Il n'est proposé qu'en
+  dernier recours, avec `--autoriser-getparam`, si ni l'API v2 ni `HGSERVICE getparam` ne répondent.
+- Les appels objet par objet sont parallélisés (`--workers`, 8 par défaut). Sur un gros parc,
+  `--sans-macros` réduit fortement le nombre d'appels (les lignes de commande seront moins résolues,
+  la correspondance Zabbix reste calculée).
+- Les macros de type mot de passe sont masquées dès la lecture.
+
+### Options spécifiques à l'API
+
+| Option | Rôle |
+|---|---|
+| `--url` | URL de Centreon (avec le chemin `/centreon`) |
+| `--user` / `--password` | Identifiants (mot de passe : sinon `CENTREON_API_PASSWORD`, sinon saisie masquée) |
+| `--insecure` / `--ca-bundle FICHIER` | Certificat auto-signé : désactiver la vérification ou fournir l'AC |
+| `--api-v1-seule` | Ne pas utiliser l'API v2 |
+| `--sans-macros` | Ne pas lire les macros (plus rapide) |
+| `--workers N` / `--timeout S` | Parallélisme et timeout HTTP |
+| `--autoriser-getparam` | Dernier recours pour lire le template des services (voir ci-dessus) |
+
+## Autres sources possibles
+
+### Export CLAPI (sur le serveur central)
 
 ```bash
 centreon -u admin -p 'MOT_DE_PASSE' -e > centreon_export.txt
-# ou limité aux objets utiles :
-centreon -u admin -p 'MOT_DE_PASSE' -e --select='HOST' --select='HTPL' --select='STPL' \
-    --select='CMD' --select='HG' --select='HGSERVICE' > centreon_export.txt
-```
-
-Copier le fichier sur le poste d'analyse, puis :
-
-```bash
 python3 -m centreon_inventory clapi centreon_export.txt -o matrice_centreon_zabbix.xlsx
 ```
 
-### Option 2 — Lecture directe de la base `centreon` (MariaDB/MySQL)
-
-Créer un compte en lecture seule :
-
-```sql
-CREATE USER 'inventaire'@'%' IDENTIFIED BY '...';
-GRANT SELECT ON centreon.* TO 'inventaire'@'%';
-```
-
-Puis :
+### Lecture directe de la base `centreon` (MariaDB/MySQL, compte en lecture seule)
 
 ```bash
 export CENTREON_DB_PASSWORD='...'
@@ -82,7 +119,7 @@ python3 -m centreon_inventory db --db-host centreon-db.example.local --db-user i
     -o matrice_centreon_zabbix.xlsx
 ```
 
-### Options communes
+### Options communes (toutes sources)
 
 | Option | Rôle |
 |---|---|
@@ -125,3 +162,8 @@ Le résultat est disponible dans [`examples/matrice_exemple.xlsx`](examples/matr
 python3 -m pip install pytest
 python3 -m pytest
 ```
+
+Les tests de l'extraction API utilisent un faux serveur Centreon (`tests/fake_centreon.py`)
+qui reproduit le format des réponses de l'API v1 (CLAPI) et de l'API v2, établi d'après le code
+source de Centreon. Faites un premier essai sur votre instance et comparez les volumes
+(nombre d'hôtes / services) avec l'interface.
