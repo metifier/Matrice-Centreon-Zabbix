@@ -37,6 +37,7 @@
   <button data-view="zabbix_hosts" class="zbx">Zabbix · hôtes</button>
   <button data-view="zabbix_only" class="zbx">Zabbix · uniquement</button>
   <button data-view="zabbix_templates" class="zbx">Zabbix · templates</button>
+  <button data-view="correlation" class="zbx">Corrélation items</button>
   <button data-view="commands">Commandes</button>
   <button data-view="sources" class="right">Sources &amp; extractions</button>
   <button data-view="clients">Clients</button>
@@ -54,6 +55,7 @@
       <div class="card"><h3>Proposition par template de service</h3><div id="chart-props"></div></div>
       <div class="card"><h3>Décision effective des services</h3><div id="chart-decisions"></div></div>
       <div class="card"><h3>Statut des services dans Zabbix</h3><div id="chart-zbx"></div></div>
+      <div class="card"><h3>Couverture par le standard Zabbix</h3><div id="chart-cov"></div></div>
       <div class="card span-all"><h3>Top 10 des templates de service</h3><div id="top"></div></div>
     </div>
     <details class="card"><summary>Synthèse détaillée</summary><div class="grid2"><table id="summary" class="kv"></table><table id="zsummary" class="kv"></table></div></details>
@@ -66,6 +68,15 @@
       <span class="spacer"></span>
       <label class="muted">Lignes <select id="size"><option>50</option><option selected>100</option><option>250</option><option>500</option></select></label>
       <button id="clear-filters" class="ghost">Effacer les filtres</button>
+    </div>
+    <div id="bulk" class="bulk hidden">
+      <strong id="bulk-count"></strong>
+      <button id="bulk-all" class="ghost" type="button"></button>
+      <span class="spacer"></span>
+      <label>Champ <select id="bulk-field"></select></label>
+      <label>Valeur <span id="bulk-value-wrap"></span></label>
+      <button id="bulk-apply" class="primary" type="button">Appliquer à la sélection</button>
+      <button id="bulk-clear" class="ghost" type="button">Désélectionner</button>
     </div>
     <div class="table-wrap"><table id="grid" class="grid"><thead></thead><tbody></tbody></table></div>
     <div class="pager" id="pager"></div>

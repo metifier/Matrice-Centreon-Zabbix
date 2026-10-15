@@ -63,7 +63,11 @@ def test_detect_prefixes():
 
 # ----------------------------------------------------------------------- Zabbix
 def test_zabbix_inventory(zbx):
-    assert zbx.version == "7.0.5" and len(zbx.hosts) == 5 and len(zbx.templates) == 8
+    assert zbx.version == "7.0.5" and len(zbx.hosts) == 5 and len(zbx.templates) == 9
+    tpl = {t["name"]: t for t in zbx.templates}
+    assert ["CPU utilization", "system.cpu.util[snmp.cpu.util]"] in tpl["Linux by SNMP"]["items"]
+    assert any(k.startswith("vfs.fs.pused") for _, k in tpl["Linux by SNMP"]["prototypes"])
+    assert tpl["Linux by Zabbix agent"]["linked"] == [tpl["Linux CPU by Zabbix agent"]["templateid"]]
     h = next(x for x in zbx.hosts if x["host"] == "srv-lnx-web01")
     assert h["proxy"] == "proxy-dc1" and "Apache by HTTP" in h["templates"] and h["items"] == 182
 
@@ -254,3 +258,76 @@ def test_web_lookup_and_client_with_hostgroups(client):
     assert {row["Hôte"] for row in t["rows"]} == {"srv-lnx-web01", "srv-lnx-web02"}
     state = client.get("/api/state").get_json()
     assert dict(state["pollers"]) == {"Poller-DC1": 2}
+
+
+def test_host_not_migrated_excludes_its_services(inv, tmp_path):
+    from centreon_inventory.excel import write_excel
+    decisions = {"hosts": {"srv-lnx-db01": {"Décision finale": "Ne pas migrer"}},
+                 "services": {"srv-lnx-db01|Cpu": {"Décision (service)": MIGRER_DEV}}}
+    m = build_report(inv, decisions=decisions)
+    db = [r for r in m.services if r["Hôte"] == "srv-lnx-db01"]
+    assert db and all(r["Décision effective"] == "Ne pas migrer" for r in db)
+    assert all(r["Décision (hôte)"] == "Ne pas migrer" for r in db)
+    other = next(r for r in m.services if r["Hôte"] == "srv-lnx-web01" and r["Service"] == "Cpu")
+    assert other["Décision effective"] != "Ne pas migrer"
+    # La formule Excel applique la même règle
+    ws = load_workbook(write_excel(m, tmp_path / "h.xlsx"))["Services"]
+    hdr = [c.value for c in ws[1]]
+    f = ws.cell(row=2, column=hdr.index("Décision effective") + 1).value
+    assert f.startswith('=IF(') and "Ne pas migrer" in f and "Hôtes" in ws.cell(row=2, column=hdr.index("Décision (hôte)") + 1).value
+
+
+def test_web_bulk_decisions(client):
+    client.post("/api/import/demo")
+    keys = client.get("/api/table/service_templates/keys?f.Catégorie=CPU").get_json()["keys"]
+    assert set(keys) == {"OS-Linux-Cpu-SNMP-custom", "OS-Windows-Cpu-SNMP-custom", "OS-Linux-Cpu-SNMP"}
+    r = client.post("/api/decisions/bulk", json={"table": "service_templates", "keys": keys,
+                                                 "field": "Décision finale", "value": "À analyser"})
+    assert r.get_json()["count"] == 3
+    t = client.get("/api/table/service_templates?f.Catégorie=CPU").get_json()
+    assert {row["Décision finale"] for row in t["rows"]} == {"À analyser"}
+    # hôtes : décision groupée « Ne pas migrer » -> leurs services ne sont plus migrés
+    hk = client.get("/api/table/hosts/keys?f.Hôte=srv-win").get_json()["keys"]
+    client.post("/api/decisions/bulk", json={"table": "hosts", "keys": hk, "field": "Décision finale",
+                                             "value": "Ne pas migrer"})
+    s = client.get("/api/table/services?f.Hôte=srv-win&size=100").get_json()
+    assert s["rows"] and {row["Décision effective"] for row in s["rows"]} == {"Ne pas migrer"}
+    # effacement groupé
+    client.post("/api/decisions/bulk", json={"table": "hosts", "keys": hk, "field": "Décision finale", "value": ""})
+    s = client.get("/api/table/services?f.Hôte=srv-win-ad01").get_json()
+    assert "Ne pas migrer" not in {row["Décision effective"] for row in s["rows"] if row["Actif"] == "Oui"}
+    assert client.post("/api/decisions/bulk", json={"table": "hosts", "keys": [], "field": "Décision finale"}).status_code == 400
+
+
+def test_correlation_with_zabbix_items(inv, zbx):
+    from centreon_inventory.correlate import A_IMPORTER, COUVERT, SANS_DONNEES, SPECIFIQUE
+    m = build_report(inv, zabbix=zbx)
+    corr = {r["Template de service"]: r for r in m.correlation}
+    assert corr["OS-Linux-Cpu-SNMP-custom"]["Couverture standard"] == COUVERT
+    assert "system.cpu.util" in corr["OS-Linux-Cpu-SNMP-custom"]["Items Zabbix correspondants"]
+    assert "vfs.fs.pused" in corr["OS-Linux-Disk-Generic-Name-SNMP-custom"]["Items Zabbix correspondants"]  # LLD
+    # suggestion « template constructeur » : on s'appuie sur le template Zabbix de l'hôte (Cisco)
+    assert corr["Net-Cisco-Standard-Environment-SNMP-custom"]["Couverture standard"] == COUVERT
+    # template suggéré absent de Zabbix -> à importer (pas de faux rapprochement avec Apache)
+    assert corr["App-Protocol-HTTP-Response-Time-custom"]["Couverture standard"] == A_IMPORTER
+    assert corr["ERP-Batch-Nocturne"]["Couverture standard"] == SPECIFIQUE
+    assert corr["ERP-Batch-Nocturne"]["Approche recommandée"].startswith("Spécificité")
+    svc = {(r["Hôte"], r["Service"]): r for r in m.services}
+    assert svc["srv-lnx-web01", "Cpu"]["Couverture standard"] == COUVERT
+    assert "CPU utilization" in svc["srv-lnx-web01", "Cpu"]["Item Zabbix standard"]
+    tpl = {r["Template Zabbix suggéré"]: r for r in m.zabbix_templates}
+    assert tpl["Linux by SNMP"]["Nb prototypes LLD"] == 2 and tpl["Linux by SNMP"]["Apport du standard (sans équivalent Centreon)"] >= 1
+    # inventaire Zabbix enregistré par une version précédente (sans items)
+    from centreon_inventory.zabbix import ZabbixInventory
+    old = ZabbixInventory.from_dict({**zbx.to_dict(), "templates": [
+        {k: v for k, v in t.items() if k not in ("items", "prototypes", "linked")} for t in zbx.templates]})
+    m2 = build_report(inv, zabbix=old)
+    assert {r["Couverture standard"] for r in m2.correlation} & {SANS_DONNEES}
+
+
+def test_correlation_linked_templates(inv, zbx):
+    """Les items des templates liés (ex. module CPU d'un template Linux) sont pris en compte."""
+    from centreon_inventory.correlate import _Catalog
+    cat = _Catalog(zbx)
+    keys = {k for _, _, k, _ in cat.items(cat.get("Linux by Zabbix agent"))}
+    assert "system.cpu.util" in keys and "vm.memory.util" in keys

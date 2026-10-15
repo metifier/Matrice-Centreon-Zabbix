@@ -125,6 +125,33 @@ compte de la casse), puis par adresse IP. Le comparatif ajoute :
 | **Templates Zabbix** | Templates suggérés : disponibles dans Zabbix ou **à importer** |
 | Services → *Statut Zabbix* | *Couvert dans Zabbix*, *Template à lier*, *À créer dans Zabbix*, *Hôte absent de Zabbix*, *Non migré (décision)* |
 
+### Corrélation services Centreon ↔ items Zabbix (partir du standard)
+
+Plutôt que de recopier chaque service Centreon, la démarche conseillée est de **lier d'abord les templates
+standards de Zabbix, puis de n'ajouter que les spécificités**. L'inventaire Zabbix lit pour cela les items et
+les prototypes d'items (LLD) de chaque template, y compris ceux de ses templates liés. Pour chaque service
+Centreon, l'outil cherche dans le template Zabbix suggéré (à défaut, celui de l'hôte, ex. template constructeur
+réseau) un item qui mesure la même chose, selon la catégorie du service (section `correlation` de
+`mapping/zabbix_mapping.yaml`, modifiable) :
+
+| Couverture standard | Signification |
+|---|---|
+| Couvert par un item standard | le template standard mesure déjà ce que fait le service (item cité) |
+| Template standard sans item correspondant | template standard lié, mais il faut lui ajouter un item |
+| Template standard à importer dans Zabbix | template officiel suggéré absent de votre Zabbix |
+| Spécificité à créer | aucun standard : item / UserParameter / script à créer |
+
+Onglet **Corrélation items** (et feuille Excel *Corrélation items Zabbix*) : par template de service, items
+correspondants et **approche recommandée**. L'onglet *Templates Zabbix* indique aussi l'**apport du standard** :
+nombre d'items du template qui n'ont pas d'équivalent dans Centreon.
+
+### Décisions : hôtes et décisions groupées
+
+- Un hôte marqué **« Ne pas migrer »** entraîne tous ses services en « Ne pas migrer » (interface et Excel,
+  colonne *Décision (hôte)*).
+- Dans les tableaux modifiables, cochez des lignes (ou « Sélectionner les N résultats filtrés »), choisissez le
+  champ et la valeur, puis **« Appliquer à la sélection »** : décision finale, cible ou commentaire en une fois.
+
 En ligne de commande : `--zabbix-url https://zabbix.example.com` avec `ZABBIX_API_TOKEN=...`
 (ou `--zabbix-user` et `ZABBIX_PASSWORD`).
 

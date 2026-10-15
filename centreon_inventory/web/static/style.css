@@ -39,7 +39,7 @@ button:hover, .button:hover { border-color: var(--accent); }
 .ghost { background: transparent; }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
-.tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; padding: 10px 12px; color: var(--muted); }
+.tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; padding: 10px 8px; color: var(--muted); font-size: 13.5px; }
 .tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
 .tabs .right { margin-left: auto; }
 .tabs .zbx.disabled { opacity: .45; }
@@ -87,6 +87,12 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-siz
 .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; background: var(--neutral); }
 .b-ok { background: var(--ok); } .b-info { background: var(--info); } .b-warn { background: var(--warn); }
 .b-bad { background: var(--bad); } .b-dev { background: var(--dev); }
+.bulk { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--info); border-radius: 8px;
+  padding: 8px 12px; margin-bottom: 10px; }
+.bulk label { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+.bulk select, .bulk input { min-width: 180px; }
+.grid th.sel, .grid td.sel { width: 28px; min-width: 28px; text-align: center; padding: 2px 4px; }
+.grid tr.selected td { background: color-mix(in srgb, var(--info) 60%, transparent); }
 .pager { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
 
 form.card label { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; font-size: 13px; }

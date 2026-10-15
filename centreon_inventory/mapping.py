@@ -50,6 +50,8 @@ class Mapper:
         self.service_rules = [_Rule(r, i) for i, r in enumerate(data.get("services") or [], 1)]
         self.default_service = Suggestion(**{**(data.get("default_service") or {}), "rule": "défaut"})
         self.default_host = Suggestion(**{**(data.get("default_host_template") or {}), "rule": "défaut"})
+        self.correlation = {str(cat): re.compile(str(rx), re.IGNORECASE)
+                            for cat, rx in (data.get("correlation") or {}).items() if rx}
 
     def for_service(self, templates: list[str], command: str, plugin: str, mode: str, line: str) -> Suggestion:
         facts = {"template": templates, "command": command, "plugin": plugin, "mode": mode,

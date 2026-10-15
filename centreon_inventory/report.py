@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from .compare import compare_with_zabbix
+from .correlate import correlate
 from .decisions import apply_decisions, prune_unused
 from .filters import ClientFilter
 from .mapping import Mapper
@@ -22,4 +23,5 @@ def build_report(inv: Inventory, mapper: Mapper | None = None, client: ClientFil
     apply_decisions(m, decisions)
     if zabbix is not None:
         compare_with_zabbix(m, zabbix, client)
+        correlate(m, zabbix, mapper or Mapper())
     return m
