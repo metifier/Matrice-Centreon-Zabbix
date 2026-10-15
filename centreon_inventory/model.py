@@ -248,3 +248,20 @@ __all__ = [
     "Inventory", "ResolvedCheck", "NO_TEMPLATE", "normalize_macro", "substitute",
     "parse_check_line", "_uniq",
 ]
+
+
+def inventory_to_dict(inv: Inventory) -> dict:
+    from dataclasses import asdict
+    return asdict(inv)
+
+
+def inventory_from_dict(d: dict) -> Inventory:
+    return Inventory(
+        commands={k: Command(**v) for k, v in (d.get("commands") or {}).items()},
+        host_templates={k: HostTemplate(**v) for k, v in (d.get("host_templates") or {}).items()},
+        hosts={k: Host(**v) for k, v in (d.get("hosts") or {}).items()},
+        service_templates={k: ServiceTemplate(**v) for k, v in (d.get("service_templates") or {}).items()},
+        services=[Service(**s) for s in d.get("services") or []],
+        hostgroup_services=[HostgroupService(**s) for s in d.get("hostgroup_services") or []],
+        source=d.get("source", ""),
+    )

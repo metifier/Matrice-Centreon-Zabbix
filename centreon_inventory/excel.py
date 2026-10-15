@@ -23,6 +23,9 @@ SHEET_X_HTPL = "Croisé hôtes x tpl hôtes"
 SHEET_X_STPL = "Croisé hôtes x tpl services"
 SHEET_CMD = "Commandes"
 SHEET_HELP = "Mode d'emploi"
+SHEET_ZBX_HOSTS = "Comparatif Zabbix hôtes"
+SHEET_ZBX_ONLY = "Uniquement dans Zabbix"
+SHEET_ZBX_TPL = "Templates Zabbix"
 
 HEADER_FILL = PatternFill("solid", fgColor="1F3864")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -32,6 +35,13 @@ DECISION_COLORS = {
     MIGRER_NATIF: "C6EFCE", MIGRER_ADAPTER: "DDEBF7", MIGRER_DEV: "FCE4D6",
     NE_PAS_MIGRER: "D9D9D9", A_ANALYSER: "FFEB9C", HERITE: "EDEDED", "Migrer": "C6EFCE",
 }
+STATUS_COLORS = {
+    "Présent – templates OK": "C6EFCE", "Couvert dans Zabbix": "C6EFCE", "Oui": None,
+    "Présent – templates à lier": "FFEB9C", "Template à lier": "FFEB9C", "Présent": "DDEBF7",
+    "Absent de Zabbix": "F8CBAD", "Hôte absent de Zabbix": "F8CBAD", "À créer dans Zabbix": "FCE4D6",
+    "Non migré (décision)": "D9D9D9", "Non (à importer)": "F8CBAD",
+}
+STATUS_COLUMNS = {"Statut Zabbix", "Disponible dans Zabbix"}
 INPUT_COLUMNS = {"Décision finale", "Décision (service)", "Template / item Zabbix cible",
                  "Template Zabbix cible", "Commentaire"}
 MAX_WIDTH = {"Ligne de commande résolue": 80, "Ligne de commande": 90, "Chaîne d'héritage": 50,
@@ -49,6 +59,10 @@ def write_excel(m: Matrix, path: str | Path) -> Path:
     _service_formulas(ws, m)
     _cross(wb, SHEET_X_HTPL, *m.host_x_htpl, legend="D = template appliqué directement, h = hérité")
     _cross(wb, SHEET_X_STPL, *m.host_x_stpl, legend="Nombre de services de l'hôte utilisant ce template")
+    if m.zabbix_hosts or m.zabbix_templates or m.zabbix_only:
+        _table(wb, SHEET_ZBX_HOSTS, m.zabbix_hosts)
+        _table(wb, SHEET_ZBX_ONLY, m.zabbix_only)
+        _table(wb, SHEET_ZBX_TPL, m.zabbix_templates)
     _table(wb, SHEET_CMD, m.commands)
     _help_sheet(wb)
     wb.calculation.fullCalcOnLoad = True
@@ -64,7 +78,11 @@ def write_csv(m: Matrix, directory: str | Path) -> list[Path]:
     written = []
     for name, rows in (("matrice_templates_services", m.service_templates),
                        ("matrice_templates_hotes", m.host_templates), ("hotes", m.hosts),
-                       ("services", m.services), ("commandes", m.commands)):
+                       ("services", m.services), ("commandes", m.commands),
+                       ("comparatif_zabbix_hotes", m.zabbix_hosts), ("uniquement_zabbix", m.zabbix_only),
+                       ("templates_zabbix", m.zabbix_templates)):
+        if not rows and name.startswith(("comparatif", "uniquement", "templates_zabbix")):
+            continue
         p = directory / f"{name}.csv"
         with p.open("w", newline="", encoding="utf-8-sig") as fh:
             if rows:
@@ -105,6 +123,12 @@ def _table(wb, title, rows, decisions=None, key_width=None):
                                 error="Choisir une valeur dans la liste")
             ws.add_data_validation(dv)
             dv.add(f"{letter}2:{letter}{n}")
+        if h in STATUS_COLUMNS:
+            for status, color in STATUS_COLORS.items():
+                if color:
+                    ws.conditional_formatting.add(
+                        f"{letter}2:{letter}{n}",
+                        FormulaRule(formula=[f'{letter}2="{status}"'], fill=PatternFill("solid", fgColor=color)))
         if h in ("Proposition", "Décision finale", "Décision (template)", "Décision effective",
                  "Décision (service)"):
             for decision, color in DECISION_COLORS.items():
@@ -178,8 +202,13 @@ def _summary_sheet(wb, m: Matrix):
     ws.append(["Inventaire Centreon – matrice de migration vers Zabbix"])
     ws["A1"].font = Font(bold=True, size=14)
     ws.append([f"Généré le {datetime.now():%d/%m/%Y %H:%M}"])
+    client = getattr(m, "client", None)
+    if client is not None and client.active:
+        ws.append([f"Périmètre client : {client.name or '(filtre)'} — hôtes : {client.hosts or '*'} ; "
+                   f"services : {client.services or '*'} ; exclusions : {client.exclude or 'aucune'}"])
+        ws.cell(row=ws.max_row, column=1).font = Font(bold=True, color="C00000")
     ws.append([])
-    for label, value in m.summary:
+    for label, value in list(m.summary) + ([(None, None)] + list(m.zabbix_summary) if m.zabbix_summary else []):
         ws.append([label, value])
         if label in SUMMARY_HEADERS:
             for c in (1, 2):

@@ -17,7 +17,8 @@ A_ANALYSER = "À analyser"
 HERITE = "Hérité (pas d'action directe)"
 DECISIONS = [MIGRER_NATIF, MIGRER_ADAPTER, MIGRER_DEV, NE_PAS_MIGRER, A_ANALYSER, HERITE]
 HOST_DECISIONS = ["Migrer", NE_PAS_MIGRER, A_ANALYSER]
-SUMMARY_HEADERS = {"Proposition par template de service", "Services par catégorie", "Services par stratégie"}
+SUMMARY_HEADERS = {"Proposition par template de service", "Services par catégorie", "Services par stratégie",
+                   "Hôtes Centreon par statut Zabbix", "Services Centreon par statut Zabbix"}
 
 _STRATEGY_TO_DECISION = {"Natif": MIGRER_NATIF, "Adapter": MIGRER_ADAPTER,
                          "Développer": A_ANALYSER, "Abandonner": NE_PAS_MIGRER}
@@ -61,6 +62,12 @@ class Matrix:
     host_x_htpl: tuple[list[str], list[dict]] = ((), [])
     host_x_stpl: tuple[list[str], list[dict]] = ((), [])
     summary: list[tuple] = field(default_factory=list)
+    # Renseignés par compare.compare_with_zabbix()
+    zabbix_hosts: list[dict] = field(default_factory=list)
+    zabbix_only: list[dict] = field(default_factory=list)
+    zabbix_templates: list[dict] = field(default_factory=list)
+    zabbix_summary: list[tuple] = field(default_factory=list)
+    client: object = None  # filters.ClientFilter du périmètre affiché
 
 
 def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, medium: int = 5,

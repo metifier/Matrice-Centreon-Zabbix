@@ -1,0 +1,148 @@
+"""Comparaison de l'inventaire Centreon (matrice) avec l'existant Zabbix."""
+from __future__ import annotations
+
+import re
+from collections import Counter
+
+from .filters import ClientFilter
+from .matrix import Matrix
+from .zabbix import ZabbixInventory
+
+PRESENT_OK = "Présent – templates OK"
+PRESENT_A_LIER = "Présent – templates à lier"
+PRESENT = "Présent"
+ABSENT = "Absent de Zabbix"
+
+SVC_COUVERT = "Couvert dans Zabbix"
+SVC_A_LIER = "Template à lier"
+SVC_A_CREER = "À créer dans Zabbix"
+SVC_HOTE_ABSENT = "Hôte absent de Zabbix"
+SVC_NON_MIGRE = "Non migré (décision)"
+
+
+def _norm(name: str) -> str:
+    return re.sub(r"\s+", " ", (name or "").strip().lower())
+
+
+def split_templates(value: str) -> list[str]:
+    """'Linux by SNMP, Apache by HTTP' -> noms ; ignore les libellés génériques entre parenthèses."""
+    out = []
+    for part in re.split(r",|\s/\s|\s\+\s", value or ""):
+        part = part.strip()
+        if part and not part.startswith("("):
+            out.append(part)
+    return out
+
+
+def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | None = None) -> Matrix:
+    inv = m.inventory
+    by_name, by_ip = {}, {}
+    for zh in zbx.hosts:
+        for n in (zh["host"], zh["name"]):
+            by_name.setdefault(_norm(n), zh)
+        for i in zh.get("interfaces") or []:
+            if i.get("ip"):
+                by_ip.setdefault(i["ip"], []).append(zh)
+    zbx_tpl = {}
+    for t in zbx.templates:
+        for n in (t["name"], t["host"]):
+            zbx_tpl.setdefault(_norm(n), t)
+
+    # ------------------------------------------------------------------ hôtes
+    matched_ids, host_match = set(), {}
+    m.zabbix_hosts = []
+    for row in m.hosts:
+        h = inv.hosts.get(row["Hôte"])
+        zh, how = by_name.get(_norm(row["Hôte"])), "Nom"
+        if not zh and h and h.alias:
+            zh, how = by_name.get(_norm(h.alias)), "Alias"
+        if not zh and row["Adresse"] and len(by_ip.get(row["Adresse"], [])) == 1:
+            zh, how = by_ip[row["Adresse"]][0], "Adresse IP"
+        host_match[row["Hôte"]] = zh
+        suggested = split_templates(row["Templates Zabbix suggérés"])
+        if zh:
+            matched_ids.add(zh["hostid"])
+            linked = {_norm(t) for t in zh["templates"]}
+            missing = [t for t in suggested if _norm(t) not in linked]
+            status = PRESENT_A_LIER if missing else (PRESENT_OK if suggested else PRESENT)
+        else:
+            missing, status, how = suggested, ABSENT, ""
+        m.zabbix_hosts.append({
+            "Hôte Centreon": row["Hôte"], "Adresse": row["Adresse"], "Collecteur Centreon": row["Collecteur"],
+            "Actif Centreon": row["Actif"], "Statut Zabbix": status, "Correspondance": how,
+            "Hôte Zabbix": zh["host"] if zh else "", "Nom visible Zabbix": zh["name"] if zh else "",
+            "Activé dans Zabbix": ("Oui" if zh["enabled"] else "Non") if zh else "",
+            "Proxy Zabbix": zh["proxy"] if zh else "", "Groupes Zabbix": ", ".join(zh["groups"]) if zh else "",
+            "Interfaces Zabbix": ", ".join(sorted({i["type"] for i in zh["interfaces"]})) if zh else "",
+            "Nb items Zabbix": zh["items"] if zh else "",
+            "Templates Zabbix liés": ", ".join(zh["templates"]) if zh else "",
+            "Templates Zabbix suggérés": ", ".join(suggested),
+            "Templates à lier": ", ".join(missing),
+            "Nb services Centreon": row["Nb services"],
+        })
+
+    # ------------------------------------------------- hôtes présents uniquement dans Zabbix
+    m.zabbix_only = []
+    for zh in zbx.hosts:
+        if zh["hostid"] in matched_ids:
+            continue
+        if client and client.active and not (client.host_matches(zh["host"]) or client.host_matches(zh["name"])):
+            continue
+        m.zabbix_only.append({
+            "Hôte Zabbix": zh["host"], "Nom visible": zh["name"], "Activé": "Oui" if zh["enabled"] else "Non",
+            "Adresses": ", ".join(i["ip"] or i["dns"] for i in zh["interfaces"]),
+            "Proxy": zh["proxy"], "Groupes": ", ".join(zh["groups"]), "Templates liés": ", ".join(zh["templates"]),
+            "Nb items": zh["items"],
+        })
+
+    # ---------------------------------------------------------------- services
+    for row in m.services:
+        zh = host_match.get(row["Hôte"])
+        suggested = split_templates(row["Template Zabbix suggéré"])
+        linked = {_norm(t) for t in zh["templates"]} if zh else set()
+        decision = row.get("Décision effective") or row["Proposition"]
+        if decision.startswith("Ne pas migrer"):
+            status = SVC_NON_MIGRE
+        elif not zh:
+            status = SVC_HOTE_ABSENT
+        elif suggested and any(_norm(t) in linked for t in suggested):
+            status = SVC_COUVERT
+        elif suggested:
+            status = SVC_A_LIER
+        else:
+            status = SVC_A_CREER
+        row["Hôte dans Zabbix"] = "Oui" if zh else "Non"
+        row["Statut Zabbix"] = status
+
+    # ------------------------------------------------------- templates suggérés
+    need = Counter()
+    for row in m.service_templates:
+        for t in split_templates(row["Template Zabbix suggéré"]):
+            need[t] += row["Nb hôtes"]
+        avail = [t for t in split_templates(row["Template Zabbix suggéré"]) if _norm(t) in zbx_tpl]
+        row["Template Zabbix disponible"] = ("Oui" if avail else "Non") if row["Template Zabbix suggéré"] and \
+            not row["Template Zabbix suggéré"].startswith("(") else ""
+    for row in m.host_templates:
+        for t in split_templates(row["Template Zabbix suggéré"]):
+            need[t] += row["Nb hôtes (direct)"]
+        row["Template Zabbix disponible"] = ("Oui" if any(_norm(t) in zbx_tpl for t in split_templates(
+            row["Template Zabbix suggéré"])) else "Non") if split_templates(row["Template Zabbix suggéré"]) else ""
+    m.zabbix_templates = []
+    for name in sorted(need, key=lambda n: (-need[n], n.lower())):
+        t = zbx_tpl.get(_norm(name))
+        m.zabbix_templates.append({
+            "Template Zabbix suggéré": name, "Disponible dans Zabbix": "Oui" if t else "Non (à importer)",
+            "Nom technique Zabbix": t["host"] if t else "", "Nb hôtes Zabbix liés": t["hosts"] if t else 0,
+            "Utilisations Centreon (hôtes)": need[name],
+        })
+
+    statuses = Counter(r["Statut Zabbix"] for r in m.zabbix_hosts)
+    svc_statuses = Counter(r["Statut Zabbix"] for r in m.services)
+    m.zabbix_summary = [("Zabbix", f"{zbx.url} (version {zbx.version})"),
+                        ("Hôtes Zabbix", len(zbx.hosts)), ("Templates Zabbix", len(zbx.templates)), (None, None),
+                        ("Hôtes Centreon par statut Zabbix", "Nb hôtes")]
+    m.zabbix_summary += [(k, v) for k, v in statuses.most_common()]
+    m.zabbix_summary += [("Hôtes uniquement dans Zabbix", len(m.zabbix_only)), (None, None),
+                         ("Services Centreon par statut Zabbix", "Nb services")]
+    m.zabbix_summary += [(k, v) for k, v in svc_statuses.most_common()]
+    return m

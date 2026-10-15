@@ -1,0 +1,164 @@
+{
+ "url": "https://zabbix.demo.local",
+ "version": "7.0.5",
+ "hosts": [
+  {
+   "hostid": "10000",
+   "host": "srv-lnx-web01",
+   "name": "srv-lnx-web01",
+   "enabled": true,
+   "groups": [
+    "Linux servers",
+    "Web"
+   ],
+   "templates": [
+    "Linux by SNMP",
+    "Apache by HTTP",
+    "ICMP Ping"
+   ],
+   "interfaces": [
+    {
+     "ip": "10.0.10.11",
+     "dns": "",
+     "type": "SNMP"
+    }
+   ],
+   "items": 182,
+   "proxy": "proxy-dc1"
+  },
+  {
+   "hostid": "10001",
+   "host": "srv-lnx-db01",
+   "name": "srv-lnx-db01",
+   "enabled": true,
+   "groups": [
+    "Linux servers"
+   ],
+   "templates": [
+    "Linux by SNMP"
+   ],
+   "interfaces": [
+    {
+     "ip": "10.0.10.21",
+     "dns": "",
+     "type": "SNMP"
+    }
+   ],
+   "items": 120,
+   "proxy": "proxy-dc1"
+  },
+  {
+   "hostid": "10002",
+   "host": "SRV-WIN-AD01",
+   "name": "SRV-WIN-AD01",
+   "enabled": true,
+   "groups": [
+    "Windows servers"
+   ],
+   "templates": [
+    "Windows by Zabbix agent"
+   ],
+   "interfaces": [
+    {
+     "ip": "10.0.20.11",
+     "dns": "",
+     "type": "Agent"
+    }
+   ],
+   "items": 240,
+   "proxy": "proxy-dc1"
+  },
+  {
+   "hostid": "10003",
+   "host": "core-switch",
+   "name": "core-switch",
+   "enabled": true,
+   "groups": [
+    "Network"
+   ],
+   "templates": [
+    "Cisco IOS by SNMP"
+   ],
+   "interfaces": [
+    {
+     "ip": "10.0.0.1",
+     "dns": "",
+     "type": "SNMP"
+    }
+   ],
+   "items": 640,
+   "proxy": "proxy-dc1"
+  },
+  {
+   "hostid": "10004",
+   "host": "srv-lnx-new01",
+   "name": "srv-lnx-new01",
+   "enabled": true,
+   "groups": [
+    "Linux servers"
+   ],
+   "templates": [
+    "Linux by Zabbix agent"
+   ],
+   "interfaces": [
+    {
+     "ip": "10.0.10.99",
+     "dns": "",
+     "type": "Agent"
+    }
+   ],
+   "items": 95,
+   "proxy": "proxy-dc1"
+  }
+ ],
+ "templates": [
+  {
+   "templateid": "100",
+   "host": "Linux by SNMP",
+   "name": "Linux by SNMP",
+   "hosts": 2
+  },
+  {
+   "templateid": "101",
+   "host": "Linux by Zabbix agent",
+   "name": "Linux by Zabbix agent",
+   "hosts": 1
+  },
+  {
+   "templateid": "102",
+   "host": "Apache by HTTP",
+   "name": "Apache by HTTP",
+   "hosts": 1
+  },
+  {
+   "templateid": "103",
+   "host": "Windows by Zabbix agent",
+   "name": "Windows by Zabbix agent",
+   "hosts": 1
+  },
+  {
+   "templateid": "104",
+   "host": "Windows by SNMP",
+   "name": "Windows by SNMP",
+   "hosts": 0
+  },
+  {
+   "templateid": "105",
+   "host": "Cisco IOS by SNMP",
+   "name": "Cisco IOS by SNMP",
+   "hosts": 1
+  },
+  {
+   "templateid": "106",
+   "host": "ICMP Ping",
+   "name": "ICMP Ping",
+   "hosts": 1
+  },
+  {
+   "templateid": "107",
+   "host": "MySQL by Zabbix agent 2",
+   "name": "MySQL by Zabbix agent 2",
+   "hosts": 0
+  }
+ ]
+}

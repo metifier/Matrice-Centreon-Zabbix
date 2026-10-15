@@ -5,6 +5,76 @@ templates de service, commandes) qui produit une **matrice de décision Excel** 
 une migration vers **Zabbix** : quels templates et quels services reprendre, avec quel
 équivalent Zabbix, et dans quel ordre.
 
+## Démarrage rapide : l'interface web
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 -m centreon_inventory web            # http://127.0.0.1:8080
+```
+
+L'interface permet de :
+
+1. **Lancer les extractions** (onglet *Sources & extractions*) : Centreon par API, Zabbix par API,
+   ou import d'un export CLAPI. Un jeu de démonstration (Centreon + Zabbix fictifs) permet
+   de découvrir l'outil sans connexion.
+2. **Définir des clients** (onglet *Clients*) : un client = des chaînes de caractères que
+   doivent contenir les noms d'hôtes et/ou de services (ex. `Mdph-973`). Les préfixes de
+   nommage récurrents sont détectés et proposés automatiquement.
+3. **Consulter** la matrice pour tout le parc ou un client : tableau de bord, templates de
+   service / d'hôte, hôtes, services, comparatif Zabbix ; recherche, filtres par colonne, tri.
+4. **Décider** directement dans les tableaux (*Décision finale*, cible Zabbix, commentaire,
+   exception par service) : les décisions sont enregistrées et se propagent aux services.
+5. **Exporter en Excel** le périmètre affiché (bouton *Exporter Excel*), décisions comprises.
+
+Les données sont conservées en JSON dans `./data` (`--data-dir`). **Les mots de passe et jetons
+ne sont jamais enregistrés** : ils ne servent que le temps de l'extraction.
+
+| Option de `web` | Rôle |
+|---|---|
+| `--host` / `--port` | Adresse et port d'écoute (127.0.0.1:8080 par défaut) |
+| `--data-dir` | Dossier de stockage des inventaires, clients et décisions |
+| `--mapping` | Référentiel de correspondance alternatif |
+
+Pour exposer l'interface à d'autres postes (`--host 0.0.0.0`), protégez-la par mot de passe :
+`WEB_USER=... WEB_PASSWORD=... python3 -m centreon_inventory web --host 0.0.0.0`
+(authentification HTTP Basic ; placez-la derrière un reverse proxy HTTPS).
+
+## Périmètre client (filtre sur le nommage)
+
+Le client est identifié par le nommage des hôtes et des services :
+
+| Champ | Effet |
+|---|---|
+| Hôtes contiennent | le nom (ou l'alias) de l'hôte contient l'une des chaînes (ex. `Mdph-973`) |
+| Services contiennent | la description du service contient l'une des chaînes |
+| Exclure | écarte les hôtes ou services contenant l'une des chaînes |
+| Mode | `et` : l'hôte ET le service doivent correspondre ; `ou` : l'un OU l'autre |
+
+Plusieurs chaînes se séparent par des virgules ; la recherche ignore la casse ; le préfixe
+`re:` active une expression régulière (ex. `re:^Mdph-97[34]-`). Dans une vue client, les
+templates non utilisés par ce client sont masqués et la synthèse indique le périmètre.
+En ligne de commande : `--client "MDPH 973" --client-hotes "Mdph-973"` (voir `--help`).
+
+## Comparatif avec l'existant Zabbix
+
+L'inventaire Zabbix (API JSON-RPC, méthodes `*.get` uniquement, Zabbix 5.0 à 7.x) récupère
+les hôtes (groupes, templates liés, interfaces, proxy, nombre d'items) et les templates.
+Authentification par **jeton d'API** (recommandé : *Utilisateurs > Jetons d'API*, rôle en lecture)
+ou par identifiant / mot de passe.
+
+Chaque hôte Centreon est rapproché d'un hôte Zabbix par nom, nom visible ou alias (sans tenir
+compte de la casse), puis par adresse IP. Le comparatif ajoute :
+
+| Onglet / colonne | Contenu |
+|---|---|
+| **Comparatif Zabbix hôtes** | Statut (*Présent – templates OK*, *Présent – templates à lier*, *Absent de Zabbix*), mode de correspondance, groupes, proxy, templates liés, **templates à lier** |
+| **Uniquement dans Zabbix** | Hôtes Zabbix sans équivalent Centreon (dans le périmètre client) |
+| **Templates Zabbix** | Templates suggérés : disponibles dans Zabbix ou **à importer** |
+| Services → *Statut Zabbix* | *Couvert dans Zabbix*, *Template à lier*, *À créer dans Zabbix*, *Hôte absent de Zabbix*, *Non migré (décision)* |
+
+En ligne de commande : `--zabbix-url https://zabbix.example.com` avec `ZABBIX_API_TOKEN=...`
+(ou `--zabbix-user` et `ZABBIX_PASSWORD`).
+
 ## Ce que produit l'outil
 
 Un classeur `.xlsx` (et en option des CSV) avec les onglets suivants :
@@ -19,6 +89,7 @@ Un classeur `.xlsx` (et en option des CSV) avec les onglets suivants :
 | **Croisé hôtes x tpl hôtes** | Matrice hôtes × templates d'hôte (D = direct, h = hérité) |
 | **Croisé hôtes x tpl services** | Matrice hôtes × templates de service (nombre de services) |
 | **Commandes** | Commandes Centreon, exécutable, plugin, mode, nombre de services qui les utilisent |
+| **Comparatif Zabbix…** | Présents si l'inventaire Zabbix a été lu (voir ci-dessus) |
 
 ### Logique de proposition
 
@@ -44,7 +115,8 @@ commande). **Adaptez ce fichier à votre parc** (templates maison, nomenclature)
 python3 -m pip install -r requirements.txt
 ```
 
-Python ≥ 3.9. Dépendances : `requests`, `openpyxl`, `PyYAML` (et `PyMySQL` uniquement pour la lecture directe en base).
+Python ≥ 3.9. Dépendances : `requests`, `openpyxl`, `PyYAML`, `Flask` (interface web) et `PyMySQL`
+(uniquement pour la lecture directe en base).
 
 ## Récupérer les données Centreon par l'API (méthode recommandée)
 
@@ -163,7 +235,9 @@ python3 -m pip install pytest
 python3 -m pytest
 ```
 
-Les tests de l'extraction API utilisent un faux serveur Centreon (`tests/fake_centreon.py`)
+Les tests utilisent un faux serveur Centreon (`tests/fake_centreon.py`) et un faux Zabbix
+(`tests/fake_zabbix.py`). Ceux de l'extraction Centreon reposent sur un faux serveur
 qui reproduit le format des réponses de l'API v1 (CLAPI) et de l'API v2, établi d'après le code
 source de Centreon. Faites un premier essai sur votre instance et comparez les volumes
-(nombre d'hôtes / services) avec l'interface.
+(nombre d'hôtes / services) avec l'interface. De même, le client Zabbix suit la documentation de
+l'API Zabbix 5.0 à 7.x mais n'a été testé que contre le faux serveur : vérifiez le nombre d'hôtes lus.

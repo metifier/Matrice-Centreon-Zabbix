@@ -1,4 +1,4 @@
-"""Ligne de commande : python -m centreon_inventory {api|clapi|db} ..."""
+"""Ligne de commande : python -m centreon_inventory {web|api|clapi|db} ..."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,9 @@ from dataclasses import asdict
 
 from .excel import write_csv, write_excel
 from .mapping import DEFAULT_MAPPING, Mapper
-from .matrix import build_matrix
+from .decisions import load_decisions
+from .filters import ClientFilter
+from .report import build_report
 
 
 def main(argv=None) -> int:
@@ -36,6 +38,12 @@ def main(argv=None) -> int:
     p_api.add_argument("--workers", type=int, default=8, help="Appels API en parallèle (8)")
     p_api.add_argument("--timeout", type=int, default=120, help="Timeout HTTP en secondes (120)")
 
+    p_web = sub.add_parser("web", help="Lance l'interface web (pilotage, consultation, export Excel)")
+    p_web.add_argument("--host", default="127.0.0.1", help="Adresse d'écoute (127.0.0.1)")
+    p_web.add_argument("--port", type=int, default=8080, help="Port (8080)")
+    p_web.add_argument("--data-dir", default="data", help="Dossier de stockage des données (./data)")
+    p_web.add_argument("--mapping", default=str(DEFAULT_MAPPING), help="Référentiel de correspondance YAML")
+
     p_clapi = sub.add_parser("clapi", help="À partir d'un export CLAPI (centreon -e)")
     p_clapi.add_argument("export", help="Fichier issu de : centreon -u admin -p '***' -e > export.txt")
 
@@ -54,8 +62,27 @@ def main(argv=None) -> int:
         p.add_argument("--seuil-haute", type=int, default=20, help="Nb d'hôtes pour une priorité Haute (20)")
         p.add_argument("--seuil-moyenne", type=int, default=5, help="Nb d'hôtes pour une priorité Moyenne (5)")
         p.add_argument("--no-mask", action="store_true", help="Ne pas masquer les secrets des lignes de commande")
+        g = p.add_argument_group("Périmètre client (filtre sur le nommage)")
+        g.add_argument("--client", default="", help="Nom du client (affiché dans la synthèse)")
+        g.add_argument("--client-hotes", default="",
+                       help="Motif(s) que le nom d'hôte doit contenir, séparés par des virgules ; 're:' pour une regex")
+        g.add_argument("--client-services", default="", help="Motif(s) que la description du service doit contenir")
+        g.add_argument("--client-exclure", default="", help="Motif(s) excluant hôtes ou services")
+        g.add_argument("--client-mode", choices=["et", "ou"], default="et",
+                       help="Combinaison des motifs hôtes et services (et / ou)")
+        p.add_argument("--decisions", help="Fichier JSON de décisions (enregistré par l'interface web)")
+        z = p.add_argument_group("Comparatif avec Zabbix (API)")
+        z.add_argument("--zabbix-url", help="URL de Zabbix, ex. https://zabbix.example.com")
+        z.add_argument("--zabbix-token", help="Jeton d'API Zabbix (sinon variable ZABBIX_API_TOKEN)")
+        z.add_argument("--zabbix-user", help="Identifiant Zabbix si pas de jeton (mot de passe : ZABBIX_PASSWORD)")
+        z.add_argument("--zabbix-insecure", action="store_true", help="Ne pas vérifier le certificat TLS de Zabbix")
 
     args = parser.parse_args(argv)
+
+    if args.source == "web":
+        from .web.app import run
+        run(host=args.host, port=args.port, data_dir=args.data_dir, mapping=args.mapping)
+        return 0
 
     if args.source == "api":
         from .sources.api import ApiError, load_from_api
@@ -78,8 +105,27 @@ def main(argv=None) -> int:
             f"Mot de passe MySQL pour {args.db_user}@{args.db_host} : ")
         inv = load_from_database(args.db_host, args.db_user, password, args.db_name, args.db_port)
 
-    matrix = build_matrix(inv, Mapper(args.mapping), high=args.seuil_haute, medium=args.seuil_moyenne,
-                          mask=not args.no_mask)
+    zbx = None
+    if args.zabbix_url:
+        from .zabbix import ZabbixError, load_zabbix
+        token = args.zabbix_token or os.environ.get("ZABBIX_API_TOKEN", "")
+        zpass = ""
+        if not token and args.zabbix_user:
+            zpass = os.environ.get("ZABBIX_PASSWORD") or getpass.getpass(f"Mot de passe Zabbix pour {args.zabbix_user} : ")
+        try:
+            zbx = load_zabbix(args.zabbix_url, token=token, user=args.zabbix_user or "", password=zpass,
+                              verify=not args.zabbix_insecure)
+        except (ZabbixError, OSError) as exc:
+            print(f"Erreur API Zabbix : {exc}", file=sys.stderr)
+            return 2
+
+    client = ClientFilter(name=args.client, hosts=args.client_hotes, services=args.client_services,
+                          exclude=args.client_exclure, mode=args.client_mode)
+    matrix = build_report(inv, Mapper(args.mapping), client=client, decisions=load_decisions(args.decisions),
+                          zabbix=zbx, high=args.seuil_haute, medium=args.seuil_moyenne, mask=not args.no_mask)
+    if client.active:
+        print(f"Périmètre client « {client.name or 'filtre'} » : {len(matrix.hosts)} hôtes, "
+              f"{len(matrix.services)} services")
     out = write_excel(matrix, args.output)
     print(f"Inventaire : {len(inv.hosts)} hôtes, {len(inv.services)} services, "
           f"{len(inv.host_templates)} templates d'hôte, {len(inv.service_templates)} templates de service, "
