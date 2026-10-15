@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .compat import replace_file
 from .matrix import NE_PAS_MIGRER, Matrix
 
 # table -> (attribut Matrix, colonne clé, colonnes éditables)
@@ -33,7 +34,7 @@ def save_decisions(path: str | Path, decisions: dict):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     tmp = Path(str(path) + ".tmp")
     tmp.write_text(json.dumps(decisions, ensure_ascii=False, indent=1), encoding="utf-8")
-    tmp.replace(path)
+    replace_file(tmp, path)
 
 
 def set_decision(decisions: dict, table: str, key: str, field: str, value: str) -> dict:

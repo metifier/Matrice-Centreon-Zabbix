@@ -22,6 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file, send_from_directory
 
+from ..compat import replace_file
 from ..decisions import TABLES, row_key, save_decisions, set_decision
 from ..excel import write_excel
 from ..filters import ClientFilter, detect_prefixes
@@ -89,7 +90,7 @@ class Store:
             fd, tmp = tempfile.mkstemp(dir=self.dir, suffix=".tmp")
             with os.fdopen(fd, "w", encoding="utf-8") as fh:
                 json.dump(data, fh, ensure_ascii=False)
-            os.replace(tmp, self._path(name))
+            replace_file(tmp, self._path(name))
             self.invalidate()
 
     def invalidate(self):
@@ -443,12 +444,13 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
     @app.post("/api/decision")
     def decision():
         d = request.get_json(force=True) or {}
-        try:
-            decisions = set_decision(store.decisions(), d.get("table", ""), d.get("key", ""), d.get("field", ""),
-                                     str(d.get("value") or "").strip())
-        except ValueError as exc:
-            abort(400, str(exc))
-        save_decisions(store._path("decisions"), decisions)
+        with store.lock:  # lecture-modification-écriture atomique (requêtes simultanées)
+            try:
+                decisions = set_decision(store.decisions(), d.get("table", ""), d.get("key", ""),
+                                         d.get("field", ""), str(d.get("value") or "").strip())
+            except ValueError as exc:
+                abort(400, str(exc))
+            save_decisions(store._path("decisions"), decisions)
         store.invalidate()
         return jsonify({"ok": True})
 
@@ -459,9 +461,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
         if m is None:
             abort(400, "Aucun inventaire Centreon chargé")
         buf = io.BytesIO()
-        with tempfile.TemporaryDirectory() as tmp:
-            path = write_excel(m, Path(tmp) / "matrice.xlsx")
-            buf.write(path.read_bytes())
+        write_excel(m, buf)
         buf.seek(0)
         label = re.sub(r"[^\w.-]+", "_", client.name or ("filtre" if client.active else "complet"))
         return send_file(buf, as_attachment=True,
@@ -475,11 +475,16 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
     return app
 
 
-def run(host="127.0.0.1", port=8080, data_dir="data", mapping=None):
+def run(host="127.0.0.1", port=8080, data_dir="data", mapping=None, open_browser=False):
     if host not in ("127.0.0.1", "localhost") and not (os.environ.get("WEB_USER") and os.environ.get("WEB_PASSWORD")):
         print("ATTENTION : interface exposée sur le réseau sans authentification "
               "(définir WEB_USER et WEB_PASSWORD).")
     app = create_app(data_dir, mapping)
-    print(f"Interface web : http://{host}:{port}/  (données : {Path(data_dir).resolve()})")
+    url = f"http://{'127.0.0.1' if host in ('0.0.0.0', '::') else host}:{port}/"
+    print(f"Interface web : {url}  (données : {Path(data_dir).resolve()})")
+    print("Arrêt : Ctrl+C")
+    if open_browser:
+        import webbrowser
+        threading.Timer(1.0, webbrowser.open, args=(url,)).start()
     from werkzeug.serving import run_simple
     run_simple(host, port, app, threaded=True)

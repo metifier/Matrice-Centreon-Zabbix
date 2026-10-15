@@ -48,7 +48,8 @@ MAX_WIDTH = {"Ligne de commande résolue": 80, "Ligne de commande": 90, "Chaîne
              "Chaîne complète": 50, "Templates (tous)": 50}
 
 
-def write_excel(m: Matrix, path: str | Path) -> Path:
+def write_excel(m: Matrix, path) -> Path:
+    """Écrit le classeur dans `path` (chemin ou flux binaire, ex. io.BytesIO)."""
     wb = Workbook()
     wb.remove(wb.active)
     _summary_sheet(wb, m)
@@ -66,6 +67,9 @@ def write_excel(m: Matrix, path: str | Path) -> Path:
     _table(wb, SHEET_CMD, m.commands)
     _help_sheet(wb)
     wb.calculation.fullCalcOnLoad = True
+    if hasattr(path, "write"):
+        wb.save(path)
+        return path
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(path)

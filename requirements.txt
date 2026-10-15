@@ -3,3 +3,4 @@ openpyxl>=3.1
 PyYAML>=6.0
 PyMySQL>=1.1
 Flask>=2.2
+truststore>=0.9; python_version >= "3.10"

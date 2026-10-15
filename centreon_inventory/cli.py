@@ -10,12 +10,15 @@ from dataclasses import asdict
 
 from .excel import write_csv, write_excel
 from .mapping import DEFAULT_MAPPING, Mapper
+from .compat import setup_console, use_system_certificates
 from .decisions import load_decisions
 from .filters import ClientFilter
 from .report import build_report
 
 
 def main(argv=None) -> int:
+    setup_console()
+    use_system_certificates()
     parser = argparse.ArgumentParser(
         prog="centreon_inventory",
         description="Inventaire Centreon (hôtes, services, templates) et matrice de décision "
@@ -43,6 +46,7 @@ def main(argv=None) -> int:
     p_web.add_argument("--port", type=int, default=8080, help="Port (8080)")
     p_web.add_argument("--data-dir", default="data", help="Dossier de stockage des données (./data)")
     p_web.add_argument("--mapping", default=str(DEFAULT_MAPPING), help="Référentiel de correspondance YAML")
+    p_web.add_argument("--ouvrir", action="store_true", help="Ouvre l'interface dans le navigateur au démarrage")
 
     p_clapi = sub.add_parser("clapi", help="À partir d'un export CLAPI (centreon -e)")
     p_clapi.add_argument("export", help="Fichier issu de : centreon -u admin -p '***' -e > export.txt")
@@ -81,7 +85,7 @@ def main(argv=None) -> int:
 
     if args.source == "web":
         from .web.app import run
-        run(host=args.host, port=args.port, data_dir=args.data_dir, mapping=args.mapping)
+        run(host=args.host, port=args.port, data_dir=args.data_dir, mapping=args.mapping, open_browser=args.ouvrir)
         return 0
 
     if args.source == "api":
