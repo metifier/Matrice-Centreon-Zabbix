@@ -214,6 +214,7 @@ rien n'est installé sur le serveur Centreon.
 | `--insecure` / `--ca-bundle FICHIER` | Certificat auto-signé : désactiver la vérification ou fournir l'AC |
 | `--api-v1-seule` | Ne pas utiliser l'API v2 |
 | `--sans-macros` | Ne pas lire les macros (plus rapide) |
+| `--collecte-client` | Ne collecter que les hôtes du client (`--client-hotes`), leurs services et les templates utilisés : beaucoup plus rapide (case « Limiter la collecte au client » dans l'interface web) |
 | `--workers N` / `--timeout S` | Parallélisme et timeout HTTP |
 | `--autoriser-getparam` | Dernier recours pour lire le template des services (voir ci-dessus) |
 

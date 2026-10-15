@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..model import (Command, Host, HostgroupService, HostTemplate, Inventory, Service,
                      ServiceTemplate)
@@ -191,7 +191,14 @@ def _macros(rows: list[dict], direct_only: bool = False) -> dict[str, str]:
 
 def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bool = True,
                   allow_getparam: bool = False, macros: bool = True, workers: int = 8,
-                  timeout: int = 120, session_factory=None, log=None) -> Inventory:
+                  timeout: int = 120, session_factory=None, log=None, scope=None) -> Inventory:
+    """Collecte la configuration Centreon.
+
+    scope : filtre client (filters.ClientFilter) optionnel. S'il porte sur les noms d'hôtes (mode « et »),
+    seuls les hôtes correspondants, leurs services et les templates de service qu'ils utilisent (avec leurs
+    parents) sont lus objet par objet : la collecte d'un client est bien plus rapide que celle du parc entier.
+    """
+    import time
     log = log or (lambda msg: print(msg, file=sys.stderr, flush=True))
     factory = session_factory or _default_session_factory(verify)
     v1 = CentreonApiV1(url, factory, timeout)
@@ -209,6 +216,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             v2 = None
 
     def v2_list(path):
+        nonlocal v2
         if not v2:
             return None
         try:
@@ -217,13 +225,15 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             return items
         except (NotAvailable, OSError) as exc:
             log(f"API v2 {path} indisponible ({exc}) : repli sur l'API v1")
+            if "No route found" in str(exc):
+                v2 = None  # version de Centreon sans API v2 de configuration : inutile d'insister
             return None
 
     pool = ThreadPoolExecutor(max_workers=max(1, workers))
     errors: list[str] = []
 
     def each(label, items, fn):
-        """Appelle fn(item) en parallèle ; renvoie {item: résultat} (None si erreur)."""
+        """Appelle fn(item) en parallèle ; renvoie {item: résultat} (None si erreur) et affiche la progression."""
         items = list(items)
         if not items:
             return {}
@@ -235,15 +245,25 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             except ApiError as exc:
                 errors.append(str(exc))
                 return None
-        return dict(zip(items, pool.map(safe, items)))
+        futures = {pool.submit(safe, item): item for item in items}
+        out, done, last = {}, 0, time.monotonic()
+        step = max(1, len(items) // 10)
+        for fut in as_completed(futures):
+            out[futures[fut]] = fut.result()
+            done += 1
+            if done < len(items) and (done % step == 0 or time.monotonic() - last > 15):
+                log(f"   … {label} : {done}/{len(items)}")
+                last = time.monotonic()
+        return out
 
-    inv = Inventory(source=f"API Centreon {url}")
+    scoped = bool(scope is not None and scope.active and scope.hosts.strip()
+                  and scope.mode.strip().lower() != "ou")
+    inv = Inventory(source=f"API Centreon {url}" + (f" — collecte limitée au client « {scope.name or scope.hosts} »"
+                                                     if scoped else ""))
     try:
         # --- commandes -----------------------------------------------------------
-        cmd_by_id = {}
         for c in v1.clapi("show", "CMD"):
             inv.commands[c["name"]] = Command(name=c["name"], line=c.get("line", ""), type=c.get("type", "check"))
-            cmd_by_id[str(c.get("id"))] = c["name"]
         log(f"Commandes : {len(inv.commands)}")
 
         # --- templates d'hôte -------------------------------------------------------
@@ -256,7 +276,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             inv.host_templates[name].parents = [x["name"] for x in rows or []]
         log(f"Templates d'hôte : {len(inv.host_templates)}")
 
-        # --- templates de service ---------------------------------------------------
+        # --- templates de service (liste ; le détail est lu plus bas) ------------------
         stpl_rows = v1.clapi("show", "STPL")
         stpl_by_id = {str(r["id"]): r["description"] for r in stpl_rows}
         for r in stpl_rows:
@@ -272,29 +292,15 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                 t.parent = stpl_by_id.get(str(r.get("service_template_id")), "")
                 t.host_templates = [htpl_by_id[str(i)] for i in r.get("host_templates") or [] if str(i) in htpl_by_id]
                 t.macros = _macros(r.get("macros") or [])
-        else:
-            res = each("STPL getparam template", inv.service_templates,
-                       lambda n: v1.clapi("getparam", "STPL", f"{n};template"))
-            for name, rows in res.items():
-                inv.service_templates[name].parent = ((rows or [{}])[0] or {}).get("template", "") or ""
-            res = each("STPL gethosttemplate", inv.service_templates,
-                       lambda n: v1.clapi("gethosttemplate", "STPL", n))
-            for name, rows in res.items():
-                inv.service_templates[name].host_templates = [x["name"] for x in rows or []]
-            if macros:
-                res = each("STPL getmacro", inv.service_templates, lambda n: v1.clapi("getmacro", "STPL", n))
-                for name, rows in res.items():
-                    inv.service_templates[name].macros = _macros(rows or [])
-        for t in inv.service_templates.values():
-            for h in t.host_templates:
-                if h in inv.host_templates and t.name not in inv.host_templates[h].service_templates:
-                    inv.host_templates[h].service_templates.append(t.name)
-        log(f"Templates de service : {len(inv.service_templates)}")
 
         # --- hôtes ------------------------------------------------------------------------
         for r in v1.clapi("show", "HOST"):
+            if scoped and not scope.host_matches(r["name"], r.get("alias", "")):
+                continue
             inv.hosts[r["name"]] = Host(name=r["name"], alias=r.get("alias", ""), address=r.get("address", ""),
                                         activate=_flag(r.get("activate", "1")))
+        if scoped:
+            log(f"Hôtes du client : {len(inv.hosts)}")
         v2_hosts = v2_list("/configuration/hosts")
         if v2_hosts is not None:
             for r in v2_hosts:
@@ -324,9 +330,10 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
         log(f"Hôtes : {len(inv.hosts)}")
 
         # --- services -----------------------------------------------------------------
-        svc_rows = v1.clapi("show", "SERVICE")
         services = {}
-        for r in svc_rows:
+        for r in v1.clapi("show", "SERVICE"):
+            if scoped and r["host name"] not in inv.hosts:
+                continue
             s = Service(host=r["host name"], description=r["description"],
                         check_command=r.get("check command", ""), args=_args(r.get("check command arg", "")),
                         activate=_flag(r.get("activate", "1")))
@@ -336,6 +343,9 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             hg_rows = v1.clapi("show", "HGSERVICE")
         except ApiError as exc:
             errors.append(str(exc))
+        if scoped:
+            member_groups = {g for h in inv.hosts.values() for g in h.hostgroups}
+            hg_rows = [r for r in hg_rows if r.get("hg name") in member_groups]
 
         def template_by_id(service_id):
             rows = v1.clapi("getparam", "HGSERVICE", f"{service_id};service_template_model_stm_id")
@@ -395,6 +405,40 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             for i, rows in res.items():
                 inv.hostgroup_services[i].macros = _macros(rows or [])
         log(f"Services : {len(inv.services)} + {len(inv.hostgroup_services)} services de groupes d'hôtes")
+
+        # --- détail des templates de service (API v1) ----------------------------------
+        # Parc complet : tous les templates. Client : seulement ceux utilisés et leurs parents.
+        if v2_stpl is None:
+            if scoped:
+                wanted = {s.template for s in inv.services} | {s.template for s in inv.hostgroup_services}
+                wanted &= set(inv.service_templates)
+            else:
+                wanted = set(inv.service_templates)
+            fetched: set[str] = set()
+            frontier = sorted(wanted)
+            while frontier:
+                res = each("STPL getparam template", frontier, lambda n: v1.clapi("getparam", "STPL", f"{n};template"))
+                fetched.update(frontier)
+                new = set()
+                for name, rows in res.items():
+                    parent = ((rows or [{}])[0] or {}).get("template", "") or ""
+                    inv.service_templates[name].parent = parent
+                    if parent in inv.service_templates and parent not in fetched:
+                        new.add(parent)
+                frontier = sorted(new - fetched)
+                wanted |= new
+            res = each("STPL gethosttemplate", sorted(wanted), lambda n: v1.clapi("gethosttemplate", "STPL", n))
+            for name, rows in res.items():
+                inv.service_templates[name].host_templates = [x["name"] for x in rows or []]
+            if macros:
+                res = each("STPL getmacro", sorted(wanted), lambda n: v1.clapi("getmacro", "STPL", n))
+                for name, rows in res.items():
+                    inv.service_templates[name].macros = _macros(rows or [])
+        for t in inv.service_templates.values():
+            for h in t.host_templates:
+                if h in inv.host_templates and t.name not in inv.host_templates[h].service_templates:
+                    inv.host_templates[h].service_templates.append(t.name)
+        log(f"Templates de service : {len(inv.service_templates)}")
     finally:
         pool.shutdown(wait=False, cancel_futures=True)
 

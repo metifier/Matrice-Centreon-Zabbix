@@ -219,3 +219,15 @@ def test_untrusted_values_are_never_formulas(inv, tmp_path):
     with open(tmp_path / "csv" / "matrice_templates_services.csv", encoding="utf-8-sig", newline="") as fh:
         rows = {r["Template de service"]: r for r in csv.DictReader(fh, delimiter=";")}
     assert rows["Base-Ping-LAN"]["Commentaire"].startswith("'=")
+
+
+def test_web_scoped_centreon_collection(client):
+    r = client.post("/api/jobs/centreon", json={"url": "https://c/centreon", "user": "a", "password": "p",
+                                                "scope_only": True, "scope": {"hosts": ""}})
+    assert r.status_code == 400
+    r = client.post("/api/jobs/centreon", json={"url": "https://c/centreon", "user": "a", "password": "p",
+                                                "scope_only": True, "scope": {"name": "Win", "hosts": "srv-win"}})
+    j = _wait(client, r.get_json()["job"])
+    assert j["status"] == "terminé", j
+    state = client.get("/api/state").get_json()
+    assert state["centreon"]["hosts"] == 2 and "collecte limitée" in state["centreon"]["source"]
