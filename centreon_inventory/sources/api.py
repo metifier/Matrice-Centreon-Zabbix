@@ -170,6 +170,24 @@ class CentreonApiV2(_Http):
             page += 1
 
 
+def _param_value(rows, field: str) -> str:
+    """Valeur d'un « getparam » CLAPI quelle que soit la forme de la réponse de l'API v1 :
+    [{"template": "X"}] (plusieurs colonnes), ["template", "X"] (une colonne : en-tête puis valeur),
+    ["X"] (getparam générique, sans en-tête) ou [] (valeur vide)."""
+    if not rows:
+        return ""
+    first = rows[0]
+    if isinstance(first, dict):
+        return as_text(first.get(field, "")).strip()
+    lines = [as_text(r).strip() for r in rows]
+    if lines and lines[0].lower() == field.lower():
+        lines = lines[1:]
+    value = lines[0] if lines else ""
+    if len(value) >= 2 and value[0] == value[-1] == '"':  # valeur échappée par csvEscape
+        value = value[1:-1].replace('""', '"')
+    return value
+
+
 def _flag(value) -> bool:
     return str(value).strip().lower() not in ("0", "false", "", "none")
 
@@ -245,11 +263,15 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             return {}
         log(f"API v1 {label} : {len(items)} appels")
 
+        step_errors = []
+
         def safe(item):
             try:
                 return fn(item)
-            except ApiError as exc:
-                errors.append(str(exc))
+            except Exception as exc:  # noqa: BLE001 - une réponse inattendue n'interrompt pas la collecte
+                msg = f"{label} {item}: {type(exc).__name__}: {exc}" if not isinstance(exc, ApiError) else str(exc)
+                errors.append(msg)
+                step_errors.append(msg)
                 return None
         futures = {pool.submit(safe, item): item for item in items}
         out, done, last = {}, 0, time.monotonic()
@@ -260,6 +282,8 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
             if done < len(items) and (done % step == 0 or time.monotonic() - last > 15):
                 log(f"   … {label} : {done}/{len(items)}")
                 last = time.monotonic()
+        if step_errors:
+            log(f"   ⚠ {label} : {len(step_errors)} appel(s) en erreur, ex. : {step_errors[0][:300]}")
         return out
 
     scoped = bool(scope is not None and scope.host_criteria and scope.mode.strip().lower() != "ou")
@@ -382,8 +406,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
 
         def template_by_id(service_id):
             rows = v1.clapi("getparam", "HGSERVICE", f"{service_id};service_template_model_stm_id")
-            value = str(rows[0]).strip() if rows else ""
-            return stpl_by_id.get(value, "")
+            return stpl_by_id.get(_param_value(rows, "service_template_model_stm_id"), "")
 
         v2_svc = v2_list("/configuration/services")
         if v2_svc is not None:
@@ -396,7 +419,8 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
         elif services:
             first = next(iter(services))
             try:
-                template_by_id(first[0])
+                sample = v1.clapi("getparam", "HGSERVICE", f"{first[0]};service_template_model_stm_id")
+                log(f"Diagnostic HGSERVICE getparam (service {first[0]}) : réponse {sample!r:.200}")
                 generic_ok = True
             except ApiError as exc:
                 generic_ok = False
@@ -406,17 +430,25 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                            template_by_id)
                 for k, s in services.items():
                     s.template = res.get(k[0]) or ""
-            elif allow_getparam:
-                res = each("SERVICE getparam template", services, lambda k: v1.clapi(
+            missing = [k for k, s in services.items() if not s.template and not s.check_command]
+            if (not generic_ok or len(missing) > len(services) / 2) and allow_getparam and missing:
+                log(f"{len(missing)} service(s) sans template ni commande : lecture par SERVICE getparam")
+                res = each("SERVICE getparam template", missing, lambda k: v1.clapi(
                     "getparam", "SERVICE", f"{services[k].host};{services[k].description};template"))
                 for k, rows in res.items():
-                    services[k].template = ((rows or [{}])[0] or {}).get("template", "") or ""
-            else:
+                    services[k].template = _param_value(rows, "template")
+            elif not generic_ok:
                 raise ApiError(
                     "Impossible de lire le template des services : API v2 /configuration/services absente "
                     "et HGSERVICE getparam refusé. Seul 'SERVICE getparam' reste possible ; il marque les "
                     "collecteurs « configuration modifiée » dans l'interface (sans modifier la configuration). "
                     "Relancez avec --autoriser-getparam pour l'accepter.")
+        if services:
+            with_tpl = sum(1 for s in services.values() if s.template)
+            orphans = sum(1 for s in services.values() if not s.template and not s.check_command)
+            log(f"Template trouvé pour {with_tpl}/{len(services)} services"
+                + (f" ; ⚠ {orphans} service(s) sans template ni commande (voir les erreurs ci-dessus ; "
+                   f"cocher « Autoriser SERVICE getparam » permet une lecture de secours)" if orphans else ""))
         if macros:
             res = each("SERVICE getmacro", services,
                        lambda k: v1.clapi("getmacro", "SERVICE", f"{services[k].host};{services[k].description}"))
@@ -454,7 +486,7 @@ def load_from_api(url: str, user: str, password: str, *, verify=True, use_v2: bo
                 fetched.update(frontier)
                 new = set()
                 for name, rows in res.items():
-                    parent = ((rows or [{}])[0] or {}).get("template", "") or ""
+                    parent = _param_value(rows, "template")
                     inv.service_templates[name].parent = parent
                     if parent in inv.service_templates and parent not in fetched:
                         new.add(parent)

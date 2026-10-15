@@ -112,7 +112,9 @@ class FakeCentreon:
                     for t in inv.service_templates.values()]
         if (obj, action) == ("STPL", "getparam"):
             name, param = values.split(";")
-            return [{"template": inv.service_templates[name].parent}]
+            parent = inv.service_templates[name].parent
+            # Centreon : « template\n<valeur>\n » ; sans « ; » l'API v1 renvoie des lignes de texte.
+            return ["template", parent] if parent else ["template"]
         if (obj, action) == ("STPL", "gethosttemplate"):
             return idname(inv.service_templates[values].host_templates, self.htpl_id)
         if (obj, action) == ("STPL", "getmacro"):
@@ -144,7 +146,8 @@ class FakeCentreon:
                      "activate": "1" if s.activate else "0"} for s in self.host_services]
         if (obj, action) == ("SERVICE", "getparam"):
             host, desc, _ = values.split(";")
-            return [{"template": self.template_by_svc_id[self.svc_id[host, desc]]}]
+            tpl = self.template_by_svc_id[self.svc_id[host, desc]]
+            return ["template", tpl] if tpl else ["template"]
         if (obj, action) == ("SERVICE", "getmacro"):
             host, desc = values.split(";")
             s = next(x for x in self.host_services if (x.host, x.description) == (host, desc))
