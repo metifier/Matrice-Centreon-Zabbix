@@ -133,7 +133,7 @@ def test_web_end_to_end(client, tmp_path):
     assert _wait(client, r.get_json()["job"])["status"] == "terminé"
     state = client.get("/api/state").get_json()
     assert state["centreon"]["hosts"] == 9 and state["zabbix"]["hosts"] == 5
-    stored = "".join(p.read_text() for p in (tmp_path / "data").glob("*.json"))
+    stored = "".join(p.read_text(encoding="utf-8") for p in (tmp_path / "data").glob("*.json"))
     assert "S3cret-Centreon" not in stored and "zbx-token" not in stored  # secrets jamais enregistrés
     # client enregistré + tableau filtré et trié
     client.post("/api/clients", json={"name": "Linux", "hosts": "srv-lnx"})

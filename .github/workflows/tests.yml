@@ -1,0 +1,31 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Dépendances
+        run: python -m pip install -r requirements.txt pytest
+      - name: Tests unitaires
+        run: python -m pytest -q
+      - name: Essai de la ligne de commande (sortie redirigée)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          python -m centreon_inventory clapi examples\centreon_export_exemple.txt --client "Client Linux" --client-hotes srv-lnx -o sortie\matrice.xlsx --csv-dir sortie\csv > sortie.log 2>&1
+          type sortie.log
+          if not exist sortie\matrice.xlsx exit /b 1

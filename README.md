@@ -5,6 +5,48 @@ templates de service, commandes) qui produit une **matrice de décision Excel** 
 une migration vers **Zabbix** : quels templates et quels services reprendre, avec quel
 équivalent Zabbix, et dans quel ordre.
 
+## Sous Windows
+
+1. Installer **Python 3.10 ou plus récent** depuis <https://www.python.org/downloads/windows/>
+   en cochant **« Add python.exe to PATH »** (aucun droit administrateur n'est nécessaire si
+   l'installation se fait « pour l'utilisateur courant »).
+2. Récupérer le projet (bouton *Code > Download ZIP* sur GitHub, puis extraire le ZIP).
+3. **Double-cliquer sur `demarrer_interface.bat`** : au premier lancement, il crée un
+   environnement Python local (`.venv`), installe les dépendances, démarre l'interface et
+   l'ouvre dans le navigateur (<http://127.0.0.1:8080>). Fermer la fenêtre arrête l'interface.
+
+En ligne de commande (PowerShell), depuis le dossier du projet :
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1          # si refusé : Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+python -m pip install -r requirements.txt
+
+# interface web
+python -m centreon_inventory web --ouvrir
+
+# matrice Excel directement, par l'API Centreon (+ comparatif Zabbix)
+$env:CENTREON_API_PASSWORD = 'mot_de_passe'
+$env:ZABBIX_API_TOKEN = 'jeton_zabbix'
+python -m centreon_inventory api --url https://centreon.example.com/centreon --user inventaire `
+    --client "MDPH 973" --client-hotes "Mdph-973" `
+    --zabbix-url https://zabbix.example.com -o matrice.xlsx
+```
+
+Points spécifiques à Windows :
+
+- **Proxy d'entreprise** pour l'installation des dépendances :
+  `$env:HTTPS_PROXY = 'http://proxy.entreprise.local:8080'` (PowerShell) ou
+  `set HTTPS_PROXY=...` (cmd) avant de lancer `demarrer_interface.bat`. Les appels vers Centreon
+  et Zabbix passent aussi par ce proxy s'il est défini : ajoutez leurs noms dans `NO_PROXY`
+  s'ils sont joignables directement (`$env:NO_PROXY = 'centreon.example.com,zabbix.example.com'`).
+- **Certificats** : avec Python 3.10+, l'outil fait confiance au magasin de certificats de
+  Windows (paquet `truststore`) ; un certificat Centreon/Zabbix signé par l'autorité interne de
+  l'entreprise est donc accepté sans option. Sinon : `--ca-bundle fichier.pem` ou `--insecure`.
+- Les fichiers produits (Excel, CSV en UTF-8 avec BOM, séparateur `;`) s'ouvrent directement
+  dans Excel. Fermez le classeur dans Excel avant de le régénérer sous le même nom.
+- Les tests sont exécutés automatiquement sous Windows et Linux (GitHub Actions) à chaque push.
+
 ## Démarrage rapide : l'interface web
 
 ```bash
@@ -115,8 +157,9 @@ commande). **Adaptez ce fichier à votre parc** (templates maison, nomenclature)
 python3 -m pip install -r requirements.txt
 ```
 
-Python ≥ 3.9. Dépendances : `requests`, `openpyxl`, `PyYAML`, `Flask` (interface web) et `PyMySQL`
-(uniquement pour la lecture directe en base).
+Python ≥ 3.9 (3.10+ recommandé), Windows ou Linux. Dépendances : `requests`, `openpyxl`, `PyYAML`,
+`Flask` (interface web), `truststore` (certificats du système) et `PyMySQL` (uniquement pour la
+lecture directe en base).
 
 ## Récupérer les données Centreon par l'API (méthode recommandée)
 
