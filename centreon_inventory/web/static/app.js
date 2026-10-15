@@ -333,6 +333,10 @@ function bind() {
   $("#form-centreon").addEventListener("submit", async (e) => {
     e.preventDefault();
     const d = formData(e.target);
+    if (d.scope_only) {
+      const s = app.scope, c = s.client ? (app.state.clients.find((x) => x.name === s.client) || {}) : s;
+      d.scope = { name: s.client || "", hosts: c.hosts || "", services: c.services || "", exclude: c.exclude || "", mode: c.mode || "et" };
+    }
     try {
       const { job } = await post("/api/jobs/centreon", d);
       e.target.password.value = "";

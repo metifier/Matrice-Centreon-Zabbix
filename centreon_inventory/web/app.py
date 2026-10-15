@@ -297,12 +297,18 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
         st.update({"centreon_url": url, "centreon_user": user, "centreon_insecure": bool(d.get("insecure"))})
         store.write("settings", st)
 
+        scope = None
+        if d.get("scope_only"):
+            scope = ClientFilter.from_dict(d.get("scope") or {})
+            if not scope.hosts.strip():
+                abort(400, "Pour limiter la collecte à un client, renseignez « Hôtes contiennent » (ou choisissez un client).")
+
         def run_job(log):
             from ..sources.api import load_from_api
             inv = load_from_api(url, user, password, verify=not d.get("insecure"),
                                 use_v2=not d.get("v1_only"), allow_getparam=bool(d.get("allow_getparam")),
                                 macros=not d.get("no_macros"), workers=int(d.get("workers") or 8),
-                                session_factory=session_factory, log=log)
+                                session_factory=session_factory, log=log, scope=scope)
             store.set_centreon(inv)
             log(f"Inventaire enregistré : {len(inv.hosts)} hôtes, {len(inv.services)} services")
         return jsonify({"job": jobs.start("Centreon (API)", run_job)})

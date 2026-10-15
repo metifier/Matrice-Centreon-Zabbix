@@ -40,6 +40,9 @@ def main(argv=None) -> int:
                        help="Ne pas lire les macros (plus rapide, lignes de commande moins résolues)")
     p_api.add_argument("--workers", type=int, default=8, help="Appels API en parallèle (8)")
     p_api.add_argument("--timeout", type=int, default=120, help="Timeout HTTP en secondes (120)")
+    p_api.add_argument("--collecte-client", action="store_true",
+                       help="Ne collecter que les hôtes du client (--client-hotes), leurs services et les templates "
+                            "utilisés : beaucoup plus rapide qu'une collecte du parc entier")
 
     p_web = sub.add_parser("web", help="Lance l'interface web (pilotage, consultation, export Excel)")
     p_web.add_argument("--host", default="127.0.0.1", help="Adresse d'écoute (127.0.0.1)")
@@ -88,15 +91,22 @@ def main(argv=None) -> int:
         run(host=args.host, port=args.port, data_dir=args.data_dir, mapping=args.mapping, open_browser=args.ouvrir)
         return 0
 
+    client = ClientFilter(name=args.client, hosts=args.client_hotes, services=args.client_services,
+                          exclude=args.client_exclure, mode=args.client_mode)
+
     if args.source == "api":
         from .sources.api import ApiError, load_from_api
+        if args.collecte_client and not args.client_hotes:
+            print("--collecte-client nécessite --client-hotes", file=sys.stderr)
+            return 2
         password = args.password or os.environ.get("CENTREON_API_PASSWORD") or getpass.getpass(
             f"Mot de passe Centreon pour {args.user} : ")
         try:
             inv = load_from_api(args.url, args.user, password,
                                 verify=False if args.insecure else (args.ca_bundle or True),
                                 use_v2=not args.api_v1_seule, allow_getparam=args.autoriser_getparam,
-                                macros=not args.sans_macros, workers=args.workers, timeout=args.timeout)
+                                macros=not args.sans_macros, workers=args.workers, timeout=args.timeout,
+                                scope=client if args.collecte_client else None)
         except (ApiError, OSError) as exc:
             print(f"Erreur API : {exc}", file=sys.stderr)
             return 2
@@ -123,8 +133,6 @@ def main(argv=None) -> int:
             print(f"Erreur API Zabbix : {exc}", file=sys.stderr)
             return 2
 
-    client = ClientFilter(name=args.client, hosts=args.client_hotes, services=args.client_services,
-                          exclude=args.client_exclure, mode=args.client_mode)
     matrix = build_report(inv, Mapper(args.mapping), client=client, decisions=load_decisions(args.decisions),
                           zabbix=zbx, high=args.seuil_haute, medium=args.seuil_moyenne, mask=not args.no_mask)
     if client.active:

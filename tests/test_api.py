@@ -86,3 +86,22 @@ def test_expired_token_triggers_relogin():
     inv = _load(fake, workers=4)
     assert _snapshot(inv) == _snapshot(ref)
     assert fake.logins > 2  # plusieurs ré-authentifications pendant la collecte
+
+
+def test_scoped_collection_reads_only_the_client():
+    from centreon_inventory.filters import ClientFilter
+    ref = parse_clapi_export(SAMPLE)
+    scope = ClientFilter(name="Linux", hosts="srv-lnx")
+    full_fake, scoped_fake = FakeCentreon(ref, v2=False), FakeCentreon(ref, v2=False)
+    full = scope.apply(_load(full_fake))
+    scoped = _load(scoped_fake, scope=scope)
+    assert set(scoped.hosts) == set(full.hosts) == {"srv-lnx-web01", "srv-lnx-web02", "srv-lnx-db01", "srv-lnx-erp01"}
+    assert sorted((s.host, s.description, s.template, s.check_command, s.args) for s in scoped.services) == \
+        sorted((s.host, s.description, s.template, s.check_command, s.args) for s in full.services)
+    # chaîne d'héritage complète pour les templates utilisés
+    assert scoped.stpl_chain("OS-Linux-Cpu-SNMP-custom") == full.stpl_chain("OS-Linux-Cpu-SNMP-custom")
+    # matrices identiques sur le périmètre
+    key = lambda r: (r["Hôte"], r["Service"], r["Ligne de commande résolue"], r["Proposition"])  # noqa: E731
+    assert sorted(map(key, build_matrix(scoped).services)) == sorted(map(key, build_matrix(full).services))
+    assert len(scoped_fake.calls) < len(full_fake.calls) * 0.75
+    assert "collecte limitée" in scoped.source
