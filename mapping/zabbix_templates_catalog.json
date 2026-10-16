@@ -1,0 +1,5998 @@
+{
+ "source": "https://www.zabbix.com/integrations (dépôt officiel https://github.com/zabbix/zabbix.git, dossier templates/)",
+ "generated": "2026-10-16",
+ "versions": [
+  "6.0",
+  "7.0",
+  "7.4",
+  "8.0"
+ ],
+ "templates": [
+  {
+   "name": "Acronis Cyber Protect Cloud by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Requests Acronis Cyber Protect Cloud API access token and creates host prototype for MSP.",
+   "path": "app/acronis",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Acronis Cyber Protect Cloud MSP by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Discovers and monitors alerts, clients, devices using HTTP agent items.",
+   "path": "app/acronis",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AIX by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an official AIX template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/aix",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Alcatel Timetra TiMOS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Alcatel Timetra TiMOS",
+   "path": "net/alcatel_timetra_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache ActiveMQ by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Apache ActiveMQ by Zabbix that work without any external scripts.",
+   "path": "app/activemq_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from mod_status module using HTTP agent.",
+   "path": "app/apache_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from mod_status module using HTTP agent.",
+   "path": "app/apache_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from mod_status module using HTTP agent.",
+   "path": "app/apache_agent_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache Cassandra by JMX",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor Apache Cassandra by Zabbix that work without any external scripts.",
+   "path": "db/cassandra_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache Kafka by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Official JMX Template for Apache Kafka.",
+   "path": "app/kafka_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Apache Tomcat by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Apache Tomcat by Zabbix that work without any external scripts.",
+   "path": "app/tomcat_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS 2200 RM by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS 2200 RM",
+   "path": "power/apc/apc_ups_smart_2200_rm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS 3000 XLM by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS 3000 XLM",
+   "path": "power/apc/apc_ups_smart_3000_xlm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS RT 1000 RM XL by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS RT 1000 RM XL",
+   "path": "power/apc/apc_ups_smart_rt_1000_rm_xl_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS RT 1000 XL by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS RT 1000 XL",
+   "path": "power/apc/apc_ups_smart_rt_1000_xl_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS SRT 5000 by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS SRT 5000",
+   "path": "power/apc/apc_ups_smart_srt_5000_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC Smart-UPS SRT 8000 by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC Smart-UPS SRT 8000",
+   "path": "power/apc/apc_ups_smart_srt_8000_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC UPS by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC UPS",
+   "path": "power/apc/apc_ups_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC UPS Galaxy 3500 by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC UPS Galaxy 3500",
+   "path": "power/apc/apc_ups_galaxy_3500_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC UPS Symmetra LX by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC UPS Symmetra LX",
+   "path": "power/apc/apc_ups_symmetra_lx_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC UPS Symmetra RM by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC UPS Symmetra RM",
+   "path": "power/apc/apc_ups_symmetra_rm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "APC UPS Symmetra RX by SNMP",
+   "groups": [
+    "Templates/Power"
+   ],
+   "description": "Template Power APC UPS Symmetra RX",
+   "path": "power/apc/apc_ups_symmetra_rx_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Aranet Cloud",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "app/aranet_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Arista by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Arista",
+   "path": "net/arista_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Aruba CX 8300s by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Aruba CX8300s by SNMP",
+   "path": "net/aruba/aruba_cx8300s_snmp",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Asterisk by HTTP",
+   "groups": [
+    "Templates/Telephony"
+   ],
+   "description": "The template gets Asterisk metrics from AMI by HTTP agent.",
+   "path": "tel/asterisk_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS Backup Vault by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template is designed to monitor AWS Backup vaults and jobs by HTTP via Zabbix, and it works without any external scripts.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get AWS EC2, RDS and S3 instances, AWS ECS clusters, AWS Elastic Load Balancing. Don't forget to read the README.md for the correct setup of the template.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS Cost Explorer by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template gets AWS Cost Explorer metrics and uses the script item to make HTTP requests to the Cost Explorer API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS EC2 by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get AWS EC2 and attached AWS EBS volumes metrics and uses the script item to make HTTP requests to the CloudWatch API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS ECS Cluster by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template gets AWS ECS Cluster metrics and uses the script item to make HTTP requests to the CloudWatch API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS ECS Serverless Cluster by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template gets AWS ECS Serverless Cluster metrics and uses the script item to make HTTP requests to the CloudWatch API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS ELB Application Load Balancer by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template is designed to monitor AWS ELB Application Load Balancer by HTTP via Zabbix, and it works without any external scripts.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS ELB Network Load Balancer by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template is designed to monitor AWS ELB Network Load Balancer by HTTP via Zabbix, and it works without any external scripts.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS Lambda by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template is designed to monitor AWS Lambda by HTTP via Zabbix, and it works without any external scripts.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS RDS instance by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template gets AWS RDS instance metrics and uses the script item to make HTTP requests to the CloudWatch API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "AWS S3 bucket by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template gets AWS S3 bucket metrics and uses the script item to make HTTP requests to the CloudWatch API.",
+   "path": "cloud/AWS/aws_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Backup Jobs by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Azure Backup Jobs via HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Container Apps by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Azure Container Apps via HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Cosmos DB for MongoDB by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure Cosmos DB for MongoDB by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Cost Management by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Cost Management by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Microsoft SQL Database by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft SQL databases by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Microsoft SQL DTU Database by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft SQL DTU-based databases via HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Microsoft SQL Serverless Database by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft SQL serverless databases by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure MySQL Flexible Server by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure MySQL flexible servers by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure MySQL Single Server by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure MySQL single servers by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure PostgreSQL Flexible Server by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure PostgreSQL flexible servers by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure PostgreSQL Single Server by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure PostgreSQL servers by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Sentinel by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure Sentinel by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure SQL Managed Instance by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Azure SQL Managed Instance by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure Virtual Machine by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure virtual machines (VMs) by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Azure VM Scale Set by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template is designed to monitor Microsoft Azure virtual machine scale sets by HTTP.",
+   "path": "cloud/azure_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Brocade FC by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Brocade FC",
+   "path": "net/brocade_fc_sw_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Brocade_Foundry Nonstackable by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Brocade Foundry Nonstackable",
+   "path": "net/brocade_foundry_sw_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Brocade_Foundry Performance by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module Brocade_Foundry Performance",
+   "path": "module/brocade_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Brocade_Foundry Stackable by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Brocade Foundry Stackable",
+   "path": "net/brocade_foundry_sw_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ceph by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/410059-discussion-thread-for-official-zabbix-template-ceph",
+   "path": "app/ceph_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Chassis by IPMI",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for monitoring servers with BMC over IPMI that work without any external scripts.",
+   "path": "server/chassis_ipmi",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Check Point Next Generation Firewall by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Check Point Quantum Next Generation Firewall Security Gateway by SNMP.",
+   "path": "net/checkpoint/quantum_ngfw_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ciena 3906 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Ciena 3906 by SNMP",
+   "path": "net/ciena",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco ASAv by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Cisco ASAv",
+   "path": "net/cisco/cisco_asav_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Catalyst 3750V2-24FS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Catalyst 3750V2-24FS",
+   "path": "net/cisco/cisco_catalyst_3750_24fs_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Catalyst 3750V2-24PS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Catalyst 3750V2-24PS",
+   "path": "net/cisco/cisco_catalyst_3750_24ps_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Catalyst 3750V2-24TS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Catalyst 3750V2-24TS",
+   "path": "net/cisco/cisco_catalyst_3750_24ts_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Catalyst 3750V2-48PS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Catalyst 3750V2-48PS",
+   "path": "net/cisco/cisco_catalyst_3750_48ps_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Catalyst 3750V2-48TS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Catalyst 3750V2-48TS",
+   "path": "net/cisco/cisco_catalyst_3750_48ts_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco CISCO-ENVMON-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Cisco CISCO-ENVMON-MIB",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco CISCO-MEMORY-POOL-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Cisco CISCO-MEMORY-POOL-MIB",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco CISCO-PROCESS-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Cisco CISCO-PROCESS-MIB",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5 by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco Inventory by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Cisco Inventory",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco IOS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco IOS Software releases 12.2(3.5) or later",
+   "path": "net/cisco/cisco_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco IOS prior to 12.0_3_T by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Cisco IOS Software releases prior to 12.0(3)T",
+   "path": "net/cisco/cisco_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco IOS versions 12.0_3_T-12.2_3.5 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Cisco IOS Software releases later to 12.0(3)T and prior to 12.2(3.5)",
+   "path": "net/cisco/cisco_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Meraki dashboard by HTTP",
+   "groups": [
+    "Templates/Applications",
+    "Templates/Network devices"
+   ],
+   "description": "Template for monitoring Cisco Meraki dashboard https://meraki.cisco.com/products/meraki-dashboard/",
+   "path": "net/meraki_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Meraki device by HTTP",
+   "groups": [
+    "Templates/Applications",
+    "Templates/Network devices"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "net/meraki_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Meraki organization by HTTP",
+   "groups": [
+    "Templates/Applications",
+    "Templates/Network devices"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "net/meraki_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Nexus 9000 Series by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Cisco Nexus 9000 Series",
+   "path": "net/cisco/cisco_nexus_9000_series_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco OLD-CISCO-CPU-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Cisco OLD-CISCO-CPU-MIB",
+   "path": "module/cisco_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Cisco SD-WAN by HTTP",
+   "groups": [
+    "Templates/Applications",
+    "Templates/Network devices"
+   ],
+   "description": "Discover Cisco SD-WAN devices by HTTP with script item usage.",
+   "path": "net/cisco/cisco_sdwan_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco SD-WAN device by HTTP",
+   "groups": [
+    "Templates/Applications",
+    "Templates/Network devices"
+   ],
+   "description": "Get Cisco SD-WAN devices monitoring with script item usage to perform HTTP requests to Cisco SD-WAN API.",
+   "path": "net/cisco/cisco_sdwan_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco Secure Firewall Threat Defense by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "This template is designed to monitor Cisco Secure Firewall Threat Defense devices using the REST API.",
+   "path": "net/cisco/cisco_secure_ftd_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco UCS by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template Server Cisco UCS",
+   "path": "server/cisco_ucs_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cisco UCS Manager by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "This is a template for Cisco UCS Manager monitoring via Zabbix SNMP Agent that works without any external scripts.",
+   "path": "server/cisco_ucs_manager_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Claude API by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Monitoring Claude API data from https://platform.claude.com.",
+   "path": "app/claude_api_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "ClickHouse by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get node metrics from ClickHouse HTTP interface using HTTP agent.",
+   "path": "db/clickhouse_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cloudflare by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Cloudflare to see your web traffic and DNS metrics.",
+   "path": "app/cloudflare_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "CockroachDB by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get CockroachDB metrics from Prometheus and health endpoints by HTTP agent.",
+   "path": "db/cockroachdb_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Control-M enterprise manager by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to get metrics from the Control-M Enterprise Manager using the Control-M Automation API with HTTP agent.",
+   "path": "app/controlm_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Control-M server by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to get metrics from the Control-M server using the Control-M Automation API with HTTP agent.",
+   "path": "app/controlm_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cradlepoint NCM v2 by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Discover Cradlepoint devices by HTTP with script item usage.",
+   "path": "net/cradlepoint/ncm_v2_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Cradlepoint NCM v2 device by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Get Cradlepoint devices monitoring with script item usage to perform HTTP requests to NetCloud Manager API v2.",
+   "path": "net/cradlepoint/ncm_v2_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "D-Link DES 7200 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template D-Link DES 7200",
+   "path": "net/dlink_des7200_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "D-Link DES_DGS Switch by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template D-Link DES_DGS Switch",
+   "path": "net/dlink_des_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Dell Force S-Series by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Dell Force S-Series",
+   "path": "net/dell_force_s_series_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Dell iDRAC by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for Dell servers with iDRAC version 7 and later.",
+   "path": "server/dell_idrac_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R660 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R660 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r660_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R660 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R660 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r660_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R720 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R720 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r720_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R720 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R720 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r720_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R740 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R740 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r740_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R740 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R740 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r740_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R750 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R750 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r750_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R750 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R750 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r750_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R820 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R820 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r820_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R820 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R820 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r820_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R840 by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R840 servers with iDRAC 8/9 firmware 4.32 and later and Redfish API enabled.",
+   "path": "server/dell/dell_r840_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "DELL PowerEdge R840 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for DELL PowerEdge R840 servers with iDRAC version 7 and later.",
+   "path": "server/dell/dell_r840_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Docker by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Docker engine metrics from plugin for the New Zabbix Agent (zabbix-agent2).",
+   "path": "app/docker",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Domain RDAP by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Monitor domain registration and related information using RDAP (Registration Data Access Protocol) over HTTP.",
+   "path": "app/rdap",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Elasticsearch Cluster by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Elasticsearch by Zabbix that work without any external scripts.",
+   "path": "app/elasticsearch_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Envoy Proxy by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Envoy Proxy metrics by HTTP agent from metrics endpoint.",
+   "path": "app/envoy_proxy_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Envoy Proxy by OTLP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Envoy Proxy monitoring via OpenTelemetry (OTLP) traces and logs, using Zabbix's native",
+   "path": "app/envoy_proxy_otlp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Etcd by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Etcd metrics by HTTP agent.",
+   "path": "app/etcd_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "EtherLike-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template EtherLike-MIB (duplex control only)",
+   "path": "module/ether_like_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Extreme EXOS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Extreme EXOS",
+   "path": "net/extreme_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "F5 Big-IP by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "RFC1213-MIB",
+   "path": "net/f5_bigip_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "FortiGate by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring FortiGate Next Generation Firewall by HTTP.",
+   "path": "net/fortinet/fortigate_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "FortiGate by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring FortiGate firewall by SNMP.",
+   "path": "net/fortinet/fortigate_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "FreeBSD by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an official FreeBSD template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/freebsd",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "FTP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring FTP service",
+   "path": "app/ftp_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "GCP Application Load Balancer by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template discovers GCP Application Load Balancing forwarding rules by HTTP using script items.",
+   "path": "cloud/gcp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Discover GCP Compute Engine/Cloud SQL Instances and Compute Engine project quota metrics.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud Run Service by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Discover GCP Cloud Run services by HTTP with script item usage.",
+   "path": "cloud/gcp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL MSSQL by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL MSSQL instances monitoring with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL MSSQL Replica by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL MSSQL monitoring for read-only replicas with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL MySQL by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL MySQL instances monitoring with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL MySQL Replica by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL MySQL monitoring for read-only replicas with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL PostgreSQL by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL PostgreSQL instances monitoring with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud SQL PostgreSQL Replica by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Get GCP Cloud SQL PostgreSQL  monitoring for read-only replicas with script item usage to perform HTTP requests to Google Cloud Platform Monitoring API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cloud Storage Bucket by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Discover GCP Cloud Storage buckets by HTTP with script item usage.",
+   "path": "cloud/gcp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Compute Engine Instance by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Discover GCP Compute Engine instances by HTTP with script item usage.",
+   "path": "cloud/gcp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GCP Cost Monitoring by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "The template monitors Google Cloud Platform billing costs via the BigQuery Billing Export API.",
+   "path": "cloud/gcp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Generic by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module Generic",
+   "path": "module/generic_snmp_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Generic Java JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "app/generic_java_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Generic OpenTelemetry by OTLP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template collects OpenTelemetry (OTLP) telemetry — traces, metrics and logs — via Zabbix's native APM query items (Telemetry query), without external scripts",
+   "path": "app/otlp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GitHub organization by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for the effortless deployment of GitHub organization monitoring by Zabbix via GitHub REST API and doesn't require any external scripts.",
+   "path": "app/github_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GitHub repository by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for the effortless deployment of GitHub repository monitoring by Zabbix via GitHub REST API and doesn't require any external scripts.",
+   "path": "app/github_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GitLab by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get GitLab metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/gitlab_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "GLPI by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "GLPI is an open-source IT asset management and service management platform (ITSM). It provides a centralized solution for tracking hardware, software, licenses, and service operations.",
+   "path": "app/glpi_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "GridGain by JMX",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor GridGain In-Memory Computing Platform by Zabbix that work without any external scripts.",
+   "path": "db/gridgain_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Hadoop by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template gets the Hadoop metrics from cluster's hosts (ResourceManager, NodeManagers, NameNode, DataNodes) by HTTP agent. You should define the IP address (or FQDN) and Web-UI port for the Resourc",
+   "path": "app/hadoop_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HAProxy by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from status page using HTTP agent",
+   "path": "app/haproxy_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HAProxy by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from status page using Zabbix agent",
+   "path": "app/haproxy_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Consul Cluster by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get HashiCorp Consul Cluster services and nodes by HTTP agent from API endpoints.",
+   "path": "app/consul_http/consul_cluster",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Consul Node by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get HashiCorp Consul Node metrics by HTTP agent from metrics endpoint.",
+   "path": "app/consul_http/consul",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Nomad by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Discover HashiCorp Nomad servers and clients automatically.",
+   "path": "app/nomad",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Nomad Client by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get HashiCorp Nomad client metrics by HTTP from metrics endpoint.",
+   "path": "app/nomad",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Nomad Server by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get HashiCorp Nomad server metrics by HTTP from metrics endpoint.",
+   "path": "app/nomad",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HashiCorp Vault by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get HashiCorp Vault metrics from Vault API HTTP Prometheus metrics endpoint.",
+   "path": "app/vault_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Hikvision camera by HTTP",
+   "groups": [
+    "Templates/Video surveillance"
+   ],
+   "description": "This template is designed for the effortless deployment of Hikvision cameras monitoring by Zabbix via HTTP and doesn't require any external scripts.",
+   "path": "cctv/hikvision",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HOST-RESOURCES-MIB by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "HOST-RESOURCES-MIB: CPU, memory and storage(vfs.fs.file) linked together.",
+   "path": "module/host_resources_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "HOST-RESOURCES-MIB CPU by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Requires Zabbix server 4.0.14, 4.2.8, 4.4.0 or newer (JSONPath function avg() used with types autoconversion).",
+   "path": "module/host_resources_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "HOST-RESOURCES-MIB memory by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "HOST-RESOURCES-MIB",
+   "path": "module/host_resources_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "HOST-RESOURCES-MIB storage by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "HOST-RESOURCES-MIB",
+   "path": "module/host_resources_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "HP Comware HH3C by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net HP Comware (HH3C)",
+   "path": "net/hp_hh3c_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HP Enterprise Switch by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net HP Enterprise Switch",
+   "path": "net/hp_hpn_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HP iLO by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template Server HP iLO",
+   "path": "server/hp_ilo_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HP-UX by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an official HP-UX template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/hp-ux",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE iLO by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "This template is designed for the effortless deployment of HPE iLO monitoring by Zabbix via iLO RESTful API and doesn't require any external scripts.",
+   "path": "server/hpe_ilo_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE MSA 2040 Storage by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor HPE MSA 2040 by HTTP.",
+   "path": "san/hpe_msa2040_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE MSA 2060 Storage by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor HPE MSA 2060 by HTTP.",
+   "path": "san/hpe_msa2060_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE Primera by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor HPE Primera by HTTP.",
+   "path": "san/hpe_primera_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE ProLiant BL460 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for HPE ProLiant BL460 servers with HP iLO version 4 and later.",
+   "path": "server/hp/hp_bl460_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE ProLiant BL920 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for HPE ProLiant BL920 servers with HP iLO version 4 and later.",
+   "path": "server/hp/hp_bl920_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE ProLiant DL360 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for HPE ProLiant DL360 servers with HP iLO version 4 and later.",
+   "path": "server/hp/hp_dl360_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE ProLiant DL380 by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for HPE ProLiant DL380 servers with HP iLO version 4 and later.",
+   "path": "server/hp/hp_dl380_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HPE Synergy by HTTP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "This template is designed to monitor HPE Synergy by HTTP.",
+   "path": "server/hpe_synergy_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "HTTP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring HTTP service",
+   "path": "app/http_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "HTTPS Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring HTTPS service",
+   "path": "app/https_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Huawei AR600 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Huawei AR600 Series by SNMP",
+   "path": "net/huawei_ar600_snmp",
+   "versions": [
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Huawei OceanStor 5300 V5 by SNMP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor SAN Huawei OceanStor 5300 V5 by Zabbix SNMP agent.",
+   "path": "san/huawei_5300v5_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Huawei OceanStor Dorado by SNMP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "This template is developed to monitor SAN Huawei OceanStor Dorado via the Zabbix SNMP agent.",
+   "path": "san/huawei_dorado_snmp",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Huawei OceanStor V6 by SNMP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "This template is developed to monitor SAN Huawei OceanStor V6 via the Zabbix SNMP agent.",
+   "path": "san/huawei_oceanstor_v6_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Huawei VRP by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Huawei VRP",
+   "path": "net/huawei_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "IBM IMM by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template Server IBM IMM",
+   "path": "server/ibm_imm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ICMP Ping",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module ICMP Ping",
+   "path": "module/icmp_ping",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ignite by JMX",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor Apache Ignite by Zabbix that work without any external scripts.",
+   "path": "db/ignite_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "IIS by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from IIS using Zabbix agent running on Windows.",
+   "path": "app/iis_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "IIS by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from IIS using Zabbix agent running on Windows.",
+   "path": "app/iis_agent_active",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "IMAP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring IMAP service",
+   "path": "app/imap_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "InfluxDB by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get InfluxDB metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "db/influxdb_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Intel SR1530 IPMI",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for monitoring Intel SR1530 server system.",
+   "path": "server/intel_sr1530_ipmi",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Intel SR1630 IPMI",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template for monitoring Intel SR1630 server system.",
+   "path": "server/intel_sr1630_ipmi",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Intel_Qlogic Infiniband by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Intel_Qlogic Infiniband",
+   "path": "net/intel_qlogic_infiniband_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Interfaces by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module Interfaces",
+   "path": "module/interfaces_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Interfaces Simple by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Module Interfaces Simple (no ifXTable). This is the exact copy of Template Module Interfaces template with the exception that metrics from ifXTable are replaced with ifTable counters where po",
+   "path": "module/interfaces_simple_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Interfaces Windows by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Interfaces Windows",
+   "path": "module/interfaces_win_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Jenkins by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Jenkins metrics by HTTP agent.",
+   "path": "app/jenkins",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Jira Data Center by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is used for monitoring Jira Data Center health. It is designed for standalone operation for on-premises Jira installations.",
+   "path": "app/jira_datacenter_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Juniper by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Juniper",
+   "path": "net/juniper_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Juniper MX by NETCONF",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Juniper MX Series by NETCONF.",
+   "path": "net/juniper_mx_netconf",
+   "versions": [
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Juniper MX by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Juniper MX Series by SNMP.",
+   "path": "net/juniper_mx_snmp",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes API server by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes API server metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/kubernetes_http/kubernetes_api_server_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes Cluster by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Kubernetes Cluster.",
+   "path": "app/kubernetes_cluster_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes cluster state by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes state metrics by HTTP.",
+   "path": "app/kubernetes_http/kubernetes_state_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes Controller manager by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes Controller manager metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/kubernetes_http/kubernetes_controller_manager_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes Kubelet by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes kubelet metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/kubernetes_http/kubernetes_kubelet_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes Node by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes Node metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/kubernetes_cluster_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes nodes by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes nodes metrics by HTTP.",
+   "path": "app/kubernetes_http/kubernetes_nodes_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Kubernetes Scheduler by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Kubernetes Scheduler metrics by HTTP agent from Prometheus metrics endpoint.",
+   "path": "app/kubernetes_http/kubernetes_scheduler_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "LDAP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring LDAP service",
+   "path": "app/ldap_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux block devices by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "UCD-DISKIO-MIB",
+   "path": "module/linux_snmp_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux block devices by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux block devices by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux by Prom",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "This template collects Linux metrics from node_exporter 0.18 and above. Support for older node_exporter versions is provided as 'best effort'.",
+   "path": "os/linux_prom",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Linux by SNMP",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Template OS Linux",
+   "path": "os/linux_snmp_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Linux by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Official Linux template. Requires agent of Zabbix 6.0 or newer.",
+   "path": "os/linux",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Linux by Zabbix agent active",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Official Linux template. Requires agent of Zabbix 6.0 or newer.",
+   "path": "os/linux_active",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Linux CPU by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "HOST-RESOURCES-MIB",
+   "path": "module/linux_snmp_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux CPU by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux CPU by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux filesystems by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "HOST-RESOURCES-MIB",
+   "path": "module/linux_snmp_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux filesystems by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux filesystems by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux generic by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux generic by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux memory by SNMP",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "UCD-SNMP-MIB",
+   "path": "module/linux_snmp_snmp",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux memory by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux memory by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux network interfaces by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Linux network interfaces by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/linux_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "macOS by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an official macOS template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/macos",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Mantis BT by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Mantis BT issues by HTTP.",
+   "path": "app/mantisbt_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MariaDB by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "CREATE USER 'zbx_monitor'@'%' IDENTIFIED BY '<password>';",
+   "path": "db/mariadb_odbc",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "MariaDB by Zabbix agent",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MariaDB client. If necessary, add the path to the 'mariadb' and 'mariadb-admin' utilities to the global environment variable PATH.",
+   "path": "db/mariadb_agent",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "MariaDB by Zabbix agent active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MariaDB client. If necessary, add the path to the 'mariadb' and 'mariadb-admin' utilities to the global environment variable PATH.",
+   "path": "db/mariadb_agent_active",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Mellanox by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The updated template for monitoring the Mellanox network switches over SNMP agent. All items collected in one template without any linked templates.",
+   "path": "net/mellanox_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Memcached by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Memcached metrics from plugin for the New Zabbix Agent (zabbix-agent2).",
+   "path": "app/memcached",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft 365 reports by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Microsoft 365 reports by HTTP. It works without any external scripts and uses script items.",
+   "path": "app/ms365_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft Exchange Server 2016 by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Microsoft Exchange Server 2016 by Zabbix that works without any external scripts.",
+   "path": "app/exchange",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft Exchange Server 2016 by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor Microsoft Exchange Server 2016 by Zabbix that works without any external scripts.",
+   "path": "app/exchange_active",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft Hyper-V Failover Cluster by SSH",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Microsoft Hyper-V Failover Cluster via SSH.",
+   "path": "app/hyper_v/hyper_v_cluster",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft Hyper-V Standalone by SSH",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Microsoft Hyper-V Standalone via SSH.",
+   "path": "app/hyper_v/hyper_v_standalone",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Microsoft SharePoint by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template receives data via HTTP Agent.",
+   "path": "app/sharepoint_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Mikrotik by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Mikrotik",
+   "path": "net/mikrotik/mikrotik_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1009-7G-1C-1S+ by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1009-7G-1C-1S+.",
+   "path": "net/mikrotik/mikrotik_CCR1009-7G-1C-1S+_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1009-7G-1C-1S+PC by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1009-7G-1C-1S+PC.",
+   "path": "net/mikrotik/mikrotik_CCR1009-7G-1C-1S+PC_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1009-7G-1C-PC by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1009-7G-1C-PC.",
+   "path": "net/mikrotik/mikrotik_CCR1009-7G-1C-PC_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1016-12G by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1016-12G.",
+   "path": "net/mikrotik/mikrotik_CCR1016-12G_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1016-12S-1S+ by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1016-12S-1S+.",
+   "path": "net/mikrotik/mikrotik_CCR1016-12S-1S+_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1036-12G-4S by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1036-12G-4S.",
+   "path": "net/mikrotik/mikrotik_CCR1036-12G-4S_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1036-12G-4S-EM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1036-12G-4S-EM.",
+   "path": "net/mikrotik/mikrotik_CCR1036-12G-4S-EM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1036-8G-2S+ by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1036-8G-2S+.",
+   "path": "net/mikrotik/mikrotik_CCR1036-8G-2S+_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1036-8G-2S+EM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1036-8G-2S+EM.",
+   "path": "net/mikrotik/mikrotik_CCR1036-8G-2S+EM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR1072-1G-8S+ by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR1072-1G-8S+.",
+   "path": "net/mikrotik/mikrotik_CCR1072-1G-8S+_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR2004-16G-2S+ by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR2004-16G-2S+.",
+   "path": "net/mikrotik/mikrotik_CCR2004-16G-2S+_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CCR2004-1G-12S+2XS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik CCR2004-1G-12S+2XS.",
+   "path": "net/mikrotik/mikrotik_CCR2004-1G-12S+2XS_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS106-1C-5S by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS106-1C-5S.",
+   "path": "net/mikrotik/mikrotik_CRS106-1C-5S_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS109-8G-1S-2HnD-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS109-8G-1S-2HnD-IN.",
+   "path": "net/mikrotik/mikrotik_CRS109-8G-1S-2HnD-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS112-8G-4S-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS112-8G-4S-IN.",
+   "path": "net/mikrotik/mikrotik_CRS112-8G-4S-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS112-8P-4S-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS112-8P-4S-IN.",
+   "path": "net/mikrotik/mikrotik_CRS112-8P-4S-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS125-24G-1S-2HnD-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS125-24G-1S-2HnD-IN.",
+   "path": "net/mikrotik/mikrotik_CRS125-24G-1S-2HnD-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS212-1G-10S-1S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS212-1G-10S-1S+IN.",
+   "path": "net/mikrotik/mikrotik_CRS212-1G-10S-1S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS305-1G-4S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS305-1G-4S+IN.",
+   "path": "net/mikrotik/mikrotik_CRS305-1G-4S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS309-1G-8S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS309-1G-8S+IN.",
+   "path": "net/mikrotik/mikrotik_CRS309-1G-8S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS312-4C+8XG-RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS312-4C+8XG-RM.",
+   "path": "net/mikrotik/mikrotik_CRS312-4C+8XG-RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS317-1G-16S+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS317-1G-16S+RM.",
+   "path": "net/mikrotik/mikrotik_CRS317-1G-16S+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS326-24G-2S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS326-24G-2S+IN.",
+   "path": "net/mikrotik/mikrotik_CRS326-24G-2S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS326-24G-2S+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS326-24G-2S+RM.",
+   "path": "net/mikrotik/mikrotik_CRS326-24G-2S+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS326-24S+2Q+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS326-24S+2Q+RM.",
+   "path": "net/mikrotik/mikrotik_CRS326-24S+2Q+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS328-24P-4S+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS328-24P-4S+RM.",
+   "path": "net/mikrotik/mikrotik_CRS328-24P-4S+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS328-4C-20S-4S+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS328-4C-20S-4S+RM.",
+   "path": "net/mikrotik/mikrotik_CRS328-4C-20S-4S+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS354-48G-4S+2Q+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS354-48G-4S+2Q+RM.",
+   "path": "net/mikrotik/mikrotik_CRS354-48G-4S+2Q+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CRS354-48P-4S+2Q+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CRS354-48P-4S+2Q+RM.",
+   "path": "net/mikrotik/mikrotik_CRS354-48P-4S+2Q+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CSS326-24G-2S+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CSS326-24G-2S+RM.",
+   "path": "net/mikrotik/mikrotik_CSS326-24G-2S+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik CSS610-8G-2S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik CSS610-8G-2S+IN.",
+   "path": "net/mikrotik/mikrotik_CSS610-8G-2S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik FiberBox by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik FiberBox.",
+   "path": "net/mikrotik/mikrotik_FiberBox_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik hEX by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik hEX.",
+   "path": "net/mikrotik/mikrotik_hEX_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik hEX lite by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik hEX lite.",
+   "path": "net/mikrotik/mikrotik_hEX_lite_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik hEX PoE by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik hEX PoE.",
+   "path": "net/mikrotik/mikrotik_hEX_PoE_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik hEX PoE lite by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik hEX PoE lite.",
+   "path": "net/mikrotik/mikrotik_hEX_PoE_lite_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik hEX S by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik hEX S.",
+   "path": "net/mikrotik/mikrotik_hEX_S_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik netPower 15FR by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik netPower 15FR.",
+   "path": "net/mikrotik/mikrotik_netPower_15FR_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik netPower 16P by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik netPower 16P.",
+   "path": "net/mikrotik/mikrotik_netPower_16P_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik netPower Lite 7R by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik netPower Lite 7R.",
+   "path": "net/mikrotik/mikrotik_netPower_Lite_7R_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik PowerBox by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik PowerBox.",
+   "path": "net/mikrotik/mikrotik_PowerBox_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik PowerBox Pro by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik PowerBox Pro.",
+   "path": "net/mikrotik/mikrotik_PowerBox_Pro_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB1100AHx4 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB1100AHx4.",
+   "path": "net/mikrotik/mikrotik_RB1100AHx4_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB1100AHx4 Dude Edition by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB1100AHx4 Dude Edition.",
+   "path": "net/mikrotik/mikrotik_RB1100AHx4_Dude_Edition_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB2011iL-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB2011iL-IN.",
+   "path": "net/mikrotik/mikrotik_RB2011iL-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB2011iL-RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB2011iL-RM.",
+   "path": "net/mikrotik/mikrotik_RB2011iL-RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB2011iLS-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB2011iLS-IN.",
+   "path": "net/mikrotik/mikrotik_RB2011iLS-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB2011UiAS-IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB2011UiAS-IN.",
+   "path": "net/mikrotik/mikrotik_RB2011UiAS-IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB2011UiAS-RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB2011UiAS-RM.",
+   "path": "net/mikrotik/mikrotik_RB2011UiAS-RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB260GS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik RB260GS.",
+   "path": "net/mikrotik/mikrotik_RB260GS_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB260GSP by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Switch MikroTik RB260GSP.",
+   "path": "net/mikrotik/mikrotik_RB260GSP_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB3011UiAS-RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB3011UiAS-RM.",
+   "path": "net/mikrotik/mikrotik_RB3011UiAS-RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB4011iGS+RM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB4011iGS+RM.",
+   "path": "net/mikrotik/mikrotik_RB4011iGS+RM_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MikroTik RB5009UG+S+IN by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The template for monitoring Ethernet router MikroTik RB5009UG+S+IN.",
+   "path": "net/mikrotik/mikrotik_RB5009UG+S+IN_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MongoDB cluster by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get MongoDB metrics from plugin for the zabbix-agent2.",
+   "path": "db/mongodb_cluster",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MongoDB node by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get MongoDB metrics from plugin for the zabbix-agent2.",
+   "path": "db/mongodb",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar ProStar MPPT by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "PROSTAR-MPPT",
+   "path": "net/morningstar/morningstar_prostar_mppt_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar ProStar PWM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "PROSTAR-PWM",
+   "path": "net/morningstar/morningstar_prostar_pwm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar SunSaver MPPT by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "SUNSAVER-MPPT",
+   "path": "net/morningstar/morningstar_sunsaver_mppt_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar SureSine by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "SURESINE",
+   "path": "net/morningstar/morningstar_suresine_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar TriStar MPPT 600V by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "TRISTAR-MPPT",
+   "path": "net/morningstar/morningstar_tristar_mppt_600V_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar TriStar MPPT by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "TRISTAR-MPPT",
+   "path": "net/morningstar/morningstar_tristar_mppt_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Morningstar TriStar PWM by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "TRISTAR",
+   "path": "net/morningstar/morningstar_tristar_pwm_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MSSQL by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the effortless deployment of MSSQL monitoring by Zabbix via ODBC and doesn't require any external scripts.",
+   "path": "db/mssql_odbc",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MSSQL by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the effortless deployment of MSSQL monitoring by Zabbix via Zabbix agent 2 and uses a loadable plugin to run SQL queries.",
+   "path": "db/mssql_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MySQL by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "CREATE USER 'zbx_monitor'@'%' IDENTIFIED BY '<password>';",
+   "path": "db/mysql_odbc",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MySQL by Zabbix agent",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MySQL client. If necessary, add the path to the 'mysql' and 'mysqladmin' utilities to the global environment variable PATH.",
+   "path": "db/mysql_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MySQL by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "CREATE USER 'zbx_monitor'@'%' IDENTIFIED BY '<password>';",
+   "path": "db/mysql_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MySQL by Zabbix agent 2 active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "CREATE USER 'zbx_monitor'@'%' IDENTIFIED BY '<password>';",
+   "path": "db/mysql_agent2_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "MySQL by Zabbix agent active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MySQL client. If necessary, add the path to the 'mysql' and 'mysqladmin' utilities to the global environment variable PATH.",
+   "path": "db/mysql_agent_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "NetApp AFF A700 by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor SAN NetApp AFF A700 cluster by Zabbix HTTP agent.",
+   "path": "san/netapp_aff_a700_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "NetApp FAS3220 by SNMP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "The template to monitor SAN NetApp FAS3220 cluster by Zabbix SNMP agent.",
+   "path": "san/netapp_fas3220_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Netgear Fastpath by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Netgear Fastpath",
+   "path": "net/netgear_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Network Generic Device by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Network Generic Device",
+   "path": "net/generic_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nextcloud by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for monitoring Nextcloud by HTTP via Zabbix, and it works without any external scripts.",
+   "path": "app/nextcloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nginx by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from stub status module using HTTP agent",
+   "path": "app/nginx_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nginx by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from stub status module using Zabbix agent running on Linux",
+   "path": "app/nginx_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nginx by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get metrics from stub status module using Zabbix agent running on Linux",
+   "path": "app/nginx_agent_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "NGINX Plus by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get Nginx Plus metrics by HTTP agent.",
+   "path": "app/nginx_plus_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "NNTP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring NNTP service",
+   "path": "app/nntp_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "NTP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring NTP service",
+   "path": "app/ntp_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Nutanix Cluster Prism Element by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Prism Element: It is a service already built into the platform for every Nutanix cluster deployed. It provides the ability to fully configure, manage, and monitor Nutanix clusters running any hypervis",
+   "path": "app/nutanix_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nutanix Host Prism Element by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Prism Element: It is a service already built into the platform for every Nutanix cluster deployed. It provides the ability to fully configure, manage, and monitor Nutanix clusters running any hypervis",
+   "path": "app/nutanix_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nutanix Prism Element by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Prism Element: It is a service already built into the platform for every Nutanix cluster deployed. It provides the ability to fully configure, manage, and monitor Nutanix clusters running any hypervis",
+   "path": "app/nutanix_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nvidia by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for Nvidia GPU monitoring and doesn't require any external scripts.",
+   "path": "app/nvidia_agent2",
+   "versions": [
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Nvidia by Zabbix agent 2 active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for Nvidia GPU monitoring and doesn't require any external scripts.",
+   "path": "app/nvidia_agent2_active",
+   "versions": [
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenAI Platform by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Monitoring OpenAI Platform data from https://platform.openai.com.",
+   "path": "app/openai_platform_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenBSD by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an Official OpenBSD template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/openbsd",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenRouter traces by OTLP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "OpenRouter template. Collects traces via APM query items and shows basic",
+   "path": "app/openrouter/otlp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenStack by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Requests OpenStack API access token and discovers available OpenStack services using OpenStack Identity API by HTTP using script item and creates host prototypes for them.",
+   "path": "cloud/openstack",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenStack Nova by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Discovers and monitors project limits, servers, services, hypervisors, availability zones, hypervisors and tenants with OpenStack Compute API by HTTP using script and HTTP agent items.",
+   "path": "cloud/openstack",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OpenWeatherMap by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get weather metrics from OpenWeatherMap current weather API by HTTP.",
+   "path": "app/openweathermap_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OPNsense by SNMP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring OPNsense by SNMP",
+   "path": "app/opnsense_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Create an Oracle user for monitoring.",
+   "path": "db/oracle_odbc",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get metrics from Oracle Database using Zabbix agent 2.",
+   "path": "db/oracle_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Autonomous Database by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) autonomous database (serverless) resources.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Block Volume by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) block volume resources.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Boot Volume by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Monitor Oracle Cloud Infrastructure (OCI) boot volume.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "Monitor resources of Oracle Cloud Infrastructure (OCI) services.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Compute by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) single compute instance resources and discovers attached",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Costs by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) costs and budgets.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Load Balancer by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) load balancer resources.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Networking by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) single virtual network card availability and discovers",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Oracle Cloud Object Storage by HTTP",
+   "groups": [
+    "Templates/Cloud"
+   ],
+   "description": "This template monitors Oracle Cloud Infrastructure (OCI) object storage resources.",
+   "path": "cloud/oracle_cloud",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "OS processes by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get processes metrics using item proc.get by Zabbix agent.",
+   "path": "app/process",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Palo Alto PA-440 by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "This template is designed for the effortless deployment of Palo Alto PA-440 monitoring by Zabbix via XML API and doesn't require any external scripts.",
+   "path": "net/paloalto/paloalto_pa440",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Percona by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "CREATE USER 'zbx_monitor'@'%' IDENTIFIED BY '<password>';",
+   "path": "db/percona_odbc",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Percona by Zabbix agent",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MySQL client. If necessary, add the path to the 'mysql' and 'mysqladmin' utilities to the global environment variable PATH.",
+   "path": "db/percona_agent",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Percona by Zabbix agent active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "1. Install Zabbix agent and MySQL client. If necessary, add the path to the 'mysql' and 'mysqladmin' utilities to the global environment variable PATH.",
+   "path": "db/percona_agent_active",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "PFSense by SNMP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring pfSense by SNMP",
+   "path": "app/pfsense_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PHP-FPM by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get PHP-FPM metrics using the Zabbix HTTP agent.",
+   "path": "app/php-fpm_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PHP-FPM by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get PHP-FPM metrics using Zabbix agent running on Linux.",
+   "path": "app/php-fpm_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PHP-FPM by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get PHP-FPM metrics using Zabbix agent running on Linux.",
+   "path": "app/php-fpm_agent_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Podman by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Podman via HTTP API. It includes discovery of containers and collection of various metrics such as container status, resource usage, and more.",
+   "path": "app/podman/podman_http",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Podman by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Podman via Zabbix agent. It includes discovery of containers and collection of various metrics such as container status, resource usage, and more.",
+   "path": "app/podman/podman_agent",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Podman by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Podman via Zabbix agent. It includes discovery of containers and collection of various metrics such as container status, resource usage, and more.",
+   "path": "app/podman/podman_agent_active",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "POP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring POP service",
+   "path": "app/pop_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "PostgreSQL by ODBC",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the effortless deployment of PostgreSQL monitoring by Zabbix via ODBC and doesn't require any external scripts.",
+   "path": "db/postgresql_odbc",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PostgreSQL by Zabbix agent",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of PostgreSQL monitoring by Zabbix via Zabbix agent and uses user parameters to run SQL queries with the `psql` command-line tool.",
+   "path": "db/postgresql",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PostgreSQL by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of PostgreSQL monitoring by Zabbix via Zabbix agent 2 and uses a loadable plugin to run SQL queries.",
+   "path": "db/postgresql_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PostgreSQL by Zabbix agent 2 active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of PostgreSQL monitoring by Zabbix via Zabbix agent 2 and uses a loadable plugin to run SQL queries.",
+   "path": "db/postgresql_agent2_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "PostgreSQL by Zabbix agent active",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of PostgreSQL monitoring by Zabbix via Zabbix agent and uses user parameters to run SQL queries with the `psql` command-line tool.",
+   "path": "db/postgresql_agent_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Proxmox VE by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for the effortless deployment of Proxmox VE monitoring by Zabbix via HTTP and doesn't require any external scripts.",
+   "path": "app/proxmox",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Proxmox VE by OTLP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Proxmox VE node monitoring over OpenTelemetry telemetry stored in ClickHouse.",
+   "path": "app/proxmox/otlp",
+   "versions": [
+    "8.0"
+   ]
+  },
+  {
+   "name": "Pure Storage FlashArray v1 by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "1. Create a host for the Pure Storage FlashArray device and assign to it the \"Pure Storage FlashArray v1 by HTTP\" template.",
+   "path": "san/pure_storage_flasharray",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Pure Storage FlashArray v2 by HTTP",
+   "groups": [
+    "Templates/SAN"
+   ],
+   "description": "1. Create a host for the Pure Storage FlashArray device and assign to it the \"Pure Storage FlashArray v2 by HTTP\" template.",
+   "path": "san/pure_storage_flasharray",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "QTech QSW by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net QTech QSW",
+   "path": "net/qtech_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "RabbitMQ cluster by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get cluster metrics from RabbitMQ management plugin provided an HTTP-based API using HTTP agent.",
+   "path": "app/rabbitmq_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "RabbitMQ cluster by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get cluster metrics from RabbitMQ management plugin provided an HTTP-based API using Zabbix agent.",
+   "path": "app/rabbitmq_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "RabbitMQ node by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get node metrics from RabbitMQ management plugin provided an HTTP-based API using HTTP agent.",
+   "path": "app/rabbitmq_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "RabbitMQ node by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get node metrics from RabbitMQ management plugin provided an HTTP-based API using Zabbix agent.",
+   "path": "app/rabbitmq_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Redis by Zabbix agent 2",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "Get Redis metrics from plugin for the New Zabbix Agent (zabbix-agent2).",
+   "path": "db/redis",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Remote Zabbix proxy health",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the remote Zabbix proxy.",
+   "path": "app/zabbix_proxy",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Remote Zabbix server health",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the remote Zabbix server.",
+   "path": "app/zabbix_server",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ribbon SBC Edge by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The Ribbon Session Border Controller Edge (SBC Edge) is a security and interoperability solution for medium-sized businesses and large branch offices.",
+   "path": "net/ribbon/ribbon_sbc_edge",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ribbon SBC SWe CE by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The Ribbon SBC Software Edition (SBC SWe) provides the same feature set as the award-winning SBC 5400 and SBC 7000 appliance, without requiring dedicated hardware.",
+   "path": "net/ribbon/ribbon_sbc_swe_core",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ribbon SBC SWe Core by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "The Ribbon SBC Software Edition (SBC SWe) provides the same feature set as the award-winning SBC 5400 and SBC 7000 appliances, without requiring dedicated hardware.",
+   "path": "net/ribbon/ribbon_sbc_swe_core",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "SMART by Zabbix agent 2",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "The template for monitoring S.M.A.R.T. attributes of physical disk that works without any external scripts. It collects metrics by Zabbix agent 2 version 5.0 and later with Smartmontools version 7.1 a",
+   "path": "module/smart_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "SMART by Zabbix agent 2 active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "The template for monitoring S.M.A.R.T. attributes of physical disk that works without any external scripts. It collects metrics by Zabbix agent 2 version 5.0 and later with Smartmontools version 7.1 a",
+   "path": "module/smart_agent2_active",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "SMTP Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring SMTP service",
+   "path": "app/smtp_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Solaris by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "It is an official Solaris OS template. It requires Zabbix agent 6.0 or newer.",
+   "path": "os/solaris",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Squid by SNMP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Squid caching proxy via SNMP",
+   "path": "app/squid_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "SSH Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring SSH service",
+   "path": "app/ssh_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Stormshield SNS by SNMP",
+   "groups": [
+    "Templates/Network devices",
+    "Templates/Operating systems"
+   ],
+   "description": "The template for monitoring SNS firewall by SNMP.",
+   "path": "net/stormshield_sns",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Supermicro Aten by SNMP",
+   "groups": [
+    "Templates/Server hardware"
+   ],
+   "description": "Template Server Supermicro Aten",
+   "path": "server/supermicro_aten_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Systemd by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Get systemd units metrics from plugin for the zabbix-agent2.",
+   "path": "app/systemd",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Telnet Service",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template module for monitoring telnet service",
+   "path": "app/telnet_service",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "TiDB by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor TiDB server of TiDB cluster by Zabbix that works without any external scripts.",
+   "path": "db/tidb_http/tidb_tidb_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "TiDB PD by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor PD server of TiDB cluster by Zabbix that works without any external scripts.",
+   "path": "db/tidb_http/tidb_pd_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "TiDB TiKV by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "The template to monitor TiKV server of TiDB cluster by Zabbix that works without any external scripts.",
+   "path": "db/tidb_http/tidb_tikv_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "TP-LINK by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net TP-LINK",
+   "path": "net/tplink_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Travis CI by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring Travis CI https://travis-ci.com",
+   "path": "app/travis_ci_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "TrueNAS CORE by SNMP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Template for monitoring TrueNAS CORE by SNMP.",
+   "path": "app/truenas_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Ubiquiti AirOS by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template Net Ubiquiti AirOS",
+   "path": "net/ubiquiti_airos_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Veeam Backup & Replication by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Veeam Backup & Replication.",
+   "path": "app/veeam/backup_replication_http",
+   "versions": [
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Veeam Backup and Replication by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Veeam Backup and Replication.",
+   "path": "app/veeam/backup_replication_http",
+   "versions": [
+    "6.0",
+    "7.0"
+   ]
+  },
+  {
+   "name": "Veeam Backup Enterprise Manager by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Veeam Backup Enterprise Manager.",
+   "path": "app/veeam/enterprise_manager_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VeloCloud SD-WAN by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template for monitoring VeloCloud SD-WAN https://www.arista.com/en/support/velocloud-resources",
+   "path": "net/velocloud_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VeloCloud SD-WAN Edge by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template for monitoring VeloCloud SD-WAN Edges https://www.arista.com/en/solutions/sd-wan",
+   "path": "net/velocloud_http",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VMware",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/",
+   "path": "app/vmware",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VMware FQDN",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/",
+   "path": "app/vmware_fqdn",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VMware Guest",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "app/vmware",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VMware Hypervisor",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/",
+   "path": "app/vmware",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "VMWare SD-WAN VeloCloud by HTTP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template for monitoring VMWare SD-WAN VeloCloud https://www.vmware.com/products/sd-wan.html",
+   "path": "net/velocloud_http",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Vyatta Virtual Router by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "Template for Vyatta Virtual Router 1908e",
+   "path": "net/vyatta_virtual_router",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Website by Browser",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor a website's availability and performance on the website by Browser.",
+   "path": "app/website_browser",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Website certificate by Zabbix agent 2",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor TLS/SSL certificate on the website by Zabbix agent 2 that works without any external scripts.",
+   "path": "app/certificate_agent2",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Website certificate by Zabbix agent 2 active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "The template to monitor TLS/SSL certificate on the website by Zabbix agent 2 that works without any external scripts.",
+   "path": "app/certificate_agent2_active",
+   "versions": [
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "WildFly Domain by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Official JMX Template for WildFly.",
+   "path": "app/wildfly_domain_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "WildFly Server by JMX",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "Official JMX Template for WildFly.",
+   "path": "app/wildfly_server_jmx",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Windows by SNMP",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Official Windows SNMP template. Requires Zabbix server 4.0.14, 4.2.8, 4.4.0 or newer (JSONPath function avg() used with types autoconversion).",
+   "path": "os/windows_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Windows by Zabbix agent",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Official Windows template. Requires agent of Zabbix 6.0 and newer.",
+   "path": "os/windows_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Windows by Zabbix agent active",
+   "groups": [
+    "Templates/Operating systems"
+   ],
+   "description": "Official Windows template. Requires agent of Zabbix 6.0 and newer.",
+   "path": "os/windows_agent_active",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Windows CPU by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows CPU by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows filesystems by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows filesystems by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows generic by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows generic by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows memory by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows memory by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows network by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows network by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows physical disks by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows physical disks by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Generated by official Zabbix template tool \"Templator\"",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows services by Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Services OS Windows",
+   "path": "module/windows_agent",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "Windows services by Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Template Services OS Windows",
+   "path": "module/windows_agent_active",
+   "versions": [
+    "6.0"
+   ]
+  },
+  {
+   "name": "YugabyteDB by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of YugabyteDB monitoring by Zabbix via HTTP and doesn't require any external scripts.",
+   "path": "db/yugabytedb_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "YugabyteDB Cluster by HTTP",
+   "groups": [
+    "Templates/Databases"
+   ],
+   "description": "This template is designed for the deployment of YugabyteDB clusters monitoring by Zabbix via HTTP and doesn't require any external scripts. This template will be automatically connected to discovered ",
+   "path": "db/yugabytedb_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix agent",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Use this template for agents reachable from Zabbix server/proxy (passive mode).",
+   "path": "module/zabbix_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix agent active",
+   "groups": [
+    "Templates/Modules"
+   ],
+   "description": "Use this template instead of 'Template Module Zabbix agent' for agents running in active mode only.",
+   "path": "module/zabbix_agent",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix proxy health",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the local Zabbix proxy.",
+   "path": "app/zabbix_proxy",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix proxy health by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the remote Zabbix proxy via the passive Zabbix agent.",
+   "path": "app/zabbix_proxy",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix proxy health by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the remote Zabbix proxy via the active Zabbix agent.",
+   "path": "app/zabbix_proxy",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix server health",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor internal Zabbix metrics on the local Zabbix server.",
+   "path": "app/zabbix_server",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix server health by Zabbix agent",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Zabbix server metrics via the passive Zabbix agent.",
+   "path": "app/zabbix_server",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zabbix server health by Zabbix agent active",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed to monitor Zabbix server metrics via the active Zabbix agent.",
+   "path": "app/zabbix_server",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "Zookeeper by HTTP",
+   "groups": [
+    "Templates/Applications"
+   ],
+   "description": "This template is designed for the effortless deployment of Apache Zookeeper monitoring by Zabbix via HTTP and doesn't require any external scripts.",
+   "path": "app/zookeeper_http",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL AAM1212-51 IES-612 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL AAM1212-51 / IES-612",
+   "path": "net/zyxel_snmp/zyxel_aam1212-51_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL ES3500-8PD by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL ES3500-8PD",
+   "path": "net/zyxel_snmp/zyxel_es3500-8pd_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL GS-4012F by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL GS-4012F",
+   "path": "net/zyxel_snmp/zyxel_gs4012f_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL IES-500x by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL IES-500x",
+   "path": "net/zyxel_snmp/zyxel_ies-500x_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL IES-6000 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL IES-6000",
+   "path": "net/zyxel_snmp/zyxel_ies-6000_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL IES1248-51 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL IES1248-51",
+   "path": "net/zyxel_snmp/zyxel_ies1248-51_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MES-3528 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MES-3528",
+   "path": "net/zyxel_snmp/zyxel_mes-3528_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MES3500-10 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MES3500-10",
+   "path": "net/zyxel_snmp/zyxel_mes3500-10_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MES3500-24 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MES3500-24",
+   "path": "net/zyxel_snmp/zyxel_mes3500-24_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MES3500-24S by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MES3500-24S",
+   "path": "net/zyxel_snmp/zyxel_mgs3500-24s_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MGS-3712 by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MGS-3712",
+   "path": "net/zyxel_snmp/zyxel_mgs-3712_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MGS-3712F by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MGS-3712F",
+   "path": "net/zyxel_snmp/zyxel_mgs-3712f_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL MGS3520-28x by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL MGS3520-28x",
+   "path": "net/zyxel_snmp/zyxel_mgs3520-28x_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  },
+  {
+   "name": "ZYXEL XGS-4728F by SNMP",
+   "groups": [
+    "Templates/Network devices"
+   ],
+   "description": "ZYXEL XGS-4728F",
+   "path": "net/zyxel_snmp/zyxel_xgs-4728f_snmp",
+   "versions": [
+    "6.0",
+    "7.0",
+    "7.4",
+    "8.0"
+   ]
+  }
+ ]
+}

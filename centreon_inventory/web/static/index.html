@@ -111,6 +111,8 @@
         <label>Utilisateur<input name="user"></label>
         <label>Mot de passe<input name="password" type="password" autocomplete="off"></label>
         <div class="checks"><label><input type="checkbox" name="insecure"> Ne pas vérifier le certificat TLS</label></div>
+        <label>Version de Zabbix server visée <span class="muted small">(auto-complétion des templates cibles)</span>
+          <select id="target-version"></select></label>
         <button type="submit" class="primary">Lancer l'inventaire Zabbix</button>
         <button type="button" id="forget-zabbix" class="ghost">Oublier l'inventaire Zabbix</button>
         <p class="muted small">Méthodes *.get uniquement. Le jeton n'est pas enregistré.</p>
@@ -179,6 +181,7 @@
   <div id="drawer-body"></div>
 </aside>
 <div id="toast" class="toast"></div>
+<ul id="ac" class="ac hidden" role="listbox"></ul>
 <script src="/static/app.js"></script>
 </body>
 </html>

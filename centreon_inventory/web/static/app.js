@@ -17,6 +17,8 @@ const BADGES = {
 const BADGE_COLUMNS = new Set(["Couverture standard", "Proposition", "Décision effective", "Décision (template)", "Décision (hôte)", "Statut Zabbix",
   "Disponible dans Zabbix", "Stratégie", "Priorité"]);
 const NUMERIC = (v) => typeof v === "number";
+// Champs « template Zabbix cible » : saisie libre assistée par l'auto-complétion du catalogue Zabbix.
+const TEMPLATE_FIELDS = new Set(["Template Zabbix cible", "Template / item Zabbix cible"]);
 
 const app = {
   view: "dashboard",
@@ -103,6 +105,9 @@ async function loadState() {
     ? `Inventaire du ${esc(st.zabbix.date)} — Zabbix ${esc(st.zabbix.version)}, ${st.zabbix.hosts} hôtes, ${st.zabbix.templates} templates`
     : '<span class="muted">Aucun inventaire Zabbix.</span>';
   $$(".tabs .zbx").forEach((b) => b.classList.toggle("disabled", !st.zabbix));
+  const tv = $("#target-version"), versions = (st.catalog && st.catalog.versions) || [];
+  tv.innerHTML = `<option value="">Auto${st.zabbix ? ` (Zabbix inventorié : ${esc(st.zabbix.version)})` : " (Zabbix inventorié, sinon la plus récente)"}</option>` +
+    versions.map((v) => `<option value="${esc(v)}" ${v === s.zabbix_target_version ? "selected" : ""}>Zabbix ${esc(v)}</option>`).join("");
   renderClients();
 }
 
@@ -251,7 +256,7 @@ function renderBulkValue() {
   const d = app.lastTable, field = $("#bulk-field").value, opts = d && d.choices && d.choices[field];
   $("#bulk-value-wrap").innerHTML = opts
     ? `<select id="bulk-value"><option value="">(effacer)</option>${opts.map((o) => `<option>${esc(o)}</option>`).join("")}</select>`
-    : '<input id="bulk-value" placeholder="(vide = effacer)">';
+    : `<input id="bulk-value" placeholder="(vide = effacer)"${TEMPLATE_FIELDS.has(field) ? " data-ac autocomplete=\"off\"" : ""}>`;
 }
 
 async function applyBulk() {
@@ -276,7 +281,8 @@ function cell(c, r, editable, choices, first) {
     if (opts) {
       return `<td class="edit"><select data-edit="${esc(c)}" data-key="${esc(r._key)}"><option value=""></option>${opts.map((o) => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
     }
-    return `<td class="edit"><input data-edit="${esc(c)}" data-key="${esc(r._key)}" value="${esc(v)}"></td>`;
+    const ac = TEMPLATE_FIELDS.has(c) ? ' data-ac autocomplete="off" placeholder="taper ou choisir…"' : "";
+    return `<td class="edit"><input data-edit="${esc(c)}" data-key="${esc(r._key)}" value="${esc(v)}"${ac}></td>`;
   }
   if (BADGE_COLUMNS.has(c) && v !== "") return `<td><span class="badge ${BADGES[v] || ""}">${esc(v)}</span></td>`;
   return `<td class="${NUMERIC(v) ? "num" : ""}" title="${esc(v)}">${esc(v)}</td>`;
@@ -288,6 +294,90 @@ async function saveDecision(el) {
     toast("Décision enregistrée");
     loadTable();
   } catch (e) { toast("Erreur : " + e.message); }
+}
+
+// ------------------------------------------------------------------ auto-complétion des templates Zabbix
+// Propose les templates officiels de la version de Zabbix server visée (catalogue zabbix.com/integrations) et ceux
+// du Zabbix inventorié, classés d'après le nom du template Centreon de la ligne.
+const ac = { input: null, items: [], active: -1, seq: 0, timer: null };
+
+function acContext(input) {
+  const rows = (app.lastTable && app.lastTable.rows) || [];
+  const row = input.dataset.key !== undefined ? rows.find((r) => r._key === input.dataset.key) : null;
+  return row ? { context: String(row._key), suggested: row["Template Zabbix suggéré"] || "" } : { context: "", suggested: "" };
+}
+
+async function acOpen(input) {
+  const seq = ++ac.seq, p = new URLSearchParams(acContext(input));
+  if (input._typed && input.value.trim()) p.set("q", input.value.trim());
+  let d;
+  try { d = await api("/api/zabbix/templates?" + p); } catch (e) { return; }
+  if (seq !== ac.seq || document.activeElement !== input) return;
+  ac.input = input; ac.items = d.items; ac.active = -1;
+  const list = $("#ac");
+  const head = `Templates Zabbix ${esc(d.catalog_version || "?")}${d.version && d.catalog_version !== d.version.slice(0, d.catalog_version.length) ? ` (serveur ${esc(d.version)})` : ""}`
+    + (p.get("q") ? "" : (p.get("context") ? ` — suggestions pour « ${esc(p.get("context"))} »` : " — tapez pour chercher"));
+  list.innerHTML = `<li class="head">${head}</li>` + (d.items.length ? d.items.map((t, i) => `<li data-i="${i}" role="option">
+    <span class="n">${esc(t.name)}${t.present ? '<span class="badge b-ok">dans Zabbix</span>' : ""}${t.official ? "" : '<span class="badge">personnalisé</span>'}</span>
+    <span class="d">${esc([t.group, t.description].filter(Boolean).join(" · "))}</span></li>`).join("")
+    : '<li class="head">Aucun template correspondant (saisie libre possible).</li>');
+  const r = input.getBoundingClientRect();
+  list.classList.remove("hidden");
+  list.style.left = Math.max(4, Math.min(r.left, window.innerWidth - list.offsetWidth - 4)) + "px";
+  const below = window.innerHeight - r.bottom;
+  list.style.top = (below < list.offsetHeight + 8 && r.top > below ? r.top - list.offsetHeight - 2 : r.bottom + 2) + "px";
+}
+
+function acClose() {
+  ac.seq++; ac.input = null; ac.items = [];
+  $("#ac").classList.add("hidden");
+}
+
+function acMove(delta) {
+  const lis = $$("#ac li[data-i]");
+  if (!lis.length) return;
+  ac.active = (ac.active + delta + lis.length) % lis.length;
+  lis.forEach((li, i) => li.classList.toggle("active", i === ac.active));
+  lis[ac.active].scrollIntoView({ block: "nearest" });
+}
+
+function acPick(i) {
+  const input = ac.input, t = ac.items[i];
+  if (!input || !t) return;
+  input.value = t.name;
+  acClose();
+  if (input.dataset.edit !== undefined) input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function bindAutocomplete() {
+  document.addEventListener("focusin", (e) => {
+    if (e.target.matches("input[data-ac]")) { e.target._typed = false; acOpen(e.target); }
+  });
+  document.addEventListener("focusout", (e) => {
+    if (e.target === ac.input) setTimeout(() => { if (document.activeElement !== ac.input) acClose(); }, 150);
+  });
+  document.addEventListener("input", (e) => {
+    if (!e.target.matches("input[data-ac]")) return;
+    e.target._typed = true;
+    clearTimeout(ac.timer);
+    ac.timer = setTimeout(() => acOpen(e.target), 150);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!ac.input || e.target !== ac.input) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); acMove(e.key === "ArrowDown" ? 1 : -1); }
+    else if (e.key === "Enter" && ac.active >= 0) { e.preventDefault(); acPick(ac.active); }
+    else if (e.key === "Escape") { e.stopPropagation(); acClose(); }
+  }, true);
+  $("#ac").addEventListener("mousedown", (e) => {
+    e.preventDefault(); // garde le focus dans le champ
+    const li = e.target.closest("li[data-i]");
+    if (li) acPick(+li.dataset.i);
+  });
+  window.addEventListener("scroll", (e) => { if (ac.input && !$("#ac").contains(e.target)) acClose(); }, true);
+  $("#target-version").addEventListener("change", async (e) => {
+    await post("/api/settings", { zabbix_target_version: e.target.value });
+    toast(`Auto-complétion : templates Zabbix ${e.target.value || "de la version inventoriée"}`);
+  });
 }
 
 // ------------------------------------------------------------------ fiche détaillée
@@ -609,6 +699,7 @@ function bind() {
 
 (async function init() {
   bind();
+  bindAutocomplete();
   try {
     const saved = JSON.parse(localStorage.getItem("scope") || "null");
     if (saved) Object.assign(app.scope, saved);
