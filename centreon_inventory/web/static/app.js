@@ -226,6 +226,7 @@ function renderTable(d, ts) {
     const box = selectable ? `<td class="sel"><input type="checkbox" data-sel="${esc(r._key)}" ${checked ? "checked" : ""}></td>` : "";
     return `<tr class="${checked ? "selected" : ""}">${box}${d.columns.map((c, i) => cell(c, r, editable, d.choices, i === 0)).join("")}</tr>`;
   }).join("");
+  freezeColumns(grid, (selectable ? 1 : 0) + FROZEN_COLUMNS);
   updateBulk();
   $("#count").textContent = `${d.total} ligne(s)` + (d.total !== d.all ? ` sur ${d.all}` : "");
   const pages = Math.max(1, Math.ceil(d.total / d.size));
@@ -234,6 +235,24 @@ function renderTable(d, ts) {
     <span>Page ${d.page} / ${pages}</span>
     <button data-page="${d.page + 1}" ${d.page >= pages ? "disabled" : ""}>›</button>
     <button data-page="${pages}" ${d.page >= pages ? "disabled" : ""}>»</button>` : "";
+}
+
+// Fige les premières colonnes (case de sélection comprise) lors du défilement horizontal : chaque cellule reçoit
+// un décalage « left » égal à la largeur cumulée des colonnes qui la précèdent.
+const FROZEN_COLUMNS = 3;
+
+function freezeColumns(grid, n) {
+  const head = grid.querySelector("thead tr");
+  if (!head) return;
+  const cells = [...head.children].slice(0, n), lefts = cells.map((th) => th.offsetLeft - cells[0].offsetLeft);
+  for (const tr of grid.rows) {
+    [...tr.children].forEach((c, i) => {
+      const frozen = i < n && tr.children.length > 1;
+      c.classList.toggle("frz", frozen);
+      c.classList.toggle("frz-last", frozen && i === n - 1);
+      c.style.left = frozen ? lefts[i] + "px" : "";
+    });
+  }
 }
 
 function updateBulk() {
@@ -711,4 +730,8 @@ function bind() {
   try { view = localStorage.getItem("view") || "dashboard"; } catch (e) { /* stockage indisponible */ }
   if (!app.state.centreon) view = "sources";
   show(view);
+  window.addEventListener("resize", () => {
+    const grid = $("#grid"), n = grid.querySelectorAll("thead tr:first-child th.frz").length;
+    if (n) freezeColumns(grid, n);
+  });
 })();
