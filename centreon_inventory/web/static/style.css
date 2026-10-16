@@ -77,10 +77,14 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-siz
 .grid td { padding: 4px 8px; border-bottom: 1px solid var(--line); vertical-align: top; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .grid td.wrap { white-space: normal; }
 .grid tbody tr:hover td { background: var(--row-hover); }
-#grid th:first-child, #grid td:first-child { position: sticky; left: 0; z-index: 1; }
-#grid td:first-child { background: var(--panel); font-weight: 600; }
-#grid thead th:first-child { z-index: 3; }
-#grid tr.filters th:first-child { background: var(--panel); }
+#grid .frz { position: sticky; z-index: 1; }
+#grid td.frz { background: var(--panel); }
+#grid td:first-child { font-weight: 600; }
+#grid thead th.frz { z-index: 3; }
+#grid tr.filters th.frz { background: var(--panel); }
+#grid .frz-last { box-shadow: inset -1px 0 0 var(--line), 4px 0 6px -4px rgba(0, 0, 0, .35); }
+#grid tbody tr:hover td.frz { background: var(--row-hover); }
+#grid tr.selected td.frz { background: color-mix(in srgb, var(--info) 60%, var(--panel)); }
 .grid td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .grid td.edit { background: color-mix(in srgb, var(--warn) 45%, transparent); padding: 2px 4px; }
 .grid td.edit select, .grid td.edit input { width: 100%; min-width: 150px; font-size: 12px; padding: 2px 4px; }
