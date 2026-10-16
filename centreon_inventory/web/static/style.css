@@ -136,3 +136,13 @@ a.detail { color: inherit; text-decoration: underline dotted; cursor: pointer; }
   .bars .bar { grid-template-columns: 120px 1fr 50px; }
   .toolbar input[type=search] { width: 100%; }
 }
+
+/* auto-complétion des templates Zabbix */
+.ac { position: fixed; z-index: 30; margin: 0; padding: 4px 0; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, .25); max-height: 340px; overflow-y: auto; min-width: 320px; max-width: 520px; }
+.ac li { padding: 5px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+.ac li.active, .ac li:hover { background: var(--row-hover); }
+.ac li .n { font-weight: 600; }
+.ac li .d { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ac li.head { cursor: default; font-size: 11.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 2px; }
+.ac li.head:hover { background: transparent; }
+.ac .badge { font-size: 10.5px; margin-left: 6px; }

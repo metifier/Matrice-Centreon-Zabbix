@@ -347,3 +347,19 @@ def test_web_detail(client):
     assert client.get("/api/detail/hosts?key=srv-lnx-db01").get_json()["services"]["total"] == 6
     assert client.get("/api/detail/services?key=srv-lnx-db01|Cpu").status_code == 200
     assert client.get("/api/detail/services?key=inconnu|x").status_code == 404
+
+
+def test_web_zabbix_template_autocomplete(client):
+    # sans inventaire Zabbix : catalogue de la version la plus récente
+    d = client.get("/api/zabbix/templates?context=IDRAC").get_json()
+    assert d["items"][0]["name"] == "Dell iDRAC by SNMP" and d["catalog_version"] == d["versions"][-1]
+    # avec l'inventaire Zabbix (7.0.5) : catalogue 7.0 + templates présents dans Zabbix
+    client.post("/api/import/demo")
+    d = client.get("/api/zabbix/templates?context=OS-Linux-SNMP").get_json()
+    assert d["version"] == "7.0.5" and d["catalog_version"] == "7.0"
+    assert d["items"][0]["name"] == "Linux by SNMP"
+    # version visée choisie explicitement
+    client.post("/api/settings", json={"zabbix_target_version": "6.0"})
+    d = client.get("/api/zabbix/templates?q=interfaces").get_json()
+    assert d["catalog_version"] == "6.0" and "Interfaces by SNMP" in [t["name"] for t in d["items"]]
+    assert client.get("/api/state").get_json()["catalog"]["versions"]

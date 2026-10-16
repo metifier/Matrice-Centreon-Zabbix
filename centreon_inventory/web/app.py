@@ -22,6 +22,7 @@ from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, request, send_file, send_from_directory
 
+from ..catalog import load_catalog
 from ..compat import replace_file
 from ..decisions import TABLES, row_key, save_decisions, set_decision
 from ..excel import write_excel
@@ -63,7 +64,7 @@ EDITABLE = {t: {"key": t, "fields": fields} for t, (_, _, fields) in TABLES.item
 CHOICES = {"Décision finale": DECISIONS, "Décision (service)": DECISIONS}
 HOST_CHOICES = {"Décision finale": HOST_DECISIONS}
 SETTINGS_KEYS = ("centreon_url", "centreon_user", "centreon_insecure", "zabbix_url", "zabbix_user",
-                 "zabbix_insecure", "seuil_haute", "seuil_moyenne")
+                 "zabbix_insecure", "seuil_haute", "seuil_moyenne", "zabbix_target_version")
 
 
 class Store:
@@ -286,6 +287,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             "pollers": sorted(poller_count.items(), key=lambda x: (-x[1], x[0])),
             "jobs": [{k: j[k] for k in ("id", "kind", "status", "error")} for j in jobs.recent()],
             "choices": {"default": CHOICES, "hosts": HOST_CHOICES}, "editable": EDITABLE,
+            "catalog": {"versions": load_catalog().versions, "generated": load_catalog().generated},
         })
 
     @app.post("/api/settings")
@@ -413,6 +415,26 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             store._zbx, store._loaded = None, False
         store.invalidate()
         return jsonify({"ok": True})
+
+    # ---------------------------------------------------------------- catalogue Zabbix
+    def target_version():
+        """Version de Zabbix server visée : choix explicite, sinon celle du Zabbix inventorié."""
+        zbx = store.zabbix
+        return (request.args.get("version") or store.settings().get("zabbix_target_version")
+                or (zbx.version if zbx else ""))
+
+    @app.get("/api/zabbix/templates")
+    def zabbix_templates():
+        """Auto-complétion des templates Zabbix : officiels de la version visée + présents dans le Zabbix inventorié."""
+        cat, zbx = load_catalog(), store.zabbix
+        version = target_version()
+        present = {t.get("name") for t in (zbx.templates if zbx else []) if t.get("name")}
+        a = request.args
+        items = cat.suggest(version, context=a.get("context", ""), q=a.get("q", ""),
+                            suggested=a.get("suggested", ""), present=present,
+                            limit=min(50, max(1, int(a.get("limit", 15)))))
+        return jsonify({"version": version, "catalog_version": cat.resolve_version(version),
+                        "versions": cat.versions, "generated": cat.generated, "items": items})
 
     # ---------------------------------------------------------------- consultation
     @app.get("/api/summary")

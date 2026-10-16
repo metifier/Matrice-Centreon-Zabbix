@@ -66,6 +66,8 @@ L'interface permet de :
    service / d'hôte, hôtes, services, comparatif Zabbix ; recherche, filtres par colonne, tri.
 4. **Décider** directement dans les tableaux (*Décision finale*, cible Zabbix, commentaire,
    exception par service) : les décisions sont enregistrées et se propagent aux services.
+   Les champs *Template Zabbix cible* proposent une **auto-complétion des templates Zabbix**
+   (voir ci-dessous).
 5. **Exporter en Excel** le périmètre affiché (bouton *Exporter Excel*), décisions comprises.
 
 Les données sont conservées en JSON dans `./data` (`--data-dir`). **Les mots de passe et jetons
@@ -196,6 +198,35 @@ La **priorité** dépend du nombre d'hôtes concernés (Haute ≥ 20, Moyenne �
 Les correspondances sont définies dans [`mapping/zabbix_mapping.yaml`](mapping/zabbix_mapping.yaml)
 (regex sur le nom de template, la commande, le plugin / mode Centreon Plugins ou la ligne de
 commande). **Adaptez ce fichier à votre parc** (templates maison, nomenclature) puis régénérez la matrice.
+
+### Auto-complétion des templates Zabbix cibles
+
+Dans les colonnes *Template Zabbix cible* (templates d'hôte) et *Template / item Zabbix cible* (templates de
+service), ainsi que dans la décision groupée, une liste de templates Zabbix s'ouvre dès que le champ reçoit le
+focus :
+
+* **sans saisie**, les templates proposés sont déduits du **nom du template Centreon** de la ligne : `IDRAC` →
+  *Dell iDRAC by SNMP*, `Act-Srv-Lnx` → *Linux by Zabbix agent*, `Act-MSSQL-Srv` → *MSSQL by Zabbix agent 2*,
+  `generic-host` → *ICMP Ping*, `Act-Tomcat-JMX` → *Apache Tomcat by JMX*… (abréviations courantes : Lnx, Win,
+  ESX, Printer, SNMP / agent / JMX pour privilégier la bonne variante) ; le template suggéré par le référentiel
+  passe en tête ;
+* **en tapant**, la liste est filtrée sur le nom (ex. `cisco ios`) ; ↑ ↓ puis Entrée (ou clic) pour choisir,
+  la saisie libre reste possible (item, template maison) ;
+* seuls les templates **officiels de la version de Zabbix server visée** sont proposés, plus ceux déjà présents
+  dans le Zabbix inventorié (badge *dans Zabbix*, ou *personnalisé* s'il ne s'agit pas d'un template officiel).
+
+La version visée se choisit dans *Sources & extractions* → carte Zabbix (*Version de Zabbix server visée*) ;
+par défaut, celle du Zabbix inventorié. Une version sans catalogue propre utilise la précédente (7.2 → 7.0).
+
+Le catalogue [`mapping/zabbix_templates_catalog.json`](mapping/zabbix_templates_catalog.json) reprend les
+templates officiels publiés sur https://www.zabbix.com/integrations, lus dans le dossier `templates/` du dépôt
+officiel Zabbix pour chaque version (6.0, 7.0, 7.4 et 8.0 — branche de développement à la date de génération).
+Pour le mettre à jour (nouvelle version de Zabbix) :
+
+```bash
+python3 tools/build_zabbix_catalog.py                      # versions par défaut
+python3 tools/build_zabbix_catalog.py 7.0=release/7.0 8.0=release/8.0
+```
 
 ## Installation
 
