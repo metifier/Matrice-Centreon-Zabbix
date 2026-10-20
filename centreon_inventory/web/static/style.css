@@ -150,3 +150,8 @@ a.detail { color: inherit; text-decoration: underline dotted; cursor: pointer; }
 .ac li.head { cursor: default; font-size: 11.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 2px; }
 .ac li.head:hover { background: transparent; }
 .ac .badge { font-size: 10.5px; margin-left: 6px; }
+.grid td.tchips { white-space: normal; min-width: 220px; }
+.tchip { display: inline-flex; align-items: center; gap: 2px; margin: 1px 4px 1px 0; padding: 0 2px 0 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; background: var(--panel); }
+.tchip.off { text-decoration: line-through; opacity: .6; }
+.tchip button { border: 0; background: none; padding: 0 4px; cursor: pointer; font-size: 13px; line-height: 1; color: inherit; }
+.tchip button:hover { color: var(--accent); }

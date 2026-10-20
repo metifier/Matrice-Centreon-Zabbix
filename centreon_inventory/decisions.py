@@ -15,7 +15,8 @@ TABLES = {
                           ["Décision finale", "Template / item Zabbix cible", "Commentaire"]),
     "host_templates": ("host_templates", "Template d'hôte",
                        ["Décision finale", "Template Zabbix cible", "Commentaire"]),
-    "hosts": ("hosts", "Hôte", ["Décision finale", "Templates Zabbix cibles", "Commentaire"]),
+    "hosts": ("hosts", "Hôte", ["Décision finale", "Templates Zabbix cibles", "Templates Zabbix exclus",
+                                     "Commentaire"]),
     "services": ("services", None, ["Décision (service)", "Template Zabbix cible", "Commentaire"]),
 }
 # Clé d'item Zabbix (ex. system.cpu.util[,idle]) saisie dans « Template / item Zabbix cible » : pas un template.
@@ -98,7 +99,8 @@ def _cross_targets(m: Matrix):
     """Croise les templates Zabbix cibles saisis aux différents niveaux.
 
     - service : sa cible propre, sinon celle de son template de service ;
-    - hôte : ses cibles propres + celles de ses templates d'hôte Centreon + celles de ses services migrés ;
+    - hôte : ses cibles propres + celles de ses templates d'hôte Centreon + celles de ses services migrés,
+      moins les templates exclus sur l'hôte (cumul erroné) ;
     - chaque service affiche en retour les templates retenus pour son hôte.
     """
     inv = m.inventory
@@ -114,8 +116,9 @@ def _cross_targets(m: Matrix):
     for row in m.hosts:
         h = inv.hosts.get(row["Hôte"])
         via_htpl = [t for name in (h.templates if h else []) for t in by_htpl.get(name, [])]
-        row["Templates Zabbix retenus"] = _join(target_templates(row["Templates Zabbix cibles"]), via_htpl,
-                                                from_services.get(row["Hôte"], []))
+        excluded = {t.lower() for t in split_templates(row["Templates Zabbix exclus"])}
+        cumul = _join(target_templates(row["Templates Zabbix cibles"]), via_htpl, from_services.get(row["Hôte"], []))
+        row["Templates Zabbix retenus"] = ", ".join(t for t in split_templates(cumul) if t.lower() not in excluded)
     retained = {r["Hôte"]: r["Templates Zabbix retenus"] for r in m.hosts}
     for row in m.services:
         row["Templates Zabbix (hôte)"] = retained.get(row["Hôte"], "")

@@ -54,7 +54,7 @@ WEB_ORDER = {
     "correlation": ["Template de service", "Nb services", "Catégorie", "Couverture standard", "Approche recommandée",
                     "Items Zabbix correspondants", "Template Zabbix examiné"],
     "hosts": ["Hôte", "Adresse", "Collecteur", "Actif", "Nb services", "Templates Zabbix suggérés",
-              "Templates Zabbix cibles", "Templates Zabbix retenus", "Proposition", "Décision finale", "Commentaire"],
+              "Templates Zabbix cibles", "Templates Zabbix retenus", "Templates Zabbix exclus", "Proposition", "Décision finale", "Commentaire"],
     "services": ["Hôte", "Service", "Actif", "Template de service", "Catégorie", "Template Zabbix suggéré",
                  "Template Zabbix cible", "Template Zabbix retenu", "Templates Zabbix (hôte)", "Couverture standard", "Item Zabbix standard", "Statut Zabbix", "Proposition", "Décision (template)", "Décision (hôte)", "Décision (service)",
                  "Décision effective",

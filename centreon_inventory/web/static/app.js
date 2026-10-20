@@ -292,8 +292,40 @@ async function applyBulk() {
   } catch (e) { toast("Erreur : " + e.message); }
 }
 
+// Templates retenus d'un hôte : « × » désélectionne un template du cumul ; les exclus sont barrés, « ↺ » les rétablit.
+function templateChips(c, r) {
+  const key = esc(r._key), names = splitList(r[c]);
+  if (c === "Templates Zabbix retenus") {
+    return `<td class="tchips">${names.map((t) => `<span class="tchip">${esc(t)}<button data-untpl="${esc(t)}" data-key="${key}" title="Désélectionner ce template">×</button></span>`).join("")}</td>`;
+  }
+  return `<td class="tchips">${names.map((t) => `<span class="tchip off">${esc(t)}<button data-retpl="${esc(t)}" data-key="${key}" title="Rétablir ce template">↺</button></span>`).join("")}</td>`;
+}
+
+async function toggleTemplate(btn) {
+  const row = ((app.lastTable && app.lastTable.rows) || []).find((r) => r._key === btn.dataset.key);
+  if (!row) return;
+  const lower = (t) => t.toLowerCase(), save = (field, list) =>
+    post("/api/decision", { table: "hosts", key: row._key, field, value: list.join(", ") });
+  const cibles = splitList(row["Templates Zabbix cibles"]), exclus = splitList(row["Templates Zabbix exclus"]);
+  try {
+    if (btn.dataset.untpl !== undefined) {
+      const t = btn.dataset.untpl;
+      // Saisi sur l'hôte : on le retire des cibles ; venu du cumul (template d'hôte, service) : on l'exclut.
+      if (cibles.some((x) => lower(x) === lower(t))) await save("Templates Zabbix cibles", cibles.filter((x) => lower(x) !== lower(t)));
+      else await save("Templates Zabbix exclus", [...exclus, t]);
+      toast(`« ${t} » désélectionné`);
+    } else {
+      const t = btn.dataset.retpl;
+      await save("Templates Zabbix exclus", exclus.filter((x) => lower(x) !== lower(t)));
+      toast(`« ${t} » rétabli`);
+    }
+    loadTable();
+  } catch (e) { toast("Erreur : " + e.message); }
+}
+
 function cell(c, r, editable, choices, first) {
   const v = r[c];
+  if (app.view === "hosts" && (c === "Templates Zabbix retenus" || c === "Templates Zabbix exclus")) return templateChips(c, r);
   if (first && r._key !== undefined) {
     return `<td title="Voir le détail"><a href="#" class="detail" data-detail="${esc(r._key)}">${esc(v)}</a></td>`;
   }
@@ -585,6 +617,10 @@ function bind() {
   $("#drawer-body").addEventListener("change", async (e) => {
     if (e.target.dataset.edit === undefined) return;
     await saveDecision(e.target);
+  });
+  grid.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-untpl],button[data-retpl]");
+    if (b) { e.preventDefault(); toggleTemplate(b); }
   });
   grid.addEventListener("click", (e) => {
     const th = e.target.closest("thead tr:first-child th");

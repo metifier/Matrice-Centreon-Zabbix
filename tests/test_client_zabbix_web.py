@@ -401,3 +401,16 @@ def test_web_target_templates_editable(client):
     assert r.status_code == 200
     items = client.get("/api/zabbix/templates?suggested=Foo, ICMP Ping&q=icmp").get_json()["items"]
     assert items and items[0]["name"] == "ICMP Ping"
+
+
+def test_host_excluded_templates_removed_from_cumul(inv):
+    decisions = {
+        "host_templates": {"App-Webserver-Apache-ServerStatus-custom": {"Template Zabbix cible": "Apache by HTTP"}},
+        "hosts": {"srv-lnx-web01": {"Templates Zabbix cibles": "ICMP Ping",
+                                    "Templates Zabbix exclus": "apache by http"}},
+    }
+    m = build_report(inv, decisions=decisions)
+    host = next(r for r in m.hosts if r["Hôte"] == "srv-lnx-web01")
+    assert host["Templates Zabbix retenus"] == "ICMP Ping"  # exclusion insensible à la casse
+    svc = next(r for r in m.services if r["Hôte"] == "srv-lnx-web01")
+    assert svc["Templates Zabbix (hôte)"] == "ICMP Ping"
