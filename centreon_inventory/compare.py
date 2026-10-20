@@ -34,6 +34,11 @@ def split_templates(value: str) -> list[str]:
     return out
 
 
+def target_or_suggested(row: dict, retained: str, suggested: str) -> list[str]:
+    """Templates choisis par l'utilisateur (croisés) s'il y en a, sinon les templates suggérés."""
+    return split_templates(row.get(retained, "")) or split_templates(row.get(suggested, ""))
+
+
 def _zabbix_host_in_scope(client: ClientFilter, zh: dict) -> bool:
     """Périmètre client appliqué à un hôte Zabbix : nom et groupes (les groupes Zabbix reprennent souvent
     ceux de Centreon) ; le critère collecteur, propre à Centreon, ne s'applique pas."""
@@ -91,7 +96,7 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
     m.zabbix_hosts = []
     for row in m.hosts:
         zh, how = host_match.get(row["Hôte"]), how_match.get(row["Hôte"], "")
-        suggested = split_templates(row["Templates Zabbix suggérés"])
+        suggested = target_or_suggested(row, "Templates Zabbix retenus", "Templates Zabbix suggérés")
         if zh:
             linked = {_norm(t) for t in zh["templates"]}
             missing = [t for t in suggested if _norm(t) not in linked]
@@ -107,7 +112,8 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
             "Interfaces Zabbix": ", ".join(sorted({i["type"] for i in zh["interfaces"]})) if zh else "",
             "Nb items Zabbix": zh["items"] if zh else "",
             "Templates Zabbix liés": ", ".join(zh["templates"]) if zh else "",
-            "Templates Zabbix suggérés": ", ".join(suggested),
+            "Templates Zabbix suggérés": row["Templates Zabbix suggérés"],
+            "Templates Zabbix retenus": row.get("Templates Zabbix retenus", ""),
             "Templates à lier": ", ".join(missing),
             "Nb services Centreon": row["Nb services"],
         })
@@ -129,7 +135,7 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
     # ---------------------------------------------------------------- services
     for row in m.services:
         zh = host_match.get(row["Hôte"])
-        suggested = split_templates(row["Template Zabbix suggéré"])
+        suggested = target_or_suggested(row, "Template Zabbix retenu", "Template Zabbix suggéré")
         linked = {_norm(t) for t in zh["templates"]} if zh else set()
         decision = row.get("Décision effective") or row["Proposition"]
         if decision.startswith("Ne pas migrer"):
@@ -158,6 +164,9 @@ def compare_with_zabbix(m: Matrix, zbx: ZabbixInventory, client: ClientFilter | 
             need[t] += row["Nb hôtes (direct)"]
         row["Template Zabbix disponible"] = ("Oui" if any(_norm(t) in zbx_tpl for t in split_templates(
             row["Template Zabbix suggéré"])) else "Non") if split_templates(row["Template Zabbix suggéré"]) else ""
+    for row in m.hosts:  # templates choisis explicitement sur l'hôte
+        for t in split_templates(row.get("Templates Zabbix cibles", "")):
+            need[t] += 1
     m.zabbix_templates = []
     for name in sorted(need, key=lambda n: (-need[n], n.lower())):
         t = zbx_tpl.get(_norm(name))

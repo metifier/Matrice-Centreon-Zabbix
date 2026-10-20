@@ -103,6 +103,7 @@ def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, m
             "Stratégie": sug.strategy, "Proposition": proposal,
             "Décision (template)": None, "Décision (hôte)": None, "Décision (service)": "",
             "Décision effective": None,
+            "Template Zabbix cible": "", "Template Zabbix retenu": "", "Templates Zabbix (hôte)": "",
             "Commentaire": "",
         }
         m.services.append(row)
@@ -214,7 +215,8 @@ def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, m
             "Templates Zabbix suggérés": ", ".join(_uniq(zbx)),
             "Proxy Zabbix suggéré": h.poller,
             "Proposition": "Migrer" if h.activate else NE_PAS_MIGRER,
-            "Décision finale": "", "Commentaire": "",
+            "Décision finale": "", "Templates Zabbix cibles": "", "Templates Zabbix retenus": "",
+            "Commentaire": "",
         })
 
     # ----------------------------------------------------------------- commandes

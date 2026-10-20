@@ -363,3 +363,41 @@ def test_web_zabbix_template_autocomplete(client):
     d = client.get("/api/zabbix/templates?q=interfaces").get_json()
     assert d["catalog_version"] == "6.0" and "Interfaces by SNMP" in [t["name"] for t in d["items"]]
     assert client.get("/api/state").get_json()["catalog"]["versions"]
+
+
+def test_target_templates_cross_hosts_and_services(inv, zbx):
+    decisions = {
+        "hosts": {"srv-lnx-web01": {"Templates Zabbix cibles": "Linux by Zabbix agent, ICMP Ping"}},
+        "host_templates": {"App-Webserver-Apache-ServerStatus-custom": {"Template Zabbix cible": "Apache by HTTP"}},
+        "service_templates": {"OS-Linux-Cpu-SNMP-custom": {"Template / item Zabbix cible": "system.cpu.util[,idle]"}},
+        "services": {"srv-lnx-web01|Cpu": {"Template Zabbix cible": "Linux by SNMP"}},
+    }
+    m = build_report(inv, decisions=decisions, zabbix=zbx)
+    host = next(r for r in m.hosts if r["Hôte"] == "srv-lnx-web01")
+    # choix de l'hôte + cible du template d'hôte + cible d'un service, sans doublon ni clé d'item
+    assert host["Templates Zabbix retenus"].split(", ")[:3] == ["Linux by Zabbix agent", "ICMP Ping", "Apache by HTTP"]
+    assert "Linux by SNMP" in host["Templates Zabbix retenus"]
+    assert "system.cpu.util" not in host["Templates Zabbix retenus"]
+    svc = {(r["Hôte"], r["Service"]): r for r in m.services}
+    assert svc["srv-lnx-web01", "Cpu"]["Template Zabbix retenu"] == "Linux by SNMP"
+    assert svc["srv-lnx-db01", "Cpu"]["Template Zabbix retenu"] == ""  # clé d'item : pas un template
+    assert svc["srv-lnx-web01", "Ping"]["Templates Zabbix (hôte)"] == host["Templates Zabbix retenus"]
+    zrow = next(r for r in m.zabbix_hosts if r["Hôte Centreon"] == "srv-lnx-web01")
+    assert zrow["Templates Zabbix retenus"] == host["Templates Zabbix retenus"]
+    assert zrow["Templates à lier"] == "Linux by Zabbix agent"  # le seul template retenu non lié dans Zabbix
+    assert any(r["Template Zabbix suggéré"] == "Linux by Zabbix agent" for r in m.zabbix_templates)
+
+
+def test_web_target_templates_editable(client):
+    client.post("/api/import/demo", json={})
+    r = client.post("/api/decision", json={"table": "hosts", "key": "srv-lnx-web01",
+                                           "field": "Templates Zabbix cibles", "value": "ICMP Ping, Linux by SNMP"})
+    assert r.status_code == 200
+    t = client.get("/api/table/hosts?f.Hôte=srv-lnx-web01").get_json()
+    assert "Templates Zabbix cibles" in t["editable"]
+    assert t["rows"][0]["Templates Zabbix retenus"].startswith("ICMP Ping, Linux by SNMP")
+    r = client.post("/api/decision", json={"table": "services", "key": "srv-lnx-web01|Cpu",
+                                           "field": "Template Zabbix cible", "value": "Linux by Zabbix agent"})
+    assert r.status_code == 200
+    items = client.get("/api/zabbix/templates?suggested=Foo, ICMP Ping&q=icmp").get_json()["items"]
+    assert items and items[0]["name"] == "ICMP Ping"

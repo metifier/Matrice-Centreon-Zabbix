@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
+from .compare import split_templates
 from .compat import replace_file
 from .matrix import NE_PAS_MIGRER, Matrix
 
@@ -13,9 +15,24 @@ TABLES = {
                           ["Décision finale", "Template / item Zabbix cible", "Commentaire"]),
     "host_templates": ("host_templates", "Template d'hôte",
                        ["Décision finale", "Template Zabbix cible", "Commentaire"]),
-    "hosts": ("hosts", "Hôte", ["Décision finale", "Commentaire"]),
-    "services": ("services", None, ["Décision (service)", "Commentaire"]),
+    "hosts": ("hosts", "Hôte", ["Décision finale", "Templates Zabbix cibles", "Commentaire"]),
+    "services": ("services", None, ["Décision (service)", "Template Zabbix cible", "Commentaire"]),
 }
+# Clé d'item Zabbix (ex. system.cpu.util[,idle]) saisie dans « Template / item Zabbix cible » : pas un template.
+_ITEM_KEY_RE = re.compile(r"\[|^[\w-]+(\.[\w-]+)+$")
+
+
+def target_templates(value: str) -> list[str]:
+    """Noms de templates Zabbix d'une saisie libre (séparés par des virgules), sans les clés d'item."""
+    value = re.sub(r"\[[^\]]*\]?", "[]", value or "")  # virgules des paramètres d'item
+    return [t for t in split_templates(value) if not _ITEM_KEY_RE.search(t)]
+
+
+def _join(*lists) -> str:
+    out = []
+    for names in lists:
+        out += [t for t in names if t.lower() not in {o.lower() for o in out}]
+    return ", ".join(out)
 
 
 def row_key(table: str, row: dict) -> str:
@@ -73,7 +90,35 @@ def apply_decisions(m: Matrix, decisions: dict | None) -> Matrix:
             row["Décision effective"] = NE_PAS_MIGRER
         else:
             row["Décision effective"] = row["Décision (template)"]
+    _cross_targets(m)
     return m
+
+
+def _cross_targets(m: Matrix):
+    """Croise les templates Zabbix cibles saisis aux différents niveaux.
+
+    - service : sa cible propre, sinon celle de son template de service ;
+    - hôte : ses cibles propres + celles de ses templates d'hôte Centreon + celles de ses services migrés ;
+    - chaque service affiche en retour les templates retenus pour son hôte.
+    """
+    inv = m.inventory
+    by_stpl = {r["Template de service"]: target_templates(r["Template / item Zabbix cible"])
+               for r in m.service_templates}
+    by_htpl = {r["Template d'hôte"]: target_templates(r["Template Zabbix cible"]) for r in m.host_templates}
+    from_services: dict[str, list[str]] = {}
+    for row in m.services:
+        own = target_templates(row["Template Zabbix cible"])
+        row["Template Zabbix retenu"] = _join(own or by_stpl.get(row["Template de service"], []))
+        if row["Décision effective"] != NE_PAS_MIGRER:
+            from_services.setdefault(row["Hôte"], []).extend(split_templates(row["Template Zabbix retenu"]))
+    for row in m.hosts:
+        h = inv.hosts.get(row["Hôte"])
+        via_htpl = [t for name in (h.templates if h else []) for t in by_htpl.get(name, [])]
+        row["Templates Zabbix retenus"] = _join(target_templates(row["Templates Zabbix cibles"]), via_htpl,
+                                                from_services.get(row["Hôte"], []))
+    retained = {r["Hôte"]: r["Templates Zabbix retenus"] for r in m.hosts}
+    for row in m.services:
+        row["Templates Zabbix (hôte)"] = retained.get(row["Hôte"], "")
 
 
 def prune_unused(m: Matrix) -> Matrix:
