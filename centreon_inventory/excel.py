@@ -47,7 +47,7 @@ STATUS_COLORS.update({"Couvert par un item standard": "C6EFCE", "Template standa
                       "Non migré": "D9D9D9"})
 STATUS_COLUMNS = {"Statut Zabbix", "Disponible dans Zabbix", "Couverture standard"}
 INPUT_COLUMNS = {"Décision finale", "Décision (service)", "Template / item Zabbix cible",
-                 "Template Zabbix cible", "Commentaire"}
+                 "Template Zabbix cible", "Templates Zabbix cibles", "Commentaire"}
 MAX_WIDTH = {"Ligne de commande résolue": 80, "Ligne de commande": 90, "Chaîne d'héritage": 50,
              "Chaîne complète": 50, "Templates (tous)": 50}
 
@@ -279,7 +279,11 @@ def _help_sheet(wb):
         ("3. « Services » : inventaire détaillé hôte par hôte. La colonne « Décision (template) » reprend "
          "automatiquement la décision du template ; « Décision (service) » permet une exception ponctuelle ; "
          "« Décision effective » donne le résultat final (filtrable).", False),
-        ("4. « Hôtes » : liste des hôtes avec interface et templates Zabbix suggérés, proxy = collecteur Centreon.", False),
+        ("4. « Hôtes » : liste des hôtes avec interface et templates Zabbix suggérés, proxy = collecteur Centreon. "
+         "« Templates Zabbix cibles » : templates choisis pour l'hôte (plusieurs, séparés par des virgules).", False),
+        ("   « Templates Zabbix retenus » croise ces choix avec les cibles des templates d'hôte et des services migrés "
+         "de l'hôte ; côté « Services », « Template Zabbix cible » (exception) l'emporte sur la cible du template de "
+         "service, et « Templates Zabbix (hôte) » rappelle les templates retenus pour l'hôte.", False),
         ("5. Onglets « Croisé » : vue matricielle hôtes × templates pour repérer les profils d'hôtes.", False),
         ("6. « Corrélation items Zabbix » : pour chaque template de service Centreon, item(s) des templates Zabbix "
          "standards qui couvrent déjà la mesure, ou spécificité à créer. Démarche conseillée : lier d'abord les "

@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from .compare import _norm, split_templates
+from .compare import _norm, split_templates, target_or_suggested
+from .decisions import target_templates
 from .mapping import Mapper
 from .matrix import Matrix
 from .zabbix import ZabbixInventory
@@ -99,7 +100,8 @@ def correlate(m: Matrix, zbx: ZabbixInventory, mapper: Mapper | None = None) -> 
     mapper = mapper or Mapper()
     catalog = _Catalog(zbx)
     linked_on_host = {r["Hôte Centreon"]: split_templates(r["Templates Zabbix liés"]) for r in m.zabbix_hosts}
-    host_level = {r["Hôte"]: split_templates(r["Templates Zabbix suggérés"]) for r in m.hosts}
+    host_level = {r["Hôte"]: target_or_suggested(r, "Templates Zabbix retenus", "Templates Zabbix suggérés")
+                  for r in m.hosts}
     for h, linked in linked_on_host.items():
         host_level[h] = host_level.get(h, []) + [t for t in linked if t not in host_level.get(h, [])]
     hosts_by_tpl = defaultdict(set)
@@ -109,7 +111,7 @@ def correlate(m: Matrix, zbx: ZabbixInventory, mapper: Mapper | None = None) -> 
 
     # --- par service -----------------------------------------------------------------------
     for row in m.services:
-        suggested = split_templates(row["Template Zabbix suggéré"])
+        suggested = target_or_suggested(row, "Template Zabbix retenu", "Template Zabbix suggéré")
         coverage, _, found = _assess(catalog, mapper, row["Catégorie"], suggested, host_level.get(row["Hôte"], []))
         decision = row.get("Décision effective") or row["Proposition"]
         if decision.startswith("Ne pas migrer"):
@@ -125,7 +127,8 @@ def correlate(m: Matrix, zbx: ZabbixInventory, mapper: Mapper | None = None) -> 
         if not row["Nb services"]:
             row["Couverture standard"] = ""
             continue
-        suggested = split_templates(row["Template Zabbix suggéré"])
+        suggested = (target_templates(row["Template / item Zabbix cible"])
+                     or split_templates(row["Template Zabbix suggéré"]))
         hosts_tpl = []
         for h in sorted(hosts_by_tpl.get(row["Template de service"], ())):
             hosts_tpl += [t for t in host_level.get(h, []) if t not in hosts_tpl]

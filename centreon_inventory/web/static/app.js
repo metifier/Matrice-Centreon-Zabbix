@@ -17,8 +17,10 @@ const BADGES = {
 const BADGE_COLUMNS = new Set(["Couverture standard", "Proposition", "Décision effective", "Décision (template)", "Décision (hôte)", "Statut Zabbix",
   "Disponible dans Zabbix", "Stratégie", "Priorité"]);
 const NUMERIC = (v) => typeof v === "number";
-// Champs « template Zabbix cible » : saisie libre assistée par l'auto-complétion du catalogue Zabbix.
-const TEMPLATE_FIELDS = new Set(["Template Zabbix cible", "Template / item Zabbix cible"]);
+// Champs « template Zabbix cible » : saisie libre assistée par l'auto-complétion du catalogue Zabbix ; plusieurs
+// templates possibles, séparés par des virgules.
+const TEMPLATE_FIELDS = new Set(["Template Zabbix cible", "Template / item Zabbix cible", "Templates Zabbix cibles"]);
+const splitList = (v) => String(v || "").split(",").map((x) => x.trim()).filter(Boolean);
 
 const app = {
   view: "dashboard",
@@ -300,7 +302,7 @@ function cell(c, r, editable, choices, first) {
     if (opts) {
       return `<td class="edit"><select data-edit="${esc(c)}" data-key="${esc(r._key)}"><option value=""></option>${opts.map((o) => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
     }
-    const ac = TEMPLATE_FIELDS.has(c) ? ' data-ac autocomplete="off" placeholder="taper ou choisir…"' : "";
+    const ac = TEMPLATE_FIELDS.has(c) ? ` data-ac autocomplete="off" placeholder="taper ou choisir…" title="${esc(v || "Plusieurs templates : séparer par des virgules")}"` : "";
     return `<td class="edit"><input data-edit="${esc(c)}" data-key="${esc(r._key)}" value="${esc(v)}"${ac}></td>`;
   }
   if (BADGE_COLUMNS.has(c) && v !== "") return `<td><span class="badge ${BADGES[v] || ""}">${esc(v)}</span></td>`;
@@ -323,20 +325,29 @@ const ac = { input: null, items: [], active: -1, seq: 0, timer: null };
 function acContext(input) {
   const rows = (app.lastTable && app.lastTable.rows) || [];
   const row = input.dataset.key !== undefined ? rows.find((r) => r._key === input.dataset.key) : null;
-  return row ? { context: String(row._key), suggested: row["Template Zabbix suggéré"] || "" } : { context: "", suggested: "" };
+  if (!row) return { context: "", suggested: "" };
+  // Hôte : contexte = ses templates Centreon ; service : son template de service.
+  const context = [row["Template de service"] || "", row["Templates (directs)"] || "", String(row._key)].filter(Boolean).join(" ");
+  return { context, suggested: row["Template Zabbix suggéré"] || row["Templates Zabbix suggérés"] || "" };
 }
+
+// Segment en cours de saisie (après la dernière virgule) et templates déjà choisis dans le champ.
+const acTyped = (input) => input.value.slice(input.value.lastIndexOf(",") + 1).trim();
+const acChosen = (input) => splitList(input._typed ? input.value.slice(0, input.value.lastIndexOf(",") + 1) : input.value);
 
 async function acOpen(input) {
   const seq = ++ac.seq, p = new URLSearchParams(acContext(input));
-  if (input._typed && input.value.trim()) p.set("q", input.value.trim());
+  if (input._typed && acTyped(input)) p.set("q", acTyped(input));
   let d;
   try { d = await api("/api/zabbix/templates?" + p); } catch (e) { return; }
   if (seq !== ac.seq || document.activeElement !== input) return;
-  ac.input = input; ac.items = d.items; ac.active = -1;
+  const chosen = acChosen(input), lower = new Set(chosen.map((x) => x.toLowerCase()));
+  ac.input = input; ac.items = d.items.filter((t) => !lower.has(t.name.toLowerCase())); ac.active = -1;
   const list = $("#ac");
   const head = `Templates Zabbix ${esc(d.catalog_version || "?")}${d.version && d.catalog_version !== d.version.slice(0, d.catalog_version.length) ? ` (serveur ${esc(d.version)})` : ""}`
     + (p.get("q") ? "" : (p.get("context") ? ` — suggestions pour « ${esc(p.get("context"))} »` : " — tapez pour chercher"));
-  list.innerHTML = `<li class="head">${head}</li>` + (d.items.length ? d.items.map((t, i) => `<li data-i="${i}" role="option">
+  const multi = chosen.length ? `<li class="head">Déjà choisi(s) : ${esc(chosen.join(", "))} — un clic ajoute un template</li>` : "";
+  list.innerHTML = `<li class="head">${head}</li>${multi}` + (ac.items.length ? ac.items.map((t, i) => `<li data-i="${i}" role="option">
     <span class="n">${esc(t.name)}${t.present ? '<span class="badge b-ok">dans Zabbix</span>' : ""}${t.official ? "" : '<span class="badge">personnalisé</span>'}</span>
     <span class="d">${esc([t.group, t.description].filter(Boolean).join(" · "))}</span></li>`).join("")
     : '<li class="head">Aucun template correspondant (saisie libre possible).</li>');
@@ -363,7 +374,8 @@ function acMove(delta) {
 function acPick(i) {
   const input = ac.input, t = ac.items[i];
   if (!input || !t) return;
-  input.value = t.name;
+  // Ajoute le template choisi à ceux déjà saisis (remplace seulement le segment en cours de frappe).
+  input.value = [...acChosen(input), t.name].join(", ");
   acClose();
   if (input.dataset.edit !== undefined) input.dispatchEvent(new Event("change", { bubbles: true }));
 }

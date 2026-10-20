@@ -1,7 +1,7 @@
 """Fiche détaillée d'une ligne de la matrice (template de service, template d'hôte, hôte, service)."""
 from __future__ import annotations
 
-from ..compare import split_templates
+from ..compare import split_templates, target_or_suggested
 from ..correlate import _Catalog
 from ..matrix import Matrix, mask_secrets
 from ..model import NO_TEMPLATE, Host
@@ -124,7 +124,8 @@ def detail(m: Matrix, view: str, key: str, zabbix=None, mapper=None) -> dict | N
             "summary": _kv([(k, row.get(k)) for k in row if k not in ("Commentaire",)]),
             "macros": dict(svc.macros) if svc else {},
             "chain": _stpl_chain(inv, row["Template de service"]) if svc and svc.template else [],
-            "zabbix": _zabbix_items(m, zabbix, split_templates(row["Template Zabbix suggéré"]),
+            "zabbix": _zabbix_items(m, zabbix, target_or_suggested(row, "Template Zabbix retenu",
+                                                                   "Template Zabbix suggéré"),
                                     corr_rx(row["Catégorie"])),
         }
     return None

@@ -199,11 +199,27 @@ Les correspondances sont définies dans [`mapping/zabbix_mapping.yaml`](mapping/
 (regex sur le nom de template, la commande, le plugin / mode Centreon Plugins ou la ligne de
 commande). **Adaptez ce fichier à votre parc** (templates maison, nomenclature) puis régénérez la matrice.
 
+### Templates Zabbix cibles par hôte et par service (croisés)
+
+Le template Zabbix voulu se précise à chaque niveau, **plusieurs templates par champ** (séparés par des virgules) :
+
+| Onglet | Colonne saisie | Colonne calculée |
+|---|---|---|
+| Templates de service | *Template / item Zabbix cible* | — |
+| Templates d'hôte | *Template Zabbix cible* | — |
+| Hôtes | *Templates Zabbix cibles* | *Templates Zabbix retenus* = cibles de l'hôte + cibles de ses templates d'hôte Centreon + templates retenus de ses services migrés |
+| Services | *Template Zabbix cible* (exception) | *Template Zabbix retenu* = cible du service, sinon celle de son template de service ; *Templates Zabbix (hôte)* = templates retenus de l'hôte |
+
+Les templates retenus remplacent les suggestions pour le comparatif Zabbix (*Templates à lier*, statut des
+services) et la corrélation des items ; sans choix, les suggestions s'appliquent comme avant. Les clés d'item
+(`system.cpu.util[...]`) saisies dans *Template / item Zabbix cible* ne sont pas reprises comme templates.
+
 ### Auto-complétion des templates Zabbix cibles
 
-Dans les colonnes *Template Zabbix cible* (templates d'hôte) et *Template / item Zabbix cible* (templates de
-service), ainsi que dans la décision groupée, une liste de templates Zabbix s'ouvre dès que le champ reçoit le
-focus :
+Dans les colonnes *Template Zabbix cible* (templates d'hôte et services), *Templates Zabbix cibles* (hôtes) et
+*Template / item Zabbix cible* (templates de service), ainsi que dans la décision groupée, une liste de templates
+Zabbix s'ouvre dès que le champ reçoit le focus ; un template choisi **s'ajoute** à ceux déjà saisis (ceux-ci
+n'apparaissent plus dans la liste) :
 
 * **sans saisie**, les templates proposés sont déduits du **nom du template Centreon** de la ligne : `IDRAC` →
   *Dell iDRAC by SNMP*, `Act-Srv-Lnx` → *Linux by Zabbix agent*, `Act-MSSQL-Srv` → *MSSQL by Zabbix agent 2*,

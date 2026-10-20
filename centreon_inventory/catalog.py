@@ -124,6 +124,7 @@ class ZabbixCatalog:
             pool.setdefault(name, {"name": name, "versions": [], "groups": [], "description": "",
                                    "_words": set(words(name)), "_text": name.lower()})
         needles = words(q)
+        wanted = {s.strip().lower() for s in (suggested or "").split(",") if s.strip()}
         ctx_words, protocols = _context(context)
         out = []
         for t in pool.values():
@@ -131,7 +132,7 @@ class ZabbixCatalog:
             if needles and not all(n in name_l for n in needles):
                 continue
             score = _score(t, ctx_words, protocols)
-            if suggested and name_l == suggested.strip().lower():
+            if name_l in wanted:
                 score += 100
             if t["name"] in present:
                 score += 0.5
