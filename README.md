@@ -207,8 +207,12 @@ Le template Zabbix voulu se précise à chaque niveau, **plusieurs templates par
 |---|---|---|
 | Templates de service | *Template / item Zabbix cible* | — |
 | Templates d'hôte | *Template Zabbix cible* | — |
-| Hôtes | *Templates Zabbix cibles* | *Templates Zabbix retenus* = cibles de l'hôte + cibles de ses templates d'hôte Centreon + templates retenus de ses services migrés |
+| Hôtes | *Templates Zabbix cibles*, *Templates Zabbix exclus* | *Templates Zabbix retenus* = cibles de l'hôte + cibles de ses templates d'hôte Centreon + templates retenus de ses services migrés, moins les templates exclus |
 | Services | *Template Zabbix cible* (exception) | *Template Zabbix retenu* = cible du service, sinon celle de son template de service ; *Templates Zabbix (hôte)* = templates retenus de l'hôte |
+
+Dans l'interface, chaque template retenu d'un hôte porte un **×** pour le désélectionner quand le cumul est
+erroné : un template saisi sur l'hôte est retiré de ses cibles, un template venu d'un template d'hôte ou d'un
+service est ajouté aux *Templates Zabbix exclus* (barrés, **↺** pour le rétablir).
 
 Les templates retenus remplacent les suggestions pour le comparatif Zabbix (*Templates à lier*, statut des
 services) et la corrélation des items ; sans choix, les suggestions s'appliquent comme avant. Les clés d'item

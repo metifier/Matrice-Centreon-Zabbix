@@ -216,6 +216,7 @@ def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, m
             "Proxy Zabbix suggéré": h.poller,
             "Proposition": "Migrer" if h.activate else NE_PAS_MIGRER,
             "Décision finale": "", "Templates Zabbix cibles": "", "Templates Zabbix retenus": "",
+            "Templates Zabbix exclus": "",
             "Commentaire": "",
         })
 
