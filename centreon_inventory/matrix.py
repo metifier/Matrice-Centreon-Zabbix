@@ -69,6 +69,8 @@ class Matrix:
     zabbix_summary: list[tuple] = field(default_factory=list)
     client: object = None  # filters.ClientFilter du périmètre affiché
     correlation: list[dict] = field(default_factory=list)  # services Centreon <-> items Zabbix
+    item_matches: dict = field(default_factory=dict)  # (template Zabbix, clé d'item) -> Counter(template de service)
+    zabbix_elements: list[dict] = field(default_factory=list)  # sélection des items / problèmes Zabbix
 
 
 def build_matrix(inv: Inventory, mapper: Mapper | None = None, high: int = 20, medium: int = 5,

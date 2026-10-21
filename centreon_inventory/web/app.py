@@ -31,6 +31,7 @@ from ..mapping import DEFAULT_MAPPING, Mapper
 from ..matrix import DECISIONS, HOST_DECISIONS
 from ..model import inventory_from_dict, inventory_to_dict
 from ..report import build_report
+from ..selection import ELEMENT_DECISIONS
 from ..zabbix import ZabbixInventory
 
 STATIC = Path(__file__).resolve().parent / "static"
@@ -42,6 +43,7 @@ VIEWS = {
     "service_templates": "service_templates", "host_templates": "host_templates", "hosts": "hosts",
     "services": "services", "commands": "commands", "zabbix_hosts": "zabbix_hosts",
     "zabbix_only": "zabbix_only", "zabbix_templates": "zabbix_templates", "correlation": "correlation",
+    "zabbix_elements": "zabbix_elements",
 }
 # Ordre d'affichage web : clé, volumétrie, correspondance et décisions d'abord (le reste suit).
 WEB_ORDER = {
@@ -53,6 +55,8 @@ WEB_ORDER = {
                        "Template Zabbix cible", "Commentaire"],
     "correlation": ["Template de service", "Nb services", "Catégorie", "Couverture standard", "Approche recommandée",
                     "Items Zabbix correspondants", "Template Zabbix examiné"],
+    "zabbix_elements": ["Élément", "Type", "Template Zabbix", "Sévérité", "Nb hôtes", "Services Centreon équivalents",
+                        "Proposition", "Décision", "Décision effective", "Cohérence", "Commentaire", "Justification"],
     "hosts": ["Hôte", "Adresse", "Collecteur", "Actif", "Nb services", "Templates Zabbix suggérés",
               "Templates Zabbix cibles", "Templates Zabbix retenus", "Templates Zabbix exclus", "Proposition", "Décision finale", "Commentaire"],
     "services": ["Hôte", "Service", "Actif", "Template de service", "Catégorie", "Template Zabbix suggéré",
@@ -63,6 +67,8 @@ WEB_ORDER = {
 EDITABLE = {t: {"key": t, "fields": fields} for t, (_, _, fields) in TABLES.items()}
 CHOICES = {"Décision finale": DECISIONS, "Décision (service)": DECISIONS}
 HOST_CHOICES = {"Décision finale": HOST_DECISIONS}
+ELEMENT_CHOICES = {"Décision": ELEMENT_DECISIONS}
+VIEW_CHOICES = {"hosts": HOST_CHOICES, "zabbix_elements": ELEMENT_CHOICES}
 SETTINGS_KEYS = ("centreon_url", "centreon_user", "centreon_insecure", "zabbix_url", "zabbix_user",
                  "zabbix_insecure", "seuil_haute", "seuil_moyenne", "zabbix_target_version")
 
@@ -286,7 +292,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             "hostgroups": sorted(hg_count.items(), key=lambda x: (-x[1], x[0]))[:100],
             "pollers": sorted(poller_count.items(), key=lambda x: (-x[1], x[0])),
             "jobs": [{k: j[k] for k in ("id", "kind", "status", "error")} for j in jobs.recent()],
-            "choices": {"default": CHOICES, "hosts": HOST_CHOICES}, "editable": EDITABLE,
+            "choices": {"default": CHOICES, **VIEW_CHOICES}, "editable": EDITABLE,
             "catalog": {"versions": load_catalog().versions, "generated": load_catalog().generated},
         })
 
@@ -449,11 +455,14 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             props[r["Proposition"]][1] += r["Nb services"]
         for r in m.services:
             statuses[r.get("Statut Zabbix", "")] = statuses.get(r.get("Statut Zabbix", ""), 0) + 1
-        effective, coverage = {}, {}
+        effective, coverage, selection = {}, {}, {}
         for r in m.services:
             effective[r["Décision effective"]] = effective.get(r["Décision effective"], 0) + 1
             if r.get("Couverture standard"):
                 coverage[r["Couverture standard"]] = coverage.get(r["Couverture standard"], 0) + 1
+        for r in m.zabbix_elements:
+            kinds = selection.setdefault(r["Décision effective"], {})
+            kinds[r["Type"]] = kinds.get(r["Type"], 0) + 1
         return jsonify({
             "summary": [[_cell(a), _cell(b)] for a, b in m.summary],
             "zabbix_summary": [[_cell(a), _cell(b)] for a, b in m.zabbix_summary],
@@ -464,7 +473,7 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
                     "zabbix": bool(m.zabbix_hosts or m.zabbix_templates),
                     "zabbix_present": sum(r["Statut Zabbix"] != "Absent de Zabbix" for r in m.zabbix_hosts),
                     "zabbix_only": len(m.zabbix_only)},
-            "propositions": props, "decisions_effectives": effective, "couverture": coverage,
+            "propositions": props, "decisions_effectives": effective, "couverture": coverage, "selection": selection,
             "statuts_zabbix": {k: v for k, v in statuses.items() if k},
             "top": [{k: r[k] for k in ("Template de service", "Nb services", "Nb hôtes", "Proposition",
                                        "Template Zabbix suggéré")} for r in m.service_templates[:10] if r["Nb services"]],
@@ -499,13 +508,14 @@ def create_app(data_dir: str | Path = "data", mapping: str | Path | None = None,
             out_rows.append(row)
         values = {}
         for c in ("Proposition", "Statut Zabbix", "Décision effective", "Stratégie", "Catégorie", "Priorité",
-                  "Actif", "Collecteur", "Disponible dans Zabbix", "Couverture standard", "Décision (hôte)"):
+                  "Actif", "Collecteur", "Disponible dans Zabbix", "Couverture standard", "Décision (hôte)",
+                  "Type", "Sévérité", "Template Zabbix", "Décision"):
             if c in columns:
                 values[c] = sorted({str(_cell(r.get(c))) for r in rows} - {""})
         return jsonify({"columns": columns, "rows": out_rows, "total": len(filtered), "all": len(rows),
                         "page": page, "size": size, "values": values,
                         "editable": EDITABLE.get(view, {}).get("fields", []),
-                        "choices": HOST_CHOICES if view == "hosts" else CHOICES})
+                        "choices": VIEW_CHOICES.get(view, CHOICES)})
 
     @app.get("/api/detail/<view>")
     def row_detail(view):

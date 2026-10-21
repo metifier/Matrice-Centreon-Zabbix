@@ -128,4 +128,35 @@ def detail(m: Matrix, view: str, key: str, zabbix=None, mapper=None) -> dict | N
                                                                    "Template Zabbix suggéré"),
                                     corr_rx(row["Catégorie"])),
         }
+    if view == "zabbix_elements":
+        from ..selection import A_CREER, ITEM, ITEM_PROTO, KEY_SEP, element_key
+        row = next((r for r in m.zabbix_elements if element_key(r) == key), None)
+        if not row:
+            return None
+        same = [r for r in m.zabbix_elements if r["Template Zabbix"] == row["Template Zabbix"] and r is not row]
+        if row["Type"] in (ITEM, ITEM_PROTO):
+            related = [r for r in same if r["Type"] not in (ITEM, ITEM_PROTO)
+                       and row["Clé / items"] in r["Clé / items"].split(KEY_SEP)]
+            title = "Problèmes utilisant cet item"
+        else:
+            keys = set(row["Clé / items"].split(KEY_SEP))
+            related = [r for r in same if r["Type"] in (ITEM, ITEM_PROTO) and r["Clé / items"] in keys]
+            title = "Items utilisés par ce problème"
+        cols = ["Élément", "Type", "Clé / items", "Sévérité", "Décision effective"]
+        keys = row["Clé / items"].split(KEY_SEP)
+        stpls = {s for k in keys for s in m.item_matches.get((row["Template Zabbix"], k), {})}
+        if not stpls and row["Nb services Centreon"]:  # item à créer : le template de service lui-même
+            stpls = {row["Élément"]}
+        tops = set(split_templates(row["Templates retenus"]))
+        hosts = sorted(h["Hôte"] for h in m.hosts if tops & set(target_or_suggested(
+            h, "Templates Zabbix retenus", "Templates Zabbix suggérés")))
+        return {
+            "title": row["Élément"], "kind": row["Type"],
+            "summary": _kv([(k, row.get(k)) for k in row if k not in ("Élément", "Type", "Commentaire")]),
+            "related": None if row["Type"] == A_CREER else {
+                "title": title, "columns": cols, "rows": [{c: r[c] for c in cols} for r in related],
+                "total": len(related)},
+            "services": _services_table([r for r in m.services if r["Template de service"] in stpls]),
+            "hosts": hosts,
+        }
     return None

@@ -7,7 +7,7 @@ couvert par aucun item standard est une spécificité à créer.
 """
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from .compare import _norm, split_templates, target_or_suggested
 from .decisions import target_templates
@@ -37,22 +37,28 @@ class _Catalog:
     def get(self, name):
         return self.by_name.get(_norm(name))
 
-    def items(self, tpl) -> list[tuple]:
-        """(template, nom, clé, type) du template et de ses templates liés (récursif)."""
-        tid = tpl["templateid"]
-        if tid in self._cache:
-            return self._cache[tid]
-        out, seen, stack = [], set(), [tid]
+    def family(self, tpl) -> list[dict]:
+        """Le template et ses templates liés (récursif), chacun une seule fois."""
+        out, seen, stack = [], set(), [tpl["templateid"]]
         while stack:
             cur = self.by_id.get(stack.pop())
             if not cur or cur["templateid"] in seen:
                 continue
             seen.add(cur["templateid"])
-            out += [(cur["name"], n, k, "item") for n, k in cur.get("items") or []]
-            out += [(cur["name"], n, k, "prototype LLD") for n, k in cur.get("prototypes") or []]
+            out.append(cur)
             stack += cur.get("linked") or []
-        self._cache[tid] = out
         return out
+
+    def items(self, tpl) -> list[tuple]:
+        """(template, nom, clé, type) du template et de ses templates liés (récursif)."""
+        tid = tpl["templateid"]
+        if tid not in self._cache:
+            out = []
+            for cur in self.family(tpl):
+                out += [(cur["name"], n, k, "item") for n, k in cur.get("items") or []]
+                out += [(cur["name"], n, k, "prototype LLD") for n, k in cur.get("prototypes") or []]
+            self._cache[tid] = out
+        return self._cache[tid]
 
 
 def _fmt(items, limit=4):
@@ -108,6 +114,7 @@ def correlate(m: Matrix, zbx: ZabbixInventory, mapper: Mapper | None = None) -> 
     for r in m.services:
         hosts_by_tpl[r["Template de service"]].add(r["Hôte"])
     used_keys = defaultdict(set)  # template Zabbix -> clés couvrant au moins un service Centreon
+    m.item_matches = {}  # (template Zabbix, clé) -> services Centreon migrés par template de service
 
     # --- par service -----------------------------------------------------------------------
     for row in m.services:
@@ -118,6 +125,8 @@ def correlate(m: Matrix, zbx: ZabbixInventory, mapper: Mapper | None = None) -> 
             coverage = NON_MIGRE
         for t, _, k, _ in found:
             used_keys[t].add(k)
+            if coverage != NON_MIGRE:
+                m.item_matches.setdefault((t, k), Counter())[row["Template de service"]] += 1
         row["Item Zabbix standard"] = _fmt(found, 1)
         row["Couverture standard"] = coverage
 

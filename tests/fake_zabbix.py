@@ -17,7 +17,7 @@ ITEMS = {
     "Windows by SNMP": [("CPU utilization", "system.cpu.util[snmp.cpu.util]")],
     "ICMP Ping": [("ICMP ping", "icmpping"), ("ICMP loss", "icmppingloss"), ("ICMP response time", "icmppingsec")],
     "MySQL by Zabbix agent 2": [("Status", "mysql.ping[\"{$MYSQL.DSN}\"]"), ("Connections per second", "mysql.connections.rate")],
-    "Cisco IOS by SNMP": [("Uptime", "system.uptime[sysUpTime.0]")],
+    "Cisco IOS by SNMP": [("Uptime", "system.uptime[sysUpTime.0]"), ("System name", "system.name[sysName.0]")],
 }
 PROTOTYPES = {
     "Linux by SNMP": [("{#FSNAME}: Space utilization", "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"),
@@ -27,6 +27,32 @@ PROTOTYPES = {
     "Windows by SNMP": [("{#FSNAME}: Space utilization", "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]")],
     "Cisco IOS by SNMP": [("Interface {#IFNAME}: Bits received", "net.if.in[ifHCInOctets.{#SNMPINDEX}]"),
                           ("{#SENSOR_INFO}: Temperature", "sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]")],
+}
+# Triggers (problèmes) : (nom, sévérité 0-5, clés des items utilisés)
+TRIGGERS = {
+    "Linux by SNMP": [("High CPU utilization", 2, ["system.cpu.util[snmp.cpu.util]"]),
+                      ("High memory utilization", 3, ["vm.memory.util[snmp.vm.memory.util]"]),
+                      ("Host has been restarted", 2, ["system.uptime[hrSystemUptime.0]"])],
+    "Linux CPU by Zabbix agent": [("High CPU utilization", 2, ["system.cpu.util"]),
+                                  ("Load average is too high", 3, ["system.cpu.load[all,avg1]"])],
+    "Linux by Zabbix agent": [("High memory utilization", 3, ["vm.memory.util"]),
+                              ("Host has been restarted", 2, ["system.uptime"])],
+    "Apache by HTTP": [("Apache: Too many busy workers", 2, ["apache.workers.busy"])],
+    "Windows by Zabbix agent": [("High CPU utilization", 2, ["system.cpu.util"]),
+                                ("High memory utilization", 3, ["vm.memory.util"])],
+    "ICMP Ping": [("Unavailable by ICMP ping", 4, ["icmpping"]), ("High ICMP ping loss", 2, ["icmppingloss"]),
+                  ("High ICMP ping response time", 2, ["icmppingsec"])],
+    "MySQL by Zabbix agent 2": [("MySQL: Service is down", 4, ["mysql.ping[\"{$MYSQL.DSN}\"]"])],
+    "Cisco IOS by SNMP": [("Host has been restarted", 2, ["system.uptime[sysUpTime.0]"]),
+                          ("System name has changed", 1, ["system.name[sysName.0]"])],
+}
+TRIGGER_PROTOTYPES = {
+    "Linux by SNMP": [("{#FSNAME}: Disk space is critically low", 3, ["vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"]),
+                      ("Interface {#IFNAME}: High bandwidth usage", 2, ["net.if.in[ifHCInOctets.{#SNMPINDEX}]"])],
+    "Windows by Zabbix agent": [("FS [{#FSNAME}]: Space is critically low", 3, ["vfs.fs.dependent.size[{#FSNAME},pused]"]),
+                                ("\"{#SERVICE.NAME}\" is not running", 3, ["service.info[\"{#SERVICE.NAME}\",state]"])],
+    "Cisco IOS by SNMP": [("{#SENSOR_INFO}: Temperature is above critical threshold", 4,
+                           ["sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]"])],
 }
 LINKED = {"Linux by Zabbix agent": ["Linux CPU by Zabbix agent"]}
 
@@ -97,6 +123,11 @@ class FakeZabbix:
         if method in ("item.get", "itemprototype.get"):
             src = ITEMS if method == "item.get" else PROTOTYPES
             return self._ok(json, [{"name": n, "key_": k, "hostid": tids[t]} for t, rows in src.items() for n, k in rows])
+        if method in ("trigger.get", "triggerprototype.get"):
+            src = TRIGGERS if method == "trigger.get" else TRIGGER_PROTOTYPES
+            return self._ok(json, [{"description": n, "priority": str(p), "hosts": [{"hostid": tids[t]}],
+                                    "items": [{"key_": k, "hostid": tids[t]} for k in keys]}
+                                   for t, rows in src.items() for n, p, keys in rows])
         return self._err(json, f"Method {method} not found")
 
     @staticmethod

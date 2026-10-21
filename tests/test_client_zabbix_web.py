@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 from centreon_inventory.compare import ABSENT, PRESENT_A_LIER, PRESENT_OK, SVC_COUVERT
 from centreon_inventory.filters import ClientFilter, detect_prefixes
@@ -70,6 +71,8 @@ def test_zabbix_inventory(zbx):
     assert tpl["Linux by Zabbix agent"]["linked"] == [tpl["Linux CPU by Zabbix agent"]["templateid"]]
     h = next(x for x in zbx.hosts if x["host"] == "srv-lnx-web01")
     assert h["proxy"] == "proxy-dc1" and "Apache by HTTP" in h["templates"] and h["items"] == 182
+    assert ["Unavailable by ICMP ping", 4, ["icmpping"]] in tpl["ICMP Ping"]["triggers"]
+    assert tpl["Cisco IOS by SNMP"]["trigger_prototypes"][0][1] == 4
 
 
 def test_zabbix_auth_variants():
@@ -414,3 +417,73 @@ def test_host_excluded_templates_removed_from_cumul(inv):
     assert host["Templates Zabbix retenus"] == "ICMP Ping"  # exclusion insensible à la casse
     svc = next(r for r in m.services if r["Hôte"] == "srv-lnx-web01")
     assert svc["Templates Zabbix (hôte)"] == "ICMP Ping"
+
+
+# ----------------------------------------------------------------------- sélection items / problèmes Zabbix
+def _elements(m):
+    return {(r["Template Zabbix"], r["Type"], r["Élément"]): r for r in m.zabbix_elements}
+
+
+def test_selection_of_items_and_problems(inv, zbx):
+    from centreon_inventory.selection import (A_CREER, DESACTIVER, FACULTATIF, ITEM, ITEM_PROTO, SURVEILLER,
+                                              TRIGGER, TRIGGER_PROTO)
+    el = _elements(build_report(inv, zabbix=zbx))
+    # équivalent d'un service Centreon migré : item et problème à surveiller
+    cpu = el["Linux by SNMP", ITEM, "CPU utilization"]
+    assert cpu["Proposition"] == SURVEILLER and "OS-Linux-Cpu-SNMP-custom" in cpu["Services Centreon équivalents"]
+    assert cpu["Nb hôtes"] >= 2 and cpu["Problèmes liés"] == "High CPU utilization"
+    assert el["Linux by SNMP", TRIGGER, "High CPU utilization"]["Proposition"] == SURVEILLER
+    assert el["Linux by SNMP", TRIGGER_PROTO, "{#FSNAME}: Disk space is critically low"]["Proposition"] == SURVEILLER
+    # apport du standard sans équivalent Centreon : facultatif ; bruit (changement d'inventaire) : désactiver
+    assert el["Linux by SNMP", TRIGGER, "Host has been restarted"]["Proposition"] == FACULTATIF
+    assert el["Linux by SNMP", ITEM_PROTO, "Interface {#IFNAME}: Bits received"]["Proposition"] == FACULTATIF
+    assert el["Cisco IOS by SNMP", TRIGGER, "System name has changed"]["Proposition"] == DESACTIVER
+    # problème grave du standard, sans équivalent Centreon
+    temp = el["Cisco IOS by SNMP", TRIGGER_PROTO, "{#SENSOR_INFO}: Temperature is above critical threshold"]
+    assert temp["Proposition"] == SURVEILLER and temp["Sévérité"] == "Haute"
+    # item d'un template lié (Linux CPU by Zabbix agent) : rattaché à son template d'origine
+    assert all(r["Template Zabbix"] != "Linux by Zabbix agent" or r["Élément"] != "CPU utilization"
+               for r in el.values())
+    # spécificités sans item standard : items à créer
+    assert el["(template maison)", A_CREER, "ERP-Batch-Nocturne"]["Proposition"] == SURVEILLER
+
+
+def test_selection_decisions_and_consistency(inv, zbx, tmp_path):
+    from centreon_inventory.excel import SHEET_SEL, write_excel
+    from centreon_inventory.selection import DESACTIVER, ITEM, SURVEILLER, TRIGGER, element_key
+    el = _elements(build_report(inv, zabbix=zbx))
+    uptime, restart = el["Linux by SNMP", ITEM, "Uptime"], el["Linux by SNMP", TRIGGER, "Host has been restarted"]
+    decisions = {"zabbix_elements": {element_key(restart): {"Décision": SURVEILLER},
+                                     element_key(uptime): {"Décision": DESACTIVER, "Commentaire": "inutile"}}}
+    m = build_report(inv, zabbix=zbx, decisions=decisions)
+    el = _elements(m)
+    item, trigger = el["Linux by SNMP", ITEM, "Uptime"], el["Linux by SNMP", TRIGGER, "Host has been restarted"]
+    assert item["Décision effective"] == DESACTIVER and item["Commentaire"] == "inutile"
+    assert "Host has been restarted" in item["Cohérence"]
+    assert trigger["Décision effective"] == DESACTIVER and trigger["Cohérence"].startswith("Tous ses items")
+    # un hôte non migré ne compte plus pour les templates
+    m2 = build_report(inv, zabbix=zbx, decisions={"hosts": {h["Hôte"]: {"Décision finale": "Ne pas migrer"}
+                                                            for h in m.hosts}})
+    assert not [r for r in m2.zabbix_elements if r["Type"] == ITEM]
+    out = write_excel(m, tmp_path / "sel.xlsx")
+    ws = load_workbook(out)[SHEET_SEL]
+    headers = [c.value for c in ws[1]]
+    assert headers[:3] == ["Élément", "Type", "Template Zabbix"]
+    assert any(str(c.value).startswith("=IF(") for c in ws[get_column_letter(headers.index("Décision effective") + 1)])
+
+
+def test_web_selection(client):
+    client.post("/api/import/demo")
+    t = client.get("/api/table/zabbix_elements?f.Type==Problème&f.Template Zabbix==ICMP Ping").get_json()
+    assert t["total"] == 3 and t["editable"] == ["Décision", "Commentaire"]
+    assert t["choices"]["Décision"] == ["Surveiller", "Facultatif", "Désactiver"]
+    key = next(r["_key"] for r in t["rows"] if r["Élément"] == "High ICMP ping loss")
+    assert client.post("/api/decision", json={"table": "zabbix_elements", "key": key, "field": "Décision",
+                                              "value": "Désactiver"}).status_code == 200
+    t = client.get("/api/table/zabbix_elements?f.Décision==Désactiver").get_json()
+    assert [r["Élément"] for r in t["rows"]] == ["High ICMP ping loss"]
+    d = client.get("/api/detail/zabbix_elements?key=" + key).get_json()
+    assert d["kind"] == "Problème" and d["related"]["rows"][0]["Clé / items"] == "icmppingloss"
+    assert d["services"]["total"] >= 1 and d["hosts"]
+    s = client.get("/api/summary").get_json()
+    assert s["selection"]["Désactiver"]["Problème"] >= 2

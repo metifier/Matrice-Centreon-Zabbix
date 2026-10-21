@@ -138,14 +138,17 @@ def load_zabbix(url: str, token: str = "", user: str = "", password: str = "", v
                           "name": t.get("name") or t.get("host", ""),
                           "hosts": int(nb) if not isinstance(nb, list) and nb is not None else len(nb or []),
                           "linked": [str(x.get("templateid")) for x in linked],
-                          "items": [], "prototypes": []})
+                          "items": [], "prototypes": [], "triggers": [], "trigger_prototypes": []})
     log(f"Zabbix : {len(templates)} templates")
 
     # Items et prototypes d'items (LLD) des templates : base de la corrélation services Centreon <-> items.
+    # « inherited: false » : chaque élément est rattaché au template qui le définit (pas aux copies héritées
+    # par les templates qui le lient).
     by_id = {t["templateid"]: t for t in templates}
     for method, field in (("item.get", "items"), ("itemprototype.get", "prototypes")):
         try:
-            rows = api.call(method, {"output": ["name", "key_", "hostid"], "templated": True}) or []
+            rows = api.call(method, {"output": ["name", "key_", "hostid"], "templated": True,
+                                     "inherited": False}) or []
         except ZabbixError as exc:
             log(f"{method} indisponible ({exc}) : corrélation des items limitée")
             continue
@@ -154,6 +157,23 @@ def load_zabbix(url: str, token: str = "", user: str = "", password: str = "", v
             if t is not None:
                 t[field].append([it.get("name", ""), it.get("key_", "")])
         log(f"Zabbix : {len(rows)} {'items' if field == 'items' else 'prototypes d’items'} de templates")
+
+    # Triggers (problèmes) et prototypes de triggers : [nom, sévérité 0-5, [clés des items utilisés]].
+    for method, field in (("trigger.get", "triggers"), ("triggerprototype.get", "trigger_prototypes")):
+        try:
+            rows = api.call(method, {"output": ["description", "priority"], "templated": True, "inherited": False,
+                                     "selectHosts": ["hostid"], "selectItems": ["key_", "hostid"]}) or []
+        except ZabbixError as exc:
+            log(f"{method} indisponible ({exc}) : sélection des problèmes limitée")
+            continue
+        for tr in rows:
+            items = tr.get("items") or []
+            owners = [str(h.get("hostid")) for h in tr.get("hosts") or []] + [str(i.get("hostid")) for i in items]
+            t = next((by_id[o] for o in owners if o in by_id), None)
+            if t is not None:
+                t[field].append([tr.get("description", ""), int(tr.get("priority") or 0),
+                                 sorted({i.get("key_", "") for i in items} - {""})])
+        log(f"Zabbix : {len(rows)} {'triggers' if field == 'triggers' else 'prototypes de triggers'} de templates")
     return ZabbixInventory(url=url, version=api.version, hosts=hosts, templates=templates)
 
 

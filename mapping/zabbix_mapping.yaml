@@ -220,3 +220,18 @@ correlation:
   Logs:             'log\[|logrt\[|eventlog\['
   Virtualisation:   'vmware\.'
   SNMP générique:   'snmp'
+
+# Sélection des items et des problèmes (triggers) Zabbix à surveiller
+# -------------------------------------------------------------------
+# Onglet « Sélection items & problèmes » : pour chaque élément des templates Zabbix retenus, proposition
+# Surveiller / Facultatif / Désactiver. Un élément qui correspond à un service Centreon migré (règles
+# « correlation » ci-dessus) est toujours à surveiller ; pour les autres problèmes :
+#   - sévérité >= surveiller_severite_min                     -> Surveiller (problème grave du standard) ;
+#   - sévérité <= desactiver_severite_max ou nom correspondant
+#     à desactiver_problemes (changement d'inventaire...)     -> Désactiver (bruit) ;
+#   - sinon                                                   -> Facultatif.
+# Sévérités Zabbix : 0 Non classée, 1 Information, 2 Avertissement, 3 Moyenne, 4 Haute, 5 Désastre.
+selection:
+  surveiller_severite_min: 4
+  desactiver_severite_max: 1
+  desactiver_problemes: 'has (been )?changed|has been replaced|changed to lower speed'
