@@ -18,6 +18,8 @@ TABLES = {
     "hosts": ("hosts", "Hôte", ["Décision finale", "Templates Zabbix cibles", "Templates Zabbix exclus",
                                      "Commentaire"]),
     "services": ("services", None, ["Décision (service)", "Template Zabbix cible", "Commentaire"]),
+    # items et problèmes Zabbix : décisions reportées par selection.build_selection()
+    "zabbix_elements": ("zabbix_elements", None, ["Décision", "Commentaire"]),
 }
 # Clé d'item Zabbix (ex. system.cpu.util[,idle]) saisie dans « Template / item Zabbix cible » : pas un template.
 _ITEM_KEY_RE = re.compile(r"\[|^[\w-]+(\.[\w-]+)+$")
@@ -39,6 +41,9 @@ def _join(*lists) -> str:
 def row_key(table: str, row: dict) -> str:
     if table == "services":
         return f"{row['Hôte']}|{row['Service']}"
+    if table == "zabbix_elements":
+        from .selection import element_key
+        return element_key(row)
     return row[TABLES[table][1]]
 
 

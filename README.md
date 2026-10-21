@@ -147,6 +147,31 @@ Onglet **Corrélation items** (et feuille Excel *Corrélation items Zabbix*) : p
 correspondants et **approche recommandée**. L'onglet *Templates Zabbix* indique aussi l'**apport du standard** :
 nombre d'items du template qui n'ont pas d'équivalent dans Centreon.
 
+### Sélection des items et des problèmes à surveiller
+
+Un template standard Zabbix apporte bien plus d'items et de problèmes (triggers) que ce que supervisait Centreon.
+L'onglet **Sélection items & problèmes** (et la feuille Excel du même nom) aide à ne garder que ce qui est utile :
+pour chaque template Zabbix des hôtes migrés (templates retenus, sinon suggérés, plus ceux déjà liés dans Zabbix),
+y compris ses templates liés, il liste les **items**, **prototypes d'items (LLD)**, **problèmes** et **prototypes
+de problèmes**, chacun rattaché au template qui le définit, avec le nombre d'hôtes concernés, la sévérité et les
+services Centreon équivalents. Les spécificités sans item standard (corrélation) y figurent comme
+**items à créer**.
+
+| Proposition | Quand |
+|---|---|
+| **Surveiller** | l'item mesure ce que mesurait un service Centreon migré, ou le problème porte sur un tel item ; problème grave du standard (sévérité *Haute* ou *Désastre*) ; item utilisé par un problème à surveiller ; item à créer |
+| **Facultatif** | apport du standard sans équivalent Centreon, à garder ou non |
+| **Désactiver** | bruit : sévérité *Information* / *Non classée*, changement d'inventaire (« … has changed ») |
+
+La colonne **Décision** (liste déroulante, décision groupée possible) l'emporte sur la proposition. Contrôles de
+cohérence (colonne *Cohérence*) : un problème dont tous les items sont désactivés est désactivé ; un item désactivé
+utilisé par un problème surveillé est signalé. Les seuils et le motif « bruit » se règlent dans la section
+`selection` de `mapping/zabbix_mapping.yaml`. Un hôte « Ne pas migrer » ne compte plus pour les templates. Cliquez
+sur un élément pour voir les items ou problèmes liés, les services Centreon équivalents et les hôtes.
+
+Les problèmes sont lus par `trigger.get` et `triggerprototype.get` (lecture seule) : relancez l'inventaire Zabbix si
+celui-ci a été fait avec une version précédente de l'outil.
+
 ### Fiche détaillée
 
 Dans les tableaux, **cliquez sur le nom** d'un template de service, d'un template d'hôte, d'un hôte ou d'un
@@ -180,6 +205,7 @@ Un classeur `.xlsx` (et en option des CSV) avec les onglets suivants :
 | **Croisé hôtes x tpl services** | Matrice hôtes × templates de service (nombre de services) |
 | **Commandes** | Commandes Centreon, exécutable, plugin, mode, nombre de services qui les utilisent |
 | **Comparatif Zabbix…** | Présents si l'inventaire Zabbix a été lu (voir ci-dessus) |
+| **Sélection items & problèmes** | Items et problèmes des templates Zabbix retenus : Surveiller / Facultatif / Désactiver, colonne *Décision* à remplir |
 
 ### Logique de proposition
 
@@ -362,6 +388,8 @@ Le résultat est disponible dans [`examples/matrice_exemple.xlsx`](examples/matr
 4. Filtrer l'onglet **Services** sur *Décision effective* pour obtenir la liste exacte des
    services à migrer et traiter les exceptions dans *Décision (service)*.
 5. Utiliser l'onglet **Hôtes** (interface, proxy, groupes) pour préparer l'import des hôtes dans Zabbix.
+6. Dans **Sélection items & problèmes**, filtrer par *Template Zabbix* et *Proposition*, puis valider la
+   *Décision* : items à surveiller, problèmes à garder, bruit à désactiver dans les templates.
 
 ## Sécurité
 

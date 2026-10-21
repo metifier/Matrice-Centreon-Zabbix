@@ -13,9 +13,11 @@ const BADGES = {
   "Haute": "b-bad", "Moyenne": "b-warn", "Basse": "",
   "Couvert par un item standard": "b-ok", "Template standard sans item correspondant": "b-warn",
   "Template standard à importer dans Zabbix": "b-info", "Spécificité à créer": "b-dev", "Non migré": "",
+  "Surveiller": "b-ok", "Facultatif": "b-info", "Désactiver": "",
+  "Désastre": "b-bad", "Avertissement": "b-warn", "Information": "", "Non classée": "",
 };
 const BADGE_COLUMNS = new Set(["Couverture standard", "Proposition", "Décision effective", "Décision (template)", "Décision (hôte)", "Statut Zabbix",
-  "Disponible dans Zabbix", "Stratégie", "Priorité"]);
+  "Disponible dans Zabbix", "Stratégie", "Priorité", "Sévérité"]);
 const NUMERIC = (v) => typeof v === "number";
 // Champs « template Zabbix cible » : saisie libre assistée par l'auto-complétion du catalogue Zabbix ; plusieurs
 // templates possibles, séparés par des virgules.
@@ -161,6 +163,12 @@ async function loadDashboard() {
   const cov = Object.entries(d.couverture || {}).sort((a, b) => b[1] - a[1]);
   if (cov.length) bars($("#chart-cov"), cov);
   else $("#chart-cov").innerHTML = '<p class="muted">Lancez l\'inventaire Zabbix pour voir quels services sont déjà couverts par les items des templates standards.</p>';
+  const sel = Object.entries(d.selection || {}).map(([dec, kinds]) => [dec, Object.values(kinds).reduce((a, b) => a + b, 0),
+    Object.entries(kinds).map(([k2, n]) => `${n} ${k2.toLowerCase()}`).join(" · ")]);
+  const selOrder = ["Surveiller", "Facultatif", "Désactiver"];
+  sel.sort((a, b) => selOrder.indexOf(a[0]) - selOrder.indexOf(b[0]));
+  if (sel.length) bars($("#chart-sel"), sel);
+  else $("#chart-sel").innerHTML = '<p class="muted">Lancez l\'inventaire Zabbix pour choisir les items et problèmes (triggers) des templates retenus à surveiller.</p>';
   if (zbx.length) bars($("#chart-zbx"), zbx);
   else $("#chart-zbx").innerHTML = '<p class="muted">Lancez l\'inventaire Zabbix (onglet Sources) pour comparer.</p>';
   $("#top").innerHTML = `<table class="grid"><thead><tr><th>Template</th><th>Services</th><th>Hôtes</th><th>Proposition</th><th>Zabbix</th></tr></thead><tbody>${
@@ -472,7 +480,7 @@ function zabbixSection(z) {
 
 function decideBox(view, key) {
   const d = app.lastTable;
-  const field = view === "services" ? "Décision (service)" : "Décision finale";
+  const field = { services: "Décision (service)", zabbix_elements: "Décision" }[view] || "Décision finale";
   const opts = d && d.choices && d.choices[field];
   if (!opts || !(d.editable || []).includes(field)) return "";
   const row = (d.rows || []).find((r) => r._key === key) || {};
@@ -504,7 +512,8 @@ async function openDetail(view, key) {
     rows: d.linked_service_templates.map((x) => ({ "Template de service": x.name, ...(x.row || {}) })), total: d.linked_service_templates.length })}`;
   if (d.macros && Object.keys(d.macros).length) html += `<h3>Macros</h3>${macroTable(d.macros)}`;
   if ("zabbix" in d) html += `<h3>Items des templates Zabbix standards</h3>${zabbixSection(d.zabbix)}`;
-  if (d.services) html += `<h3>Services (${d.services.total})</h3>${rowsTable(d.services)}`;
+  if (d.related) html += `<h3>${esc(d.related.title)} (${d.related.total})</h3>${rowsTable(d.related)}`;
+  if (d.services) html += `<h3>Services${d.related ? " Centreon équivalents" : ""} (${d.services.total})</h3>${rowsTable(d.services)}`;
   if (d.hosts && d.hosts.length) html += `<h3>Hôtes (${d.hosts.length})</h3><div class="chips">${d.hosts.map((h) => `<span class="chip">${esc(h)}</span>`).join("")}</div>`;
   $("#drawer-body").innerHTML = html;
   $("#drawer").classList.remove("hidden");

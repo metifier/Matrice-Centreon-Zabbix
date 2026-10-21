@@ -38,6 +38,7 @@
   <button data-view="zabbix_only" class="zbx">Zabbix · uniquement</button>
   <button data-view="zabbix_templates" class="zbx">Zabbix · templates</button>
   <button data-view="correlation" class="zbx">Corrélation items</button>
+  <button data-view="zabbix_elements" class="zbx" title="Items et problèmes (triggers) des templates Zabbix retenus : à surveiller, facultatifs ou à désactiver">Sélection items &amp; problèmes</button>
   <button data-view="commands">Commandes</button>
   <button data-view="sources" class="right">Sources &amp; extractions</button>
   <button data-view="clients">Clients</button>
@@ -56,6 +57,7 @@
       <div class="card"><h3>Décision effective des services</h3><div id="chart-decisions"></div></div>
       <div class="card"><h3>Statut des services dans Zabbix</h3><div id="chart-zbx"></div></div>
       <div class="card"><h3>Couverture par le standard Zabbix</h3><div id="chart-cov"></div></div>
+      <div class="card span-all"><h3>Items &amp; problèmes Zabbix à surveiller <a href="#" data-goto="zabbix_elements" class="small">(sélectionner)</a></h3><div id="chart-sel"></div></div>
       <div class="card span-all"><h3>Top 10 des templates de service</h3><div id="top"></div></div>
     </div>
     <details class="card"><summary>Synthèse détaillée</summary><div class="grid2"><table id="summary" class="kv"></table><table id="zsummary" class="kv"></table></div></details>

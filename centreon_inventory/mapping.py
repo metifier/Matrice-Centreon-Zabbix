@@ -52,6 +52,11 @@ class Mapper:
         self.default_host = Suggestion(**{**(data.get("default_host_template") or {}), "rule": "défaut"})
         self.correlation = {str(cat): re.compile(str(rx), re.IGNORECASE)
                             for cat, rx in (data.get("correlation") or {}).items() if rx}
+        sel = data.get("selection") or {}
+        self.watch_severity = int(sel.get("surveiller_severite_min", 4))
+        self.noise_severity = int(sel.get("desactiver_severite_max", 1))
+        self.noise_problems = re.compile(str(sel["desactiver_problemes"]), re.IGNORECASE) \
+            if sel.get("desactiver_problemes") else None
 
     def for_service(self, templates: list[str], command: str, plugin: str, mode: str, line: str) -> Suggestion:
         facts = {"template": templates, "command": command, "plugin": plugin, "mode": mode,

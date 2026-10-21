@@ -141,6 +141,45 @@
      "Interface {#IFNAME}: Bits received",
      "net.if.in[ifHCInOctets.{#SNMPINDEX}]"
     ]
+   ],
+   "triggers": [
+    [
+     "High CPU utilization",
+     2,
+     [
+      "system.cpu.util[snmp.cpu.util]"
+     ]
+    ],
+    [
+     "High memory utilization",
+     3,
+     [
+      "vm.memory.util[snmp.vm.memory.util]"
+     ]
+    ],
+    [
+     "Host has been restarted",
+     2,
+     [
+      "system.uptime[hrSystemUptime.0]"
+     ]
+    ]
+   ],
+   "trigger_prototypes": [
+    [
+     "{#FSNAME}: Disk space is critically low",
+     3,
+     [
+      "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"
+     ]
+    ],
+    [
+     "Interface {#IFNAME}: High bandwidth usage",
+     2,
+     [
+      "net.if.in[ifHCInOctets.{#SNMPINDEX}]"
+     ]
+    ]
    ]
   },
   {
@@ -161,7 +200,24 @@
      "system.uptime"
     ]
    ],
-   "prototypes": []
+   "prototypes": [],
+   "triggers": [
+    [
+     "High memory utilization",
+     3,
+     [
+      "vm.memory.util"
+     ]
+    ],
+    [
+     "Host has been restarted",
+     2,
+     [
+      "system.uptime"
+     ]
+    ]
+   ],
+   "trigger_prototypes": []
   },
   {
    "templateid": "102",
@@ -179,7 +235,17 @@
      "apache.workers.busy"
     ]
    ],
-   "prototypes": []
+   "prototypes": [],
+   "triggers": [
+    [
+     "Apache: Too many busy workers",
+     2,
+     [
+      "apache.workers.busy"
+     ]
+    ]
+   ],
+   "trigger_prototypes": []
   },
   {
    "templateid": "103",
@@ -206,6 +272,38 @@
      "State of service \"{#SERVICE.NAME}\"",
      "service.info[\"{#SERVICE.NAME}\",state]"
     ]
+   ],
+   "triggers": [
+    [
+     "High CPU utilization",
+     2,
+     [
+      "system.cpu.util"
+     ]
+    ],
+    [
+     "High memory utilization",
+     3,
+     [
+      "vm.memory.util"
+     ]
+    ]
+   ],
+   "trigger_prototypes": [
+    [
+     "FS [{#FSNAME}]: Space is critically low",
+     3,
+     [
+      "vfs.fs.dependent.size[{#FSNAME},pused]"
+     ]
+    ],
+    [
+     "\"{#SERVICE.NAME}\" is not running",
+     3,
+     [
+      "service.info[\"{#SERVICE.NAME}\",state]"
+     ]
+    ]
    ]
   },
   {
@@ -225,7 +323,9 @@
      "{#FSNAME}: Space utilization",
      "vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]"
     ]
-   ]
+   ],
+   "triggers": [],
+   "trigger_prototypes": []
   },
   {
    "templateid": "105",
@@ -237,6 +337,10 @@
     [
      "Uptime",
      "system.uptime[sysUpTime.0]"
+    ],
+    [
+     "System name",
+     "system.name[sysName.0]"
     ]
    ],
    "prototypes": [
@@ -247,6 +351,31 @@
     [
      "{#SENSOR_INFO}: Temperature",
      "sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]"
+    ]
+   ],
+   "triggers": [
+    [
+     "Host has been restarted",
+     2,
+     [
+      "system.uptime[sysUpTime.0]"
+     ]
+    ],
+    [
+     "System name has changed",
+     1,
+     [
+      "system.name[sysName.0]"
+     ]
+    ]
+   ],
+   "trigger_prototypes": [
+    [
+     "{#SENSOR_INFO}: Temperature is above critical threshold",
+     4,
+     [
+      "sensor.temp.value[ciscoEnvMonTemperatureValue.{#SNMPINDEX}]"
+     ]
     ]
    ]
   },
@@ -270,7 +399,31 @@
      "icmppingsec"
     ]
    ],
-   "prototypes": []
+   "prototypes": [],
+   "triggers": [
+    [
+     "Unavailable by ICMP ping",
+     4,
+     [
+      "icmpping"
+     ]
+    ],
+    [
+     "High ICMP ping loss",
+     2,
+     [
+      "icmppingloss"
+     ]
+    ],
+    [
+     "High ICMP ping response time",
+     2,
+     [
+      "icmppingsec"
+     ]
+    ]
+   ],
+   "trigger_prototypes": []
   },
   {
    "templateid": "107",
@@ -288,7 +441,17 @@
      "mysql.connections.rate"
     ]
    ],
-   "prototypes": []
+   "prototypes": [],
+   "triggers": [
+    [
+     "MySQL: Service is down",
+     4,
+     [
+      "mysql.ping[\"{$MYSQL.DSN}\"]"
+     ]
+    ]
+   ],
+   "trigger_prototypes": []
   },
   {
    "templateid": "108",
@@ -306,7 +469,24 @@
      "system.cpu.load[all,avg1]"
     ]
    ],
-   "prototypes": []
+   "prototypes": [],
+   "triggers": [
+    [
+     "High CPU utilization",
+     2,
+     [
+      "system.cpu.util"
+     ]
+    ],
+    [
+     "Load average is too high",
+     3,
+     [
+      "system.cpu.load[all,avg1]"
+     ]
+    ]
+   ],
+   "trigger_prototypes": []
   }
  ]
 }
